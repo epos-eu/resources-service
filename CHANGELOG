@@ -1,0 +1,12 @@
+# Changelog
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+
+## [0.5.5] - For public deployment 2020-06-02
+
+## [0.5.1] - xxxxxxx - Logging Pitch 
+- Improvement: Added logging Log4J2 support via SLF4J.
+- Improvement: Added additional logging calls.
+
+## [0.5.0] - pre 2020-04-23
