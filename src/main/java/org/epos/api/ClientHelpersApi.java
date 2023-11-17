@@ -13,10 +13,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import org.epos.api.clienthelpers.model.Dataproduct;
-import org.epos.api.clienthelpers.model.DiscoveryItem;
-import org.epos.api.clienthelpers.model.DistributionResource;
-import org.epos.api.clienthelpers.responses.model.SearchResponse;
+import org.epos.api.beans.DiscoveryItem;
+import org.epos.api.beans.Distribution;
+import org.epos.api.beans.SearchResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +32,7 @@ public interface ClientHelpersApi {
 
 	@Operation(summary = "metadata resources details", description = "returns detailed information useful to contextualise the discovery phase", tags={ "Resources Service" })
 	@ApiResponses(value = { 
-			@ApiResponse(responseCode = "200", description = "ok.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = DistributionResource.class))),
+			@ApiResponse(responseCode = "200", description = "ok.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Distribution.class))),
 
 			@ApiResponse(responseCode = "201", description = "Created."),
 
@@ -51,7 +50,7 @@ public interface ClientHelpersApi {
 	@RequestMapping(value = "/resources/details",
 	produces = { "application/json" }, 
 	method = RequestMethod.GET)
-	ResponseEntity<DistributionResource> resourcesDiscoveryGet(@Parameter(in = ParameterIn.QUERY, description = "id" ,schema=@Schema()) @Valid @RequestParam(value = "id", required = true) String id);
+	ResponseEntity<Distribution> resourcesDiscoveryGet(@Parameter(in = ParameterIn.QUERY, description = "id" ,schema=@Schema()) @Valid @RequestParam(value = "id", required = true) String id);
 
 
 	@Operation(summary = "search operation", description = "Search endpoint", tags={ "Resources Service" })
