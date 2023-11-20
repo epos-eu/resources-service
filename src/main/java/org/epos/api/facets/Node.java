@@ -32,11 +32,14 @@ public class Node
     	if(children == null) children = new ArrayList<>();
         children.add(child);
     }
+    
+    public void addDistribution(DiscoveryItem distribution)
+    {
+    	if(distributions == null) distributions = new ArrayList<>();
+    	distributions.add(distribution);
+    }
 
 	public List<DiscoveryItem> getDistributions() {
-		if(distributions==null) {
-			distributions = new ArrayList<DiscoveryItem>();
-		}
 		return distributions;
 	}
 

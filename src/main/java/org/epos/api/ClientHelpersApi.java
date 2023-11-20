@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import org.epos.api.beans.DiscoveryItem;
 import org.epos.api.beans.Distribution;
 import org.epos.api.beans.SearchResponse;
 import org.springframework.http.ResponseEntity;
@@ -22,35 +21,34 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-10-11T14:51:06.469Z[GMT]")
 @Validated
 public interface ClientHelpersApi {
 
 	@Operation(summary = "metadata resources details", description = "returns detailed information useful to contextualise the discovery phase", tags={ "Resources Service" })
-	@ApiResponses(value = { 
-			@ApiResponse(responseCode = "200", description = "ok.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Distribution.class))),
-
-			@ApiResponse(responseCode = "201", description = "Created."),
-
-			@ApiResponse(responseCode = "204", description = "No content."),
-
-			@ApiResponse(responseCode = "301", description = "Moved Permanently."),
-
-			@ApiResponse(responseCode = "400", description = "Bad request."),
-
-			@ApiResponse(responseCode = "401", description = "Access token is missing or invalid"),
-
-			@ApiResponse(responseCode = "403", description = "Forbidden"),
-
-			@ApiResponse(responseCode = "404", description = "Not Found") })
-	@RequestMapping(value = "/resources/details",
-	produces = { "application/json" }, 
-	method = RequestMethod.GET)
-	ResponseEntity<Distribution> resourcesDiscoveryGet(@Parameter(in = ParameterIn.QUERY, description = "id" ,schema=@Schema()) @Valid @RequestParam(value = "id", required = true) String id);
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "200", description = "ok.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Distribution.class))),
+        
+        @ApiResponse(responseCode = "201", description = "Created."),
+        
+        @ApiResponse(responseCode = "204", description = "No content."),
+        
+        @ApiResponse(responseCode = "301", description = "Moved Permanently."),
+        
+        @ApiResponse(responseCode = "400", description = "Bad request."),
+        
+        @ApiResponse(responseCode = "401", description = "Access token is missing or invalid"),
+        
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        
+        @ApiResponse(responseCode = "404", description = "Not Found") })
+    @RequestMapping(value = "/resources/details",
+        produces = { "application/json" }, 
+        method = RequestMethod.GET)
+    ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@NotNull @Parameter(in = ParameterIn.QUERY, description = "The distribution ID" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "id", required = true) String id);
 
 
 	@Operation(summary = "search operation", description = "Search endpoint", tags={ "Resources Service" })

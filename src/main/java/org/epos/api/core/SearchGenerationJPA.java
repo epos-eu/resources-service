@@ -232,7 +232,9 @@ public class SearchGenerationJPA {
 			}
 
 		}else {
-			results.setDistributions(discoveryList);
+			Node child = new Node();
+			child.setDistributions(discoveryList);
+			results.addChild(child);
 		}
 
 		LOGGER.info("Number of organizations retrieved "+organizations.size());

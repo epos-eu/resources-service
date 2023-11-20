@@ -79,7 +79,7 @@ public class Facets {
 						facetsObject.addProperty("ddss", cat.getUid());
 						if(cat.getNarrower()!=null){
 							JsonArray childrenList = recursiveChildren(categoriesList, domain, cat.getInstanceId());
-							if(!childrenList.isEmpty())
+							if(!(childrenList.size()==0))
 								facetsObject.add("children", childrenList);
 						}
 						children.add(facetsObject);
@@ -96,7 +96,7 @@ public class Facets {
 						facetsObject.addProperty("ddss", cat.getUid());
 						if(cat.getNarrower() != null) {
 							JsonArray childrenList = recursiveChildren(categoriesList, domain, cat.getInstanceId());
-							if(!childrenList.isEmpty())
+							if(!(childrenList.size()==0))
 								facetsObject.add("children", childrenList);
 						}
 						children.add(facetsObject);

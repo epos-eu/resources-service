@@ -1,6 +1,5 @@
 package org.epos.api.beans;
 
-
 import java.io.Serializable;
 import java.util.*;
 
@@ -12,7 +11,6 @@ public class Distribution implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
 	private transient String productid;
 	private transient String distributionid;
 	private String operationid;
@@ -54,20 +52,7 @@ public class Distribution implements Serializable {
 
 	private List<ServiceParameter> serviceParameters;
 	
-	public Distribution() {
-		keywords = new ArrayList<>();
-		dataProvider = new ArrayList<>();
-		internalID = new ArrayList<>();
-		DOI = new ArrayList<>();
-		availableFormats = new ArrayList<>();
-		availableContactPoints = new ArrayList<>();
-		serviceSpatial = new SpatialInfo();
-		spatial = new SpatialInfo();
-		temporalCoverage = new TemporalCoverage();
-		serviceTemporalCoverage = new TemporalCoverage();
-		scienceDomain = new ArrayList<>();
-		serviceType = new ArrayList<>();
-	}
+	public Distribution() {}
 
 	public Distribution(String productid, String distributionid, String operationid, String href, String id, String uid,
 						String type, String title, String description, String license, String downloadURL, List<String> keywords,
@@ -198,6 +183,7 @@ public class Distribution implements Serializable {
 	}
 
 	public List<String> getKeywords() {
+		if(keywords==null) keywords = new ArrayList<String>();
 		return keywords;
 	}
 
@@ -206,6 +192,7 @@ public class Distribution implements Serializable {
 	}
 
 	public List<DataServiceProvider> getDataProvider() {
+		if(dataProvider==null) dataProvider = new ArrayList<DataServiceProvider>();
 		return dataProvider;
 	}
 
@@ -222,6 +209,7 @@ public class Distribution implements Serializable {
 	}
 
 	public List<String> getInternalID() {
+		if(internalID==null) internalID = new ArrayList<String>();
 		return internalID;
 	}
 
@@ -230,6 +218,7 @@ public class Distribution implements Serializable {
 	}
 
 	public List<String> getDOI() {
+		if(DOI==null) DOI = new ArrayList<String>();
 		return DOI;
 	}
 
@@ -238,6 +227,7 @@ public class Distribution implements Serializable {
 	}
 
 	public SpatialInfo getSpatial() {
+		if(spatial ==  null) spatial = new SpatialInfo();
 		return spatial;
 	}
 
@@ -246,6 +236,7 @@ public class Distribution implements Serializable {
 	}
 
 	public TemporalCoverage getTemporalCoverage() {
+		if(temporalCoverage ==  null) temporalCoverage = new TemporalCoverage();
 		return temporalCoverage;
 	}
 
@@ -254,6 +245,7 @@ public class Distribution implements Serializable {
 	}
 
 	public List<AvailableFormat> getAvailableFormats() {
+		if(availableFormats==null) availableFormats = new ArrayList<AvailableFormat>();
 		return availableFormats;
 	}
 
@@ -262,6 +254,7 @@ public class Distribution implements Serializable {
 	}
 
 	public List<AvailableContactPoints> getAvailableContactPoints() {
+		if(availableContactPoints==null) availableContactPoints = new ArrayList<AvailableContactPoints>();
 		return availableContactPoints;
 	}
 
@@ -294,6 +287,7 @@ public class Distribution implements Serializable {
 	}
 
 	public SpatialInfo getServiceSpatial() {
+		if(serviceSpatial ==  null) serviceSpatial = new SpatialInfo();
 		return serviceSpatial;
 	}
 
@@ -302,6 +296,7 @@ public class Distribution implements Serializable {
 	}
 
 	public TemporalCoverage getServiceTemporalCoverage() {
+		if(temporalCoverage ==  null) serviceTemporalCoverage = new TemporalCoverage();
 		return serviceTemporalCoverage;
 	}
 
@@ -326,6 +321,7 @@ public class Distribution implements Serializable {
 	}
 
 	public List<ServiceParameter> getParameters() {
+		if(serviceParameters==null) serviceParameters = new ArrayList<ServiceParameter>();
 		return serviceParameters;
 	}
 
@@ -350,6 +346,7 @@ public class Distribution implements Serializable {
 	}
 	
 	public List<String> getScienceDomain() {
+		if(scienceDomain==null) scienceDomain = new ArrayList<String>();
 		return scienceDomain;
 	}
 
@@ -358,6 +355,7 @@ public class Distribution implements Serializable {
 	}
 
 	public List<String> getServiceType() {
+		if(serviceType==null) serviceType = new ArrayList<String>();
 		return serviceType;
 	}
 

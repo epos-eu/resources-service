@@ -5,15 +5,19 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import org.epos.api.facets.Node;
+import org.springframework.core.serializer.Serializer;
 
-public class SearchResponse {
+public class SearchResponse implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Node results;
 	private ArrayList<NodeFilters> filters;
 
 	public SearchResponse(Node results, ArrayList<NodeFilters> filters) {
-		super();
-		this.results = results.getChildren().get(0);
+		this.results = results.getChildren()!=null? results.getChildren().get(0) : null;
 		this.filters = filters;
 	}
 

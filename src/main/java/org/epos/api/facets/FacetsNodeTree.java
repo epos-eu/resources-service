@@ -73,14 +73,14 @@ public class FacetsNodeTree {
 					root.getChildren().remove(i);
 					i--;
 				}
-				else if(child.getChildren()==null && child.getDistributions().isEmpty()) {
+				else if(child.getChildren()==null && root.getDistributions()==null && child.getDistributions().isEmpty()) {
 					root.getChildren().remove(i);
 					i--;
 				}
 			}
 		}
 
-		if((root.getChildren()==null || root.getChildren().isEmpty()) && root.getDistributions().isEmpty())
+		if((root.getChildren()==null || root.getChildren().isEmpty()) && (root.getDistributions()==null || root.getDistributions().isEmpty()))
 			return null;
 
 		return root;

@@ -52,6 +52,8 @@ public class DiscoveryItem implements Serializable {
 				+ ", description=" + description + ", status=" + status + ", statusTimestamp=" + statusTimestamp
 				+ ", availableFormats=" + availableFormats + "]";
 	}
+	
+	public DiscoveryItem() {}
 
 	public DiscoveryItem(DiscoveryItemBuilder builder) {
 		this.href = builder.href;

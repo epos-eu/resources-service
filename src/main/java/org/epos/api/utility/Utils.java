@@ -52,10 +52,8 @@ public class Utils {
 
 	public static final String EPOSINTERNALFORMAT = "yyyy-MM-ddThh:mm:ssZ";
 
-	//public static Gson gson = Converters.registerAll(new GsonBuilder()).registerTypeHierarchyAdapter(Collection.class, new CollectionAdapter()).create();
+	public static Gson gson = Converters.registerAll(new GsonBuilder()).registerTypeHierarchyAdapter(Collection.class, new CollectionAdapter()).create();
 
-	public static Gson gson = new Gson();
-	
 	public static <T> List<T> union(List<T> list1, List<T> list2) {
 		Set<T> set = new HashSet<T>();
 
@@ -111,7 +109,7 @@ public class Utils {
 		}
 	}
 
-	/*static class CollectionAdapter implements JsonSerializer<Collection<?>> {
+	static class CollectionAdapter implements JsonSerializer<Collection<?>> {
 		@Override
 		public JsonElement serialize(Collection<?> src, Type typeOfSrc, JsonSerializationContext context) {
 			if (src == null || src.isEmpty())
@@ -127,7 +125,7 @@ public class Utils {
 			return array;
 		}
 
-	}*/
+	}
 
 	public static Boolean checkStringPattern(String inputString, String inputPattern) {
 		return Pattern.matches(inputPattern, inputString);

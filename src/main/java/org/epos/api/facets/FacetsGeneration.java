@@ -1,7 +1,6 @@
 package org.epos.api.facets;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
@@ -29,8 +28,10 @@ public class FacetsGeneration {
 					}
 				}
 			}
-			node.setDistributions(new ArrayList<>());
-			node.getDistributions().addAll(distributionsItem);
+			if(distributionsItem.size()>0) {
+				node.setDistributions(new ArrayList<>());
+				node.getDistributions().addAll(distributionsItem);
+			}
 		});
 		fnt.removeEmptyLeafs(fnt.getFacets());
 		return fnt;
@@ -65,20 +66,20 @@ public class FacetsGeneration {
 	}
 
 	public static void addToFacets(FacetsNodeTree facets, String name, DiscoveryItem item) {
-		
+
 		OptionalInt indexOpt = IntStream.range(0, facets.getNodes().size())
-			     .filter(i -> name.equals(facets.getNodes().get(i).getName()))
-			     .findFirst();
-		
+				.filter(i -> name.equals(facets.getNodes().get(i).getName()))
+				.findFirst();
+
 		List<Node> selectedNodes = facets.getNodes().stream().filter(node -> node.getName().equals(name)).collect(Collectors.toList());
 		if(indexOpt.isPresent()) {
-			facets.getNodes().get(indexOpt.getAsInt()).getDistributions().add(item);
+			facets.getNodes().get(indexOpt.getAsInt()).addDistribution(item);
 		}
 		else {
 			Node node = new Node(name);
-			node.getDistributions().add(item);
+			node.addDistribution(item);
 			facets.getNodes().add(node);
-			
+
 		}
 	}
 }

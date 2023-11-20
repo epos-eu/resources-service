@@ -13,11 +13,13 @@ import org.epos.api.utility.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestParam;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +30,7 @@ import java.util.Map;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-10-11T14:51:06.469Z[GMT]")
 @RestController
-public class ClientHelpersApiController implements ClientHelpersApi {
+public class ClientHelpersApiController extends ApiController implements ClientHelpersApi {
 
 	private static final String A_PROBLEM_WAS_ENCOUNTERED_DECODING = "A problem was encountered decoding: ";
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClientHelpersApiController.class);
@@ -39,28 +41,26 @@ public class ClientHelpersApiController implements ClientHelpersApi {
     
     @org.springframework.beans.factory.annotation.Autowired
     public ClientHelpersApiController(ObjectMapper objectMapper, HttpServletRequest request) {
+    	super(request);
         this.objectMapper = objectMapper;
         this.request = request;
     }
 
-    public ResponseEntity<Distribution> resourcesDiscoveryGet(@Parameter(in = ParameterIn.QUERY, description = "id" ,schema=@Schema()) @Valid @RequestParam(value = "id", required = true) String id) {
+    public ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@NotNull @Parameter(in = ParameterIn.QUERY, description = "The distribution ID" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "id", required = true) String id){
     	
     	if(id==null) {
     		return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			//return ResponseEntity.badRequest().body("No id parameter provided");
     	}
     	
     	try {
-			id=java.net.URLDecoder.decode(id, StandardCharsets.UTF_8.name());
+    		id=java.net.URLDecoder.decode(id, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "id: "+ id, e); 
     		return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		Map<String,Object> requestParams = Map.of("id", id);
 		
-		Distribution response = DetailsItemGenerationJPA.generate(requestParams);
-		
-		return response!=null? ResponseEntity.status(HttpStatus.OK).body(response) : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		return standardRequest("DETAILS", requestParams);
     }
 
     public ResponseEntity<SearchResponse> searchUsingGet(@Parameter(in = ParameterIn.QUERY, description = "q" ,schema=@Schema()) @Valid @RequestParam(value = "q", required = false) String q, 
@@ -178,12 +178,8 @@ public class ClientHelpersApiController implements ClientHelpersApi {
 		} catch (ParseException e1) { 
 			LOGGER.error(String.format("Invalid date format specified (use the format '%s')", Utils.EPOSINTERNALFORMAT),e1);
     		return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			//return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
 		}
-		// < /validation >
 		
-		SearchResponse response = SearchGenerationJPA.generate(requestParameters);
-
-		return response!=null? ResponseEntity.status(HttpStatus.OK).body(response) : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		return standardRequest("SEARCH", requestParameters);
     }
 }
