@@ -11,9 +11,9 @@ import org.epos.handler.dbapi.model.*;
 
 public class AvailableFormatsGeneration {
 
-	private static final String API_PATH_EXECUTE  = EnvironmentVariables.API_CONTEXT+"/execute?id=";
+	private static final String API_PATH_EXECUTE  = EnvironmentVariables.API_CONTEXT+"/execute/";
 	private static final String API_PATH_EXECUTE_OGC  = EnvironmentVariables.API_CONTEXT+"/ogcexecute/";
-	private static final String API_FORMAT = "&format=";
+	private static final String API_FORMAT = "?format=";
 
 	public static List<AvailableFormat> generate(EDMDistribution distribution) {
 
