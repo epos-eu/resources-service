@@ -1,6 +1,8 @@
 package org.epos;
 
 
+import org.epos.api.core.EnvironmentVariables;
+import org.epos.api.core.ZabbixExecutor;
 import org.epos.api.facets.Facets;
 import org.epos.configuration.LocalDateConverter;
 import org.epos.configuration.LocalDateTimeConverter;
@@ -31,6 +33,11 @@ public class Swagger2SpringBoot implements CommandLineRunner {
 			throw new ExitException();
 		}
 		Facets.getInstance();
+		if(EnvironmentVariables.MONITORING.equals("true")) LOGGER.info("Monitoring enabled");
+		else LOGGER.info("Monitoring disabled");
+		if(EnvironmentVariables.MONITORING.equals("true")) {
+			ZabbixExecutor.getInstance();
+		}
 	}
 
 	public static void main(String[] args) throws Exception {

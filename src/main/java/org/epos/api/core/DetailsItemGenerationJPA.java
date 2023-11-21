@@ -30,7 +30,7 @@ public class DetailsItemGenerationJPA {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DetailsItemGenerationJPA.class);
 
-	private static final String API_PATH_DETAILS = EnvironmentVariables.API_CONTEXT + "/resources/details?id=";
+	private static final String API_PATH_DETAILS = EnvironmentVariables.API_CONTEXT + "/resources/details/";
 	private static final String EMAIL_SENDER = EnvironmentVariables.API_CONTEXT + "/sender/send-email?id=";
 
 	public static Distribution generate(Map<String,Object> parameters) {

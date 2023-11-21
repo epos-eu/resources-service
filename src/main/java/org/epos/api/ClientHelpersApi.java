@@ -17,6 +17,7 @@ import org.epos.api.beans.Distribution;
 import org.epos.api.beans.SearchResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,10 +46,10 @@ public interface ClientHelpersApi {
         @ApiResponse(responseCode = "403", description = "Forbidden"),
         
         @ApiResponse(responseCode = "404", description = "Not Found") })
-    @RequestMapping(value = "/resources/details",
+    @RequestMapping(value = "/resources/details/{instance_id}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@NotNull @Parameter(in = ParameterIn.QUERY, description = "The distribution ID" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "id", required = true) String id);
+    ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The distribution ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id);
 
 
 	@Operation(summary = "search operation", description = "Search endpoint", tags={ "Resources Service" })

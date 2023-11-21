@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -46,7 +47,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
         this.request = request;
     }
 
-    public ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@NotNull @Parameter(in = ParameterIn.QUERY, description = "The distribution ID" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "id", required = true) String id){
+    public ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The distribution ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id){
     	
     	if(id==null) {
     		return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

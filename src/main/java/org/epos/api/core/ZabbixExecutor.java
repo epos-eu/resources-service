@@ -76,7 +76,7 @@ public class ZabbixExecutor {
 				LOGGER.info("Monitoring information updated, host result: "+hostResults.toString());
 			}
 		};
-		scheduler.scheduleAtFixedRate(updater, 0, 15, TimeUnit.MINUTES);
+		scheduler.scheduleAtFixedRate(updater, 0, 5, TimeUnit.MINUTES);
 
 	}
 

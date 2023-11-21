@@ -30,7 +30,7 @@ public class SearchGenerationJPA {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SearchGenerationJPA.class);
 
-	private static final String API_PATH_DETAILS  = EnvironmentVariables.API_CONTEXT+"/resources/details?id=";
+	private static final String API_PATH_DETAILS  = EnvironmentVariables.API_CONTEXT+"/resources/details/";
 
 	private static final String NORTHEN_LAT  = "epos:northernmostLatitude";
 	private static final String SOUTHERN_LAT  = "epos:southernmostLatitude";

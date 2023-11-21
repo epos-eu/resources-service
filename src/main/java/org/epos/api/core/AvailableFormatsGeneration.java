@@ -24,6 +24,19 @@ public class AvailableFormatsGeneration {
 			for( EDMOperation op : webserviceByAccessService.getSupportedOperationByInstanceId().stream().map(EDMSupportedOperation::getOperationByInstanceOperationId).collect(Collectors.toList())){
 
 				if (op.getUid() != null && distribution.getAccessURLByInstanceId() != null && distribution.getAccessURLByInstanceId().stream().map(EDMDistributionAccessURL::getInstanceOperationId).collect(Collectors.toList()).contains(op.getInstanceId()) ) {
+
+					boolean isWMS = false;
+					
+					for (EDMMapping map : op.getMappingsByInstanceId() != null ? op.getMappingsByInstanceId() : new ArrayList<EDMMapping>()) {
+						if (map.getProperty() != null && map.getProperty().contains("encodingFormat")) {
+							for (String pv : map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList())) {
+								if (pv.equals("image/png")) {
+									isWMS = true;
+								}
+							}
+						}
+					}	
+					
 					for (EDMMapping map : op.getMappingsByInstanceId() != null ? op.getMappingsByInstanceId() : new ArrayList<EDMMapping>()) {
 						if (map.getProperty() != null && map.getProperty().contains("encodingFormat")) {
 							for (String pv : map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList())) {
@@ -99,7 +112,7 @@ public class AvailableFormatsGeneration {
 							}
 						}
 					}
-					if (op.getSoftwareapplicationOperationsByInstanceId() != null) {
+					if (!isWMS && op.getSoftwareapplicationOperationsByInstanceId() != null) {
 						for (EDMSoftwareapplication s : op.getSoftwareapplicationOperationsByInstanceId().stream().map(EDMSoftwareapplicationOperation::getSoftwareapplicationByInstanceSoftwareapplicationId).collect(Collectors.toList())) {
 							if (s.getSoftwareapplicationParametersByInstanceId() != null) {
 								ArrayList<Parameter> parameterList = new ArrayList<>();
