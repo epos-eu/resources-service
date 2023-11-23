@@ -71,7 +71,6 @@ public class FacetsGeneration {
 				.filter(i -> name.equals(facets.getNodes().get(i).getName()))
 				.findFirst();
 
-		List<Node> selectedNodes = facets.getNodes().stream().filter(node -> node.getName().equals(name)).collect(Collectors.toList());
 		if(indexOpt.isPresent()) {
 			facets.getNodes().get(indexOpt.getAsInt()).addDistribution(item);
 		}

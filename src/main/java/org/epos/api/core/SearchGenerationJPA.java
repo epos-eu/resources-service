@@ -64,7 +64,7 @@ public class SearchGenerationJPA {
 		Set<EDMOrganization> organizations = new HashSet<>();
 
 
-		dataproducts.forEach(dataproduct -> {
+		dataproducts.stream().forEach(dataproduct -> {
 			Set<String> facetsDataProviders = new HashSet<String>();
 			/*String ddss = dataproduct.getDataproductIdentifiersByInstanceId().stream()
 					.filter(identifier -> identifier.getType().equals("DDSS-ID")).findFirst().orElse(new EDMDataproductIdentifier()).getIdentifier();*/

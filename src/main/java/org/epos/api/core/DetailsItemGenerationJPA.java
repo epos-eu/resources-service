@@ -272,7 +272,6 @@ public class DetailsItemGenerationJPA {
 		distribution.setParameters(new ArrayList<>());
 		// OPERATION AND PARAMETERS
 		if (Objects.nonNull(op)) {
-			System.out.println("TEMPLATE HERE: "+op.getTemplate());
 			distribution.setEndpoint(op.getTemplate());
 			if(op.getTemplate()!=null) distribution.setServiceEndpoint(op.getTemplate().split("\\{")[0]);
 			distribution.setOperationid(op.getUid());
