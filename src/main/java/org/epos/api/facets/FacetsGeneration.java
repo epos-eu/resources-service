@@ -15,7 +15,7 @@ public class FacetsGeneration {
 		return fnt.getFacets();
 	}
 
-	public static FacetsNodeTree generateResponseUsingCategories(ArrayList<DiscoveryItem> discoveryList) {
+	public static FacetsNodeTree generateResponseUsingCategories(List<DiscoveryItem> discoveryList) {
 		FacetsNodeTree fnt = new FacetsNodeTree(true);
 		fnt.getNodes().forEach(node -> {
 			List<DiscoveryItem> distributionsItem = new ArrayList<>();
@@ -37,7 +37,7 @@ public class FacetsGeneration {
 		return fnt;
 	}
 
-	public static FacetsNodeTree generateResponseUsingDataproviders(ArrayList<DiscoveryItem> discoveryList) {
+	public static FacetsNodeTree generateResponseUsingDataproviders(List<DiscoveryItem> discoveryList) {
 		FacetsNodeTree facets = new FacetsNodeTree();
 		discoveryList.forEach(discoveryItem -> {
 			if(discoveryItem.getDataprovider().isEmpty()) addToFacets(facets, "Undefined", discoveryItem);
@@ -50,7 +50,7 @@ public class FacetsGeneration {
 		return facets;
 	}
 
-	public static FacetsNodeTree generateResponseUsingServiceproviders(ArrayList<DiscoveryItem> discoveryList) {
+	public static FacetsNodeTree generateResponseUsingServiceproviders(List<DiscoveryItem> discoveryList) {
 
 		FacetsNodeTree facets = new FacetsNodeTree();
 

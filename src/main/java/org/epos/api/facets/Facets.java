@@ -3,9 +3,6 @@ package org.epos.api.facets;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.epos.eposdatamodel.Category;
@@ -16,34 +13,19 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 public class Facets {
-
-	private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	private JsonObject facetsStatic;
 	private JsonObject facetsFromDatabase;
 
-	private Facets() {
-
-		final Runnable updater = new Runnable() {
-			public void run() { 
-				try {
-					System.out.println("Get Facets from database");
-					facetsFromDatabase = generateFacetsFromDatabase();
-				}catch(Exception e) {}
-				System.out.println("Facets created successfully");
-			}
-		};
-		scheduler.scheduleAtFixedRate(updater, 0, 15, TimeUnit.MINUTES);
-	}
+	private Facets() {}
 
 	private static Facets facets;
 
 	public static Facets getInstance() {
-		System.out.println("Get Facets instance");
 		if(facets==null) facets = new Facets();
 		return facets;
 	}
 
-	private JsonObject generateFacetsFromDatabase() throws IOException {
+	public JsonObject generateFacetsFromDatabase() throws IOException {
 		JsonArray domainsFacets = new JsonArray();
 		JsonObject facetsObject = new JsonObject();
 

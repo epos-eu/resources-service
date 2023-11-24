@@ -5,31 +5,19 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.StringUtils;
 import org.epos.api.utility.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class ZabbixExecutor {
 
 	private static ZabbixExecutor executor;
-	private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-	private JsonArray hostResults;
+	private JsonObject hostResults;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ZabbixExecutor.class); 
 
@@ -38,47 +26,7 @@ public class ZabbixExecutor {
 		return executor;
 	}
 
-	private ZabbixExecutor() {
-		final Runnable updater = new Runnable() {
-			public void run() { 
-				LOGGER.info("Updating monitoring information");
-				hostResults = new JsonArray();
-				String auth;
-				try {
-					auth = ZabbixExecutor.auth();
-					DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-					//String items = ZabbixExecutor.getItems(auth);
-					ArrayList<String> listOfIds = new ArrayList<String>();
-					Utils.gson.fromJson(ZabbixExecutor.getProblems(auth), JsonObject.class).get("result").getAsJsonArray()
-					.forEach(e->listOfIds.add(getSubString(e.getAsJsonObject().get("name").getAsString(),'"','"')));
-					
-					for(JsonElement item : Utils.gson.fromJson(ZabbixExecutor.getItems(auth), JsonObject.class).get("result").getAsJsonArray()) {
-						if(!item.getAsJsonObject().get("name").getAsString().contains("EPOS ICS-C")) {
-							JsonObject singleResult = new JsonObject();
-							
-							String id =  StringUtils.substringBetween(item.getAsJsonObject().get("key_").getAsString(), "[", "]");
-							singleResult.addProperty("name", item.getAsJsonObject().get("name").getAsString());
-							singleResult.addProperty("itemid", item.getAsJsonObject().get("itemid").getAsString());
-							singleResult.addProperty("key_", item.getAsJsonObject().get("key_").getAsString());
-							singleResult.addProperty("lastclock",item.getAsJsonObject().get("lastclock").getAsString());
-							singleResult.addProperty("lastvalue",item.getAsJsonObject().get("lastvalue").getAsString());
-							singleResult.addProperty("id", id);
-							singleResult.addProperty("status", (!listOfIds.contains(id))? 1 : 2);
-							singleResult.addProperty("timestamp",df.format(new Date(item.getAsJsonObject().get("lastclock").getAsLong()*1000)).replace(" ", "T")+"Z");
-							hostResults.add(singleResult);
-						}
-					}
-					ZabbixExecutor.logout(auth);
-
-				} catch (IOException | InterruptedException e) {
-					LOGGER.error(e.getLocalizedMessage());
-				}
-				LOGGER.info("Monitoring information updated, host result: "+hostResults.toString());
-			}
-		};
-		scheduler.scheduleAtFixedRate(updater, 0, 5, TimeUnit.MINUTES);
-
-	}
+	private ZabbixExecutor() {}
 
 
 	public static String auth() throws IOException, InterruptedException {
@@ -394,33 +342,26 @@ public class ZabbixExecutor {
 
 
 
-	public JsonArray getHostResults() {
+	public JsonObject getHostResults() {
 		return hostResults;
 	}
 
-	public void setHostResults(JsonArray hostResults) {
+	public void setHostResults(JsonObject hostResults) {
 		this.hostResults = hostResults;
 	}
-
-	private String getSubString(final String input, char characterStart, char characterEnd) {
-	    if(input == null) {
-	        return null;
-	    }
-	    
-	    final int indexOfAt = input.indexOf(characterStart);
-	    if(input.isEmpty() || indexOfAt < 0 || indexOfAt > input.length()-1) {
-	        return null;
-	    }
-
-	    String suffix = input.substring(indexOfAt + 1);
-	    
-	    final int indexOfDot = suffix.indexOf(characterEnd);
-	    
-	    if(indexOfDot < 1) {
-	        return null;
-	    }
-
-	    return suffix.substring(0, indexOfDot);
+	
+	public Integer getStatusInfoFromSha(String idSha) {
+		if(!hostResults.has(idSha)) return 0;
+		if(!hostResults.get(idSha).getAsJsonObject().has("status")) return 0;
+		
+		return hostResults.get(idSha).getAsJsonObject().get("status").getAsInt();
+	}
+	
+	public String getStatusTimestampInfoFromSha(String idSha) {
+		if(!hostResults.has(idSha)) return null;
+		if(!hostResults.get(idSha).getAsJsonObject().has("timestamp")) return null;
+		
+		return hostResults.get(idSha).getAsJsonObject().get("timestamp").getAsString();
 	}
 
 }

@@ -18,11 +18,15 @@ import springfox.documentation.oas.annotations.EnableOpenApi;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @SpringBootApplication
 @EnableOpenApi
-@ComponentScan(basePackages = { "org.epos", "org.epos.api" , "org.epos.configuration"})
+@EnableScheduling
+@EnableAsync
+@ComponentScan(basePackages = { "org.epos", "org.epos.api", "org.epos.api.routines", "org.epos.configuration"})
 public class Swagger2SpringBoot implements CommandLineRunner {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Swagger2SpringBoot.class);
@@ -32,9 +36,10 @@ public class Swagger2SpringBoot implements CommandLineRunner {
 		if (arg0.length > 0 && arg0[0].equals("exitcode")) {
 			throw new ExitException();
 		}
+		LOGGER.info("[Facets enabled]"); 
 		Facets.getInstance();
-		if(EnvironmentVariables.MONITORING.equals("true")) LOGGER.info("Monitoring enabled");
-		else LOGGER.info("Monitoring disabled");
+		if(EnvironmentVariables.MONITORING.equals("true")) LOGGER.info("[Monitoring enabled]");
+		else System.out.println("[Monitoring disabled]");
 		if(EnvironmentVariables.MONITORING.equals("true")) {
 			ZabbixExecutor.getInstance();
 		}
