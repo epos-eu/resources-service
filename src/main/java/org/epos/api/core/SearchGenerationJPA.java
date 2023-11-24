@@ -203,13 +203,13 @@ public class SearchGenerationJPA {
 		if(parameters.containsKey("facets") && parameters.get("facets").toString().equals("true")) {
 			switch(parameters.get("facetstype").toString()) {
 			case "categories":
-				results.addChild(FacetsGeneration.generateResponseUsingCategories(discoveryMap.values().stream().toList()).getFacets());
+				results.addChild(FacetsGeneration.generateResponseUsingCategories(discoveryMap.values().stream().collect(Collectors.toList())).getFacets());
 				break;
 			case "dataproviders":
-				results.addChild(FacetsGeneration.generateResponseUsingDataproviders(discoveryMap.values().stream().toList()).getFacets());
+				results.addChild(FacetsGeneration.generateResponseUsingDataproviders(discoveryMap.values().stream().collect(Collectors.toList())).getFacets());
 				break;
 			case "serviceproviders":
-				results.addChild(FacetsGeneration.generateResponseUsingServiceproviders(discoveryMap.values().stream().toList()).getFacets());
+				results.addChild(FacetsGeneration.generateResponseUsingServiceproviders(discoveryMap.values().stream().collect(Collectors.toList())).getFacets());
 				break;
 			default:
 				break;
@@ -217,7 +217,7 @@ public class SearchGenerationJPA {
 
 		}else {
 			Node child = new Node();
-			child.setDistributions(discoveryMap.values().stream().toList());
+			child.setDistributions(discoveryMap.values().stream().collect(Collectors.toList()));
 			results.addChild(child);
 		}
 
