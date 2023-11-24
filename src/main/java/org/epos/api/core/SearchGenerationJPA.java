@@ -281,15 +281,17 @@ public class SearchGenerationJPA {
 	}
 
 
-	public static void doFilters(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	public static List<EDMDataproduct> doFilters(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
 
-		filterByFullText(datasetList, parameters);
-		filterByKeywords(datasetList, parameters);
-		filterByOrganizations(datasetList, parameters);
-		filterByDateRange(datasetList, checkTemporalExtent(parameters));
-		filterByBoundingBox(datasetList, parameters);
-		filterByScienceDomain(datasetList, parameters);
-		filterByServiceType(datasetList, parameters);
+		datasetList = filterByFullText(datasetList, parameters);
+		datasetList = filterByKeywords(datasetList, parameters);
+		datasetList = filterByOrganizations(datasetList, parameters);
+		datasetList = filterByDateRange(datasetList, checkTemporalExtent(parameters));
+		datasetList = filterByBoundingBox(datasetList, parameters);
+		datasetList = filterByScienceDomain(datasetList, parameters);
+		datasetList = filterByServiceType(datasetList, parameters);
+		
+		return datasetList;
 	}
 	
 	private static List<EDMDataproduct> filterByScienceDomain(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
