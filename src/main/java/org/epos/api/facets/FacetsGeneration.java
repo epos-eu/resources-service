@@ -1,6 +1,7 @@
 package org.epos.api.facets;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
@@ -15,7 +16,7 @@ public class FacetsGeneration {
 		return fnt.getFacets();
 	}
 
-	public static FacetsNodeTree generateResponseUsingCategories(List<DiscoveryItem> discoveryList) {
+	public static FacetsNodeTree generateResponseUsingCategories(Collection<DiscoveryItem> discoveryList) {
 		FacetsNodeTree fnt = new FacetsNodeTree(true);
 		fnt.getNodes().forEach(node -> {
 			List<DiscoveryItem> distributionsItem = new ArrayList<>();
@@ -37,7 +38,7 @@ public class FacetsGeneration {
 		return fnt;
 	}
 
-	public static FacetsNodeTree generateResponseUsingDataproviders(List<DiscoveryItem> discoveryList) {
+	public static FacetsNodeTree generateResponseUsingDataproviders(Collection<DiscoveryItem> discoveryList) {
 		FacetsNodeTree facets = new FacetsNodeTree();
 		discoveryList.forEach(discoveryItem -> {
 			if(discoveryItem.getDataprovider().isEmpty()) addToFacets(facets, "Undefined", discoveryItem);
@@ -50,7 +51,7 @@ public class FacetsGeneration {
 		return facets;
 	}
 
-	public static FacetsNodeTree generateResponseUsingServiceproviders(List<DiscoveryItem> discoveryList) {
+	public static FacetsNodeTree generateResponseUsingServiceproviders(Collection<DiscoveryItem> discoveryList) {
 
 		FacetsNodeTree facets = new FacetsNodeTree();
 

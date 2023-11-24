@@ -21,6 +21,12 @@ public class NodeFilters
     {
         this.name = name;
     }
+    
+    public NodeFilters(String id, String name)
+    {
+    	this.id = id;
+        this.name = name;
+    }
 
     public void addChild(NodeFilters child)
     {
@@ -76,6 +82,4 @@ public class NodeFilters
 	public String toString() {
 		return "Node [children=" + children + ", id=" + id + ", name=" + name + "]";
 	}
-
-
 }

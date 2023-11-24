@@ -51,7 +51,7 @@ public class SearchGenerationJPA {
 
 		LOGGER.info("Apply filter using input parameters: "+parameters.toString());
 		doFilters(dataproducts, parameters);
-		
+
 		Map<String, DiscoveryItem> discoveryMap = new HashMap<String, DiscoveryItem>();
 
 		LOGGER.info("Start for each");
@@ -62,139 +62,137 @@ public class SearchGenerationJPA {
 		Set<EDMOrganization> organizations = new HashSet<>();
 
 		dataproducts.stream().forEach(dataproduct -> {
-			Set<String> facetsDataProviders = new HashSet<String>();
+			
+			Set<String> facetsDataProviders = new HashSet<>();
 
 			List<String> categoryList = dataproduct.getDataproductCategoriesByInstanceId().stream()
-					.map(EDMDataproductCategory::getCategoryByCategoryId)
-					.filter(Objects::nonNull)
-					.filter(e->e.getUid().contains("category:"))
-					.map(EDMCategory::getUid)
-					.collect(Collectors.toList());
+			        .map(EDMDataproductCategory::getCategoryByCategoryId)
+			        .filter(Objects::nonNull)
+			        .filter(e -> e.getUid().contains("category:"))
+			        .map(EDMCategory::getUid)
+			        .collect(Collectors.toList());
 
 			List<EDMWebservice> webservices = dataproduct.getIsDistributionsByInstanceId().stream()
-					.map(EDMIsDistribution::getDistributionByInstanceDistributionId)
+			        .map(EDMIsDistribution::getDistributionByInstanceDistributionId)
+			        .filter(Objects::nonNull)
+			        .map(EDMDistribution::getWebserviceByAccessService)
+			        .filter(Objects::nonNull)
+			        .collect(Collectors.toList());
+
+			dataproduct.getPublishersByInstanceId().stream()
+			        .map(EDMPublisher::getEdmEntityIdByMetaOrganizationId)
+			        .filter(edmMetaId -> Objects.nonNull(edmMetaId.getOrganizationsByMetaId()) && !edmMetaId.getOrganizationsByMetaId().isEmpty())
+			        .map(edmMetaId -> edmMetaId.getOrganizationsByMetaId().stream().findFirst().orElse(null))
+			        .filter(Objects::nonNull)
+			        .map(EDMOrganization::getOrganizationLegalnameByInstanceId)
+			        .flatMap(Collection::stream)
+			        .filter(legalname -> Objects.nonNull(legalname))
+			        .map(EDMOrganizationLegalname::getLegalname)
+			        .forEach(facetsDataProviders::add);
+			
+			webservices.stream()
+			.map(EDMWebservice::getEdmEntityIdByProvider)
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList())
+			.stream()
+			.filter(edmMetaId -> Objects.nonNull(edmMetaId.getOrganizationsByMetaId()) && !edmMetaId.getOrganizationsByMetaId().isEmpty())
+			.map(edmMetaId -> new ArrayList<>(edmMetaId.getOrganizationsByMetaId()))
+			.map(list -> {
+				list.sort(EDMUtil::compareEntityVersion);
+				return list;
+			})
+			.map(list -> list.get(0))
+			.filter(edmDataproductRelatedOrganization -> Objects.nonNull(edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId()) && !edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId().isEmpty())
+			.forEach(organizations::add);
+			
+			Optional.ofNullable(dataproduct.getIsDistributionsByInstanceId())
+		    .ifPresent(isDistribution -> isDistribution.stream()
+		        .map(EDMIsDistribution::getDistributionByInstanceDistributionId)
+		        .filter(Objects::nonNull)
+		        .forEach(distribution -> {
+		            Set<String> facetsServiceProviders = new HashSet<>();
+
+		            dataproduct.getPublishersByInstanceId().stream()
+		                .map(EDMPublisher::getEdmEntityIdByMetaOrganizationId)
+		                .filter(edmMetaId -> Objects.nonNull(edmMetaId.getOrganizationsByMetaId()) && !edmMetaId.getOrganizationsByMetaId().isEmpty())
+		                .map(edmMetaId -> edmMetaId.getOrganizationsByMetaId().stream().findFirst().orElse(null))
+		                .filter(Objects::nonNull)
+		                .map(EDMOrganization::getOrganizationLegalnameByInstanceId)
+		                .flatMap(Collection::stream)
+		                .filter(legalname -> Objects.nonNull(legalname))
+		                .map(EDMOrganizationLegalname::getLegalname)
+		                .forEach(facetsDataProviders::add);
+
+		            if (Objects.nonNull(distribution.getWebserviceByAccessService()) &&
+		                Objects.nonNull(distribution.getWebserviceByAccessService().getEdmEntityIdByProvider())) {
+
+		                distribution.getWebserviceByAccessService()
+		                    .getEdmEntityIdByProvider()
+		                    .getOrganizationsByMetaId()
+		                    .stream()
+		                    .findFirst()
+		                    .ifPresent(edmWebserviceRelatedOrganization ->
+		                        edmWebserviceRelatedOrganization.getOrganizationLegalnameByInstanceId()
+		                            .stream()
+		                            .findFirst()
+		                            .map(EDMOrganizationLegalname::getLegalname)
+		                            .filter(Objects::nonNull)
+		                            .ifPresent(facetsServiceProviders::add)
+		                    );
+		            }
+
+		            DiscoveryItem discoveryItem = new DiscoveryItemBuilder(distribution.getMetaId(),
+		                    EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.getMetaId())
+		                    .uid(distribution.getUid())
+		                    .title(distribution.getDistributionTitlesByInstanceId()
+		                            .stream()
+		                            .findFirst()
+		                            .map(EDMDistributionTitle::getTitle)
+		                            .orElse(null))
+		                    .description(distribution.getDistributionDescriptionsByInstanceId()
+		                            .stream()
+		                            .findFirst()
+		                            .map(EDMDistributionDescription::getDescription)
+		                            .orElse(null))
+		                    .availableFormats(AvailableFormatsGeneration.generate(distribution))
+		                    .setSha256id(DigestUtils.sha256Hex(distribution.getUid()))
+		                    .setDataprovider(facetsDataProviders)
+		                    .setServiceProvider(facetsServiceProviders)
+		                    .setDataproductCategories(categoryList.isEmpty() ? null : categoryList)
+		                    .build();
+
+		            if (EnvironmentVariables.MONITORING.equals("true")) {
+		                discoveryItem.setStatus(ZabbixExecutor.getInstance().getStatusInfoFromSha(discoveryItem.getSha256id()));
+		                discoveryItem.setStatusTimestamp(ZabbixExecutor.getInstance().getStatusTimestampInfoFromSha(discoveryItem.getSha256id()));
+		            }
+
+		            discoveryMap.put(discoveryItem.getSha256id(), discoveryItem);
+		        })
+		    );
+
+			// Keywords
+			keywords.addAll(Arrays.stream(Optional.ofNullable(dataproduct.getKeywords())
+					.orElse("").split(",\t"))
+					.map(String::toLowerCase)
+					.map(String::trim)
+					.collect(Collectors.toList()));
+
+			// Science Domains
+			scienceDomains.addAll(Optional.ofNullable(dataproduct.getDataproductCategoriesByInstanceId())
+					.orElse(Collections.emptyList())
+					.stream()
+					.map(EDMDataproductCategory::getCategoryByCategoryId)
 					.filter(Objects::nonNull)
-					.map(EDMDistribution::getWebserviceByAccessService)
-					.filter(Objects::nonNull)
-					.collect(Collectors.toList());
+					.collect(Collectors.toList()));
 
-			//dataproduct organization for filter
-			if(Objects.nonNull(dataproduct.getPublishersByInstanceId()) ) {
-				for (EDMEdmEntityId edmMetaId : dataproduct.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList())) {
-					if (Objects.nonNull(edmMetaId.getOrganizationsByMetaId()) && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
-						ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
-						list.sort(EDMUtil::compareEntityVersion);
-						EDMOrganization edmDataproductRelatedOrganization = list.get(0);
-						if(Objects.nonNull(edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId()) && !edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId().isEmpty()) {
-							organizations.add(edmDataproductRelatedOrganization);
-						}
-					}
-				}
-			}
-
-			//webservice organization for filter
-			List<EDMEdmEntityId> serviceProviders = webservices.stream()
-					.map(EDMWebservice::getEdmEntityIdByProvider)
-					.filter(Objects::nonNull)
-					.collect(Collectors.toList());
-			for (EDMEdmEntityId edmMetaId : serviceProviders){
-				if (Objects.nonNull(edmMetaId.getOrganizationsByMetaId()) && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
-					ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
-					list.sort(EDMUtil::compareEntityVersion);
-					EDMOrganization edmDataproductRelatedOrganization = list.get(0);
-					if(Objects.nonNull(edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId()) && !edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId().isEmpty()) {
-						organizations.add(edmDataproductRelatedOrganization);
-					}
-				}
-			}
-
-			if (Objects.nonNull(dataproduct.getIsDistributionsByInstanceId())) {
-
-				dataproduct.getIsDistributionsByInstanceId().forEach(distr -> {
-					EDMDistribution distribution = distr.getDistributionByInstanceDistributionId();
-					Set<String> facetsServiceProviders = new HashSet<String>();
-					// distribution
-					String title = null;
-					if (Objects.nonNull(distribution.getDistributionTitlesByInstanceId()) && !distribution.getDistributionTitlesByInstanceId().isEmpty()) {
-						EDMDistributionTitle edmDistributionTitles = new ArrayList<>(distribution.getDistributionTitlesByInstanceId()).get(0);
-						title = edmDistributionTitles.getTitle();
-					}
-
-					String description = null;
-					if (Objects.nonNull(distribution.getDistributionDescriptionsByInstanceId()) && !distribution.getDistributionDescriptionsByInstanceId().isEmpty()) {
-						EDMDistributionDescription edmDistributionDescription = new ArrayList<>(distribution.getDistributionDescriptionsByInstanceId()).get(0);
-						description = edmDistributionDescription.getDescription();
-					}
-
-					if(Objects.nonNull(dataproduct.getPublishersByInstanceId())) {
-						for (EDMEdmEntityId edmMetaId : dataproduct.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList())) {
-							if (edmMetaId.getOrganizationsByMetaId() != null && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
-								ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
-								list.sort(EDMUtil::compareEntityVersion);
-								EDMOrganization edmDataproductRelatedOrganization = list.get(0);
-								if(Objects.nonNull(edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId()) && !edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId().isEmpty()) {
-									facetsDataProviders.add(edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId().stream().findFirst().get().getLegalname());
-								}
-							}
-						}
-					}
-
-					if(Objects.nonNull(distribution.getWebserviceByAccessService()) && Objects.nonNull(distribution.getWebserviceByAccessService().getEdmEntityIdByProvider())) {
-						EDMEdmEntityId edmMetaId = distribution.getWebserviceByAccessService().getEdmEntityIdByProvider();
-						if (edmMetaId.getOrganizationsByMetaId() != null && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
-							ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
-							list.sort(EDMUtil::compareEntityVersion);
-							EDMOrganization edmWebserviceRelatedOrganization = list.get(0);
-							if(Objects.nonNull(edmWebserviceRelatedOrganization.getOrganizationLegalnameByInstanceId()) && !edmWebserviceRelatedOrganization.getOrganizationLegalnameByInstanceId().isEmpty()) {
-								facetsServiceProviders.add(edmWebserviceRelatedOrganization.getOrganizationLegalnameByInstanceId().stream().findFirst().get().getLegalname());
-							}
-						}
-					}
-
-					DiscoveryItem discoveryItem = new DiscoveryItemBuilder(distribution.getMetaId(),
-							EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.getMetaId())
-							.uid(distribution.getUid())
-							.title(title)
-							.description(description)
-							.availableFormats(AvailableFormatsGeneration.generate(distribution))
-							.setSha256id(DigestUtils.sha256Hex(distribution.getUid()))
-							.setDataprovider(facetsDataProviders)
-							.setServiceProvider(facetsServiceProviders)
-							.setDataproductCategories(categoryList.isEmpty()? null : categoryList)
-							.build();
-
-					if(EnvironmentVariables.MONITORING.equals("true")) {
-						discoveryItem.setStatus(ZabbixExecutor.getInstance().getStatusInfoFromSha(discoveryItem.getSha256id()));
-						discoveryItem.setStatusTimestamp(ZabbixExecutor.getInstance().getStatusTimestampInfoFromSha(discoveryItem.getSha256id()));
-					}
-
-					discoveryMap.put(discoveryItem.getSha256id(), discoveryItem);
-
-				});
-			}
-
-			//filter section
-			//keyword for filter
-			if(Objects.nonNull(dataproduct.getKeywords())) {
-				keywords.addAll(Arrays.stream(dataproduct.getKeywords().split(",\t")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()));
-			}
-
-
-			//scienceDomain for filter
-			if (Objects.nonNull(dataproduct.getDataproductCategoriesByInstanceId()) && !dataproduct.getDataproductCategoriesByInstanceId().isEmpty()){
-				scienceDomains.addAll(dataproduct.getDataproductCategoriesByInstanceId().stream()
-						.map(EDMDataproductCategory::getCategoryByCategoryId)
-						.filter(Objects::nonNull).collect(Collectors.toList()));
-			}
-
-			//serviceType for filter
-			webservices.forEach(webservice -> {
-				if (Objects.nonNull(webservice.getWebserviceCategoriesByInstanceId()) && !webservice.getWebserviceCategoriesByInstanceId().isEmpty()){
-					serviceTypes.addAll(webservice.getWebserviceCategoriesByInstanceId().stream()
-							.map(EDMWebserviceCategory::getCategoryByCategoryId)
-							.filter(Objects::nonNull).collect(Collectors.toList()));
-				}
-			});
+			// Service Types
+			webservices.stream()
+			.flatMap(webservice -> Optional.ofNullable(webservice.getWebserviceCategoriesByInstanceId())
+					.orElse(Collections.emptyList())
+					.stream()
+					.map(EDMWebserviceCategory::getCategoryByCategoryId)
+					.filter(Objects::nonNull))
+			.forEach(serviceTypes::add);
 		});
 
 		LOGGER.info("Final number of results: "+discoveryMap.values().size());
@@ -203,13 +201,13 @@ public class SearchGenerationJPA {
 		if(parameters.containsKey("facets") && parameters.get("facets").toString().equals("true")) {
 			switch(parameters.get("facetstype").toString()) {
 			case "categories":
-				results.addChild(FacetsGeneration.generateResponseUsingCategories(discoveryMap.values().stream().collect(Collectors.toList())).getFacets());
+				results.addChild(FacetsGeneration.generateResponseUsingCategories(discoveryMap.values()).getFacets());
 				break;
 			case "dataproviders":
-				results.addChild(FacetsGeneration.generateResponseUsingDataproviders(discoveryMap.values().stream().collect(Collectors.toList())).getFacets());
+				results.addChild(FacetsGeneration.generateResponseUsingDataproviders(discoveryMap.values()).getFacets());
 				break;
 			case "serviceproviders":
-				results.addChild(FacetsGeneration.generateResponseUsingServiceproviders(discoveryMap.values().stream().collect(Collectors.toList())).getFacets());
+				results.addChild(FacetsGeneration.generateResponseUsingServiceproviders(discoveryMap.values()).getFacets());
 				break;
 			default:
 				break;
@@ -217,23 +215,18 @@ public class SearchGenerationJPA {
 
 		}else {
 			Node child = new Node();
-			child.setDistributions(discoveryMap.values().stream().collect(Collectors.toList()));
+			child.setDistributions(discoveryMap.values());
 			results.addChild(child);
 		}
 
 		LOGGER.info("Number of organizations retrieved "+organizations.size());
 
-		ArrayList<String> keywordsCollection = new ArrayList<>(keywords);
-		keywordsCollection.removeIf(Objects::isNull);
-		Collections.sort(keywordsCollection);
-		NodeFilters keywordsNodes = new NodeFilters("keywords");
+		List<String> keywordsCollection = keywords.stream()
+				.filter(Objects::nonNull)
+				.sorted()
+				.collect(Collectors.toList());
 
-		ArrayList<EDMOrganization> organizationsCollection = new ArrayList<>(organizations);
-		organizationsCollection.sort((o1, o2) -> {
-			String legalNameOrganization1 = o1.getOrganizationLegalnameByInstanceId().stream().map(EDMOrganizationLegalname::getLegalname).collect(Collectors.toList()).get(0);
-			String legalNameOrganization2 = o2.getOrganizationLegalnameByInstanceId().stream().map(EDMOrganizationLegalname::getLegalname).collect(Collectors.toList()).get(0);
-			return legalNameOrganization1.compareTo(legalNameOrganization2);
-		});
+		NodeFilters keywordsNodes = new NodeFilters("keywords");
 
 		keywordsCollection.forEach(r -> {
 			NodeFilters node = new NodeFilters(r);
@@ -241,31 +234,34 @@ public class SearchGenerationJPA {
 			keywordsNodes.addChild(node);
 		});
 
+		List<EDMOrganization> organizationsCollection = organizations.stream()
+				.sorted(Comparator.comparing(o -> o.getOrganizationLegalnameByInstanceId().stream()
+						.map(EDMOrganizationLegalname::getLegalname)
+						.findFirst()
+						.orElse("")))
+				.collect(Collectors.toList());
 
 		NodeFilters organisationsNodes = new NodeFilters("organisations");
 
 		organizationsCollection.forEach(r -> {
-			NodeFilters node = new NodeFilters(r.getOrganizationLegalnameByInstanceId().stream().map(EDMOrganizationLegalname::getLegalname).collect(Collectors.toList()).get(0));
+			String legalName = r.getOrganizationLegalnameByInstanceId().stream()
+					.map(EDMOrganizationLegalname::getLegalname)
+					.findFirst()
+					.orElse("");
+			NodeFilters node = new NodeFilters(legalName);
 			node.setId(r.getMetaId());
 			organisationsNodes.addChild(node);
 		});
 
 		NodeFilters scienceDomainsNodes = new NodeFilters(PARAMETER__SCIENCE_DOMAIN);
-
-		scienceDomains.forEach(r -> {
-			NodeFilters node = new NodeFilters(r.getName());
-			node.setId(r.getId());
-			scienceDomainsNodes.addChild(node);
-		});
+		scienceDomains.forEach(r ->
+		scienceDomainsNodes.addChild(new NodeFilters(r.getId(), r.getName()))
+				);
 
 		NodeFilters serviceTypesNodes = new NodeFilters(PARAMETER__SERVICE_TYPE);
-
-		serviceTypes.forEach(r -> {
-			NodeFilters node = new NodeFilters(r.getName());
-			node.setId(r.getId());
-			serviceTypesNodes.addChild(node);
-		});
-
+		serviceTypes.forEach(r ->
+		serviceTypesNodes.addChild(new NodeFilters(r.getId(), r.getName()))
+				);
 
 		ArrayList<NodeFilters> filters = new ArrayList<NodeFilters>();
 		filters.add(keywordsNodes);
@@ -295,8 +291,7 @@ public class SearchGenerationJPA {
 		filterByScienceDomain(datasetList, parameters);
 		filterByServiceType(datasetList, parameters);
 	}
-
-
+	
 	private static List<EDMDataproduct> filterByScienceDomain(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
 		if(parameters.containsKey(PARAMETER__SCIENCE_DOMAIN)) {
 			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();

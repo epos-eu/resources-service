@@ -1,6 +1,7 @@
 package org.epos.api.facets;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -10,7 +11,7 @@ import org.epos.api.beans.DiscoveryItem;
 public class Node
 {
     private List<Node> children = null;
-	private List<DiscoveryItem> distributions = null;
+	private Collection<DiscoveryItem> distributions = null;
     private String ddss = null;
     private String id = null;
     private String name;
@@ -39,11 +40,11 @@ public class Node
     	distributions.add(distribution);
     }
 
-	public List<DiscoveryItem> getDistributions() {
+	public Collection<DiscoveryItem> getDistributions() {
 		return distributions;
 	}
 
-	public void setDistributions(List<DiscoveryItem> distributions) {
+	public void setDistributions(Collection<DiscoveryItem> distributions) {
 		this.distributions = distributions;
 	}
 
