@@ -50,7 +50,7 @@ public class SearchGenerationJPA {
 		em.close();
 
 		LOGGER.info("Apply filter using input parameters: "+parameters.toString());
-		doFilters(dataproducts, parameters);
+		dataproducts = doFilters(dataproducts, parameters);
 
 		Map<String, DiscoveryItem> discoveryMap = new HashMap<String, DiscoveryItem>();
 
@@ -175,7 +175,7 @@ public class SearchGenerationJPA {
 					.orElse("").split(",\t"))
 					.map(String::toLowerCase)
 					.map(String::trim)
-					.collect(Collectors.toList()));
+					.collect(Collectors.toSet()));
 
 			// Science Domains
 			scienceDomains.addAll(Optional.ofNullable(dataproduct.getDataproductCategoriesByInstanceId())
@@ -183,7 +183,7 @@ public class SearchGenerationJPA {
 					.stream()
 					.map(EDMDataproductCategory::getCategoryByCategoryId)
 					.filter(Objects::nonNull)
-					.collect(Collectors.toList()));
+					.collect(Collectors.toSet()));
 
 			// Service Types
 			webservices.stream()
