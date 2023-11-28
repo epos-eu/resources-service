@@ -98,6 +98,14 @@ public class AvailableFormatsGeneration {
 									.label("geojson (" + pv.toLowerCase() + ")")
 									.description(AvailableFormatType.ORIGINAL)
 									.build());
+						} else {
+							formats.add(new AvailableFormat.AvailableFormatBuilder()
+									.originalFormat(pv)
+									.format(pv)
+									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
+									.label(pv.toLowerCase())
+									.description(AvailableFormatType.ORIGINAL)
+									.build());
 						}
 			        });
 					
