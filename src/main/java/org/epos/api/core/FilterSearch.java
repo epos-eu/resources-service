@@ -1,135 +1,222 @@
 package org.epos.api.core;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.apache.commons.codec.binary.Base64;
 import org.epos.api.utility.BBoxToPolygon;
-import org.epos.api.utility.Utils;
 import org.epos.eposdatamodel.*;
 import org.epos.handler.dbapi.dbapiimplementation.OrganizationDBAPI;
+import org.epos.handler.dbapi.model.EDMCategory;
 import org.epos.handler.dbapi.model.EDMDataproduct;
+import org.epos.handler.dbapi.model.EDMDataproductCategory;
+import org.epos.handler.dbapi.model.EDMDataproductSpatial;
+import org.epos.handler.dbapi.model.EDMDistribution;
+import org.epos.handler.dbapi.model.EDMDistributionDescription;
+import org.epos.handler.dbapi.model.EDMDistributionTitle;
+import org.epos.handler.dbapi.model.EDMEdmEntityId;
+import org.epos.handler.dbapi.model.EDMIsDistribution;
+import org.epos.handler.dbapi.model.EDMOrganization;
+import org.epos.handler.dbapi.model.EDMPublisher;
+import org.epos.handler.dbapi.model.EDMWebservice;
+import org.epos.handler.dbapi.model.EDMWebserviceCategory;
+import org.epos.handler.dbapi.model.EDMWebserviceSpatial;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.JsonObject;
 
 public class FilterSearch {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FilterSearch.class); 
+
 
 	private static final String NORTHEN_LAT  = "epos:northernmostLatitude";
 	private static final String SOUTHERN_LAT  = "epos:southernmostLatitude";
 	private static final String WESTERN_LON  = "epos:westernmostLongitude";
 	private static final String EASTERN_LON  = "epos:easternmostLongitude";
 
+	private static final String PARAMETER__SCIENCE_DOMAIN = "sciencedomains";
+	private static final String PARAMETER__SERVICE_TYPE = "servicetypes";
 
-	public static List<DataProduct> doFilters(List<DataProduct> datasetList, Map<String,Object> parameters, List<Distribution> distributionList, List<WebService> webserviceList) {
-		
-		PeriodOfTime temporal = checkTemporalExtent(parameters);
-		
-		ArrayList<String> orgIds = checkOrganizations(parameters);
-		
-		datasetList = filterByFullText(datasetList, parameters, distributionList, webserviceList);
-		
+
+
+
+	public static List<EDMDataproduct> doFilters(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+
+		datasetList = filterByFullText(datasetList, parameters);
 		datasetList = filterByKeywords(datasetList, parameters);
-
-		datasetList = filterByOrganizations(datasetList, orgIds, distributionList, webserviceList);
-		
-		datasetList = filterByDateRange(datasetList, temporal);
-
-		datasetList = filterByBoundingBox(datasetList, parameters, distributionList, webserviceList);
+		datasetList = filterByOrganizations(datasetList, parameters);
+		datasetList = filterByDateRange(datasetList, checkTemporalExtent(parameters));
+		datasetList = filterByBoundingBox(datasetList, parameters);
+		datasetList = filterByScienceDomain(datasetList, parameters);
+		datasetList = filterByServiceType(datasetList, parameters);
 		
 		return datasetList;
 	}
+	
+	private static List<EDMDataproduct> filterByScienceDomain(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+		if(parameters.containsKey(PARAMETER__SCIENCE_DOMAIN)) {
+			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
+			List<String> scienceDomainsParameters = List.of(parameters.get(PARAMETER__SCIENCE_DOMAIN).toString().split(","));
+			datasetList.forEach(dataproduct -> {
+				if (Objects.nonNull(dataproduct.getDataproductCategoriesByInstanceId()) && !dataproduct.getDataproductCategoriesByInstanceId().isEmpty()){
+					List<String> scienceDomainOfDataproduct = dataproduct.getDataproductCategoriesByInstanceId().stream()
+							.map(EDMDataproductCategory::getCategoryByCategoryId)
+							.filter(Objects::nonNull)
+							.map(EDMCategory::getId)
+							.collect(Collectors.toList());
 
-	private static List<DataProduct> filterByBoundingBox(List<DataProduct> datasetList, Map<String,Object> parameters, List<Distribution> distributionList, List<WebService> webserviceList) {
-		if(parameters.containsKey(NORTHEN_LAT)
-				&& parameters.containsKey(SOUTHERN_LAT)
-				&& parameters.containsKey(WESTERN_LON)
-				&& parameters.containsKey(EASTERN_LON)) {
-			GeometryFactory geometryFactory = new GeometryFactory();
+					if(!Collections.disjoint(scienceDomainOfDataproduct, scienceDomainsParameters)){
+						tempDatasetList.add(dataproduct);
+					}
+				}
+			});
+			datasetList = tempDatasetList;
+		}
+		return datasetList;
+	}
 
-			WKTReader reader = new WKTReader( geometryFactory );
-			try {
-				final Geometry inputGeometry = reader.read(BBoxToPolygon.transform(parameters));
-				if(inputGeometry!=null) {
-					ArrayList<DataProduct> tempDatasetList = new ArrayList<>();
-					datasetList.forEach(ds -> {
-						int tempListSize = tempDatasetList.size();
-						if(ds.getDistribution()!=null) {
-							ArrayList<String> distrs = new ArrayList<String>();
-							ds.getDistribution().forEach(dist->{
-								if(dist.getUid()!= null) {
-									distrs.add(dist.getUid().replace("file:///app/", ""));
-								}
-							});
-							for(Distribution dx : distributionList) {
-								if(distrs.contains(dx.getUid())) {
-									if(dx.getAccessService()!=null) {
-										for(WebService ws :webserviceList) {
-											if(dx.getAccessService().getUid() != null && ws.getUid().replace("file:///app/", "").equals(dx.getAccessService().getUid().replace("file:///app/", ""))){
-												if(ws.getSpatialExtent()!=null) {
-													ws.getSpatialExtent().forEach(spatial->{
-														try {
-															Geometry dsGeometry = reader.read(spatial.getLocation());
-															if(inputGeometry.intersects(dsGeometry)) {
-																tempDatasetList.add(ds);
-															}
-														} catch (org.locationtech.jts.io.ParseException e) {
-															LOGGER.error("Error occurs during BBOX dataproduct parsing {}",e);
-														}
-													});
-												}
-											}
-										}
+
+	private static List<EDMDataproduct> filterByServiceType(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+		if (parameters.containsKey(PARAMETER__SERVICE_TYPE)) {
+			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
+			List<String> serviceTypesParameters = List.of(parameters.get(PARAMETER__SERVICE_TYPE).toString().split(","));
+
+			datasetList.forEach(dataproduct -> {
+
+				List<EDMWebservice> webservices = dataproduct.getIsDistributionsByInstanceId().stream()
+						.map(EDMIsDistribution::getDistributionByInstanceDistributionId)
+						.filter(Objects::nonNull)
+						.map(EDMDistribution::getWebserviceByAccessService)
+						.filter(Objects::nonNull)
+						.collect(Collectors.toList());
+
+				for (EDMWebservice webservice : webservices) {
+					if (Objects.nonNull(webservice.getWebserviceCategoriesByInstanceId()) && !webservice.getWebserviceCategoriesByInstanceId().isEmpty()) {
+						List<String> serviceTypesOfWebservice = webservice.getWebserviceCategoriesByInstanceId().stream()
+								.map(EDMWebserviceCategory::getCategoryByCategoryId)
+								.filter(Objects::nonNull)
+								.map(EDMCategory::getId)
+								.collect(Collectors.toList());
+
+						if (!Collections.disjoint(serviceTypesOfWebservice, serviceTypesParameters)) {
+							tempDatasetList.add(dataproduct);
+							break;
+						}
+					}
+				}
+
+			});
+			datasetList = tempDatasetList;
+		}
+		return datasetList;
+	}
+
+
+	private static List<EDMDataproduct> filterByBoundingBox(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+		//check if the bbox passed inside the parameters is complete, if not exit and return the whole list of dataproduct
+		if (!parameters.containsKey(NORTHEN_LAT)
+				|| !parameters.containsKey(SOUTHERN_LAT)
+				|| !parameters.containsKey(WESTERN_LON)
+				|| !parameters.containsKey(EASTERN_LON))
+			return datasetList;
+		GeometryFactory geometryFactory = new GeometryFactory();
+		WKTReader reader = new WKTReader( geometryFactory );
+		try {
+			//try to parse the bbox
+			final Geometry inputGeometry = reader.read(BBoxToPolygon.transform(parameters));
+			//check if the bbox is parsed
+			if(inputGeometry!=null) {
+				//temporary dataproduct list, it will collect the dataproduct which are, even in part, contained inside the bbox
+				ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
+				//utility set to contain the all the uid of the selected dataproduct to avoid duplicates
+				Set<String> uidSet = new HashSet<>();
+				//iterate over every dataproduct
+				for (EDMDataproduct ds : datasetList) {
+					//if the uid belong to an already selected dataproduct just skip the iteration
+					if(uidSet.contains(ds.getMetaId())) continue;
+					//iterate over every distribution related to the dataproduct taken into account
+					ds.getIsDistributionsByInstanceId().stream()
+					.map(EDMIsDistribution::getDistributionByInstanceDistributionId)
+					.map(EDMDistribution::getWebserviceByAccessService)
+					.filter(Objects::nonNull)
+					//iterate over the webservice related to the distribution
+					.forEach(ws -> {
+						if(Objects.nonNull(ws.getWebserviceSpatialsByInstanceId())){
+							//loop on every spatial of the webservice
+							for (EDMWebserviceSpatial wsSpatial : ws.getWebserviceSpatialsByInstanceId()) {
+								try {
+									//parse the spatial of the webservice
+									Geometry dsGeometry = reader.read(wsSpatial.getLocation());
+									//if the dataproduct hasn't been selected yet and the spatial of the webservice
+									//intersect with the bbox, the dataproduct is selected.
+									if (!uidSet.contains(ds.getMetaId()) && inputGeometry.intersects(dsGeometry)) {
+										tempDatasetList.add(ds);
+										uidSet.add(ds.getMetaId());
 									}
+								} catch (ParseException e) {
+									LOGGER.error("Error occurs during BBOX dataproduct parsing", e);
 								}
 							}
 						}
-
-						if(ds.getSpatialExtent()!=null && tempDatasetList.size()==tempListSize) {
-							ds.getSpatialExtent().forEach(spatial->{
-								try {
-									Geometry dsGeometry = reader.read(spatial.getLocation());
-									if(inputGeometry.intersects(dsGeometry)) {
-										tempDatasetList.add(ds);
-									}
-								} catch (org.locationtech.jts.io.ParseException e) {
-									LOGGER.error("Error occurs during BBOX dataproduct parsing {}",e);
-								}
-							});
-						} 
-
-						if(ds.getSpatialExtent()==null && tempDatasetList.size()==tempListSize) { 
-							tempDatasetList.add(ds);
-						}
 					});
-					datasetList = tempDatasetList;
+					//if the uid belong to an already selected dataproduct just skip the iteration
+					if(uidSet.contains(ds.getMetaId())) continue;
+					//same operation done before for the webservice's spatial but now for the dataprodut spatial
+					if(ds.getDataproductSpatialsByInstanceId() != null){
+						for(EDMDataproductSpatial dsSpatial : ds.getDataproductSpatialsByInstanceId()){
+							Geometry dsGeometry = reader.read(dsSpatial.getLocation());
+							if (!uidSet.contains(ds.getMetaId()) && inputGeometry.intersects(dsGeometry)) {
+								tempDatasetList.add(ds);
+								uidSet.add(ds.getMetaId());
+							}
+						}
+					}
+					//if the uid belong to an already selected dataproduct just skip the iteration
+					if(uidSet.contains(ds.getMetaId())) continue;
+					//if the dataproduct doesn't have any spatial information it is taken
+					if ( ds.getDataproductSpatialsByInstanceId() == null || ds.getDataproductSpatialsByInstanceId().isEmpty() ) {
+						tempDatasetList.add(ds);
+						uidSet.add(ds.getMetaId());
+					}
 				}
-			} catch (org.locationtech.jts.io.ParseException e) {
-				LOGGER.error("Error occurs during BBOX input parsing {}",e);
+				//replace the old dataset list with the new temporary filtered dataproduct list
+				datasetList = tempDatasetList;
 			}
+		} catch (org.locationtech.jts.io.ParseException e) {
+			LOGGER.error("Error occurs during BBOX input parsing ",e);
 		}
-		//Set<String> collect = datasetList.stream().map(DataProduct::getUid).collect(Collectors.toSet());
-		//LOGGER.info("n° of dataproduct after bbox filter: " + datasetList.size());
-		//LOGGER.info("Dataproduct after bbox filter: " + collect);
 		return datasetList;
 	}
 
-	private static List<DataProduct> filterByDateRange(List<DataProduct> datasetList, PeriodOfTime temporal) {
+
+	private static List<EDMDataproduct> filterByDateRange(List<EDMDataproduct> datasetList, PeriodOfTime temporal) {
 		if(temporal.getStartDate()!=null && temporal.getEndDate()!=null) {
-			ArrayList<DataProduct> tempDatasetList = new ArrayList<>();
+			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
 			datasetList.forEach(ds -> {
-				if(ds.getTemporalExtent()!=null && ds.getTemporalExtent().size() > 0) {
-					if((ds.getTemporalExtent().get(0).getStartDate() == null || temporal.getEndDate() == null || ds.getTemporalExtent().get(0).getStartDate().isBefore(temporal.getEndDate()))
-							&& (temporal.getStartDate() == null || ds.getTemporalExtent().get(0).getEndDate() == null || temporal.getStartDate().isBefore(ds.getTemporalExtent().get(0).getEndDate()))
-							&& (ds.getTemporalExtent().get(0).getStartDate() == null || ds.getTemporalExtent().get(0).getEndDate() == null || ds.getTemporalExtent().get(0).getStartDate().isBefore(ds.getTemporalExtent().get(0).getEndDate()))
+				List<PeriodOfTime> dsTemporalList = ds.getDataproductTemporalsByInstanceId() != null ?
+						ds.getDataproductTemporalsByInstanceId().stream()
+						.map(elem -> {
+							PeriodOfTime periodOfTime = new PeriodOfTime();
+							periodOfTime.setStartDate(
+									elem.getStartdate() != null ?
+											elem.getStartdate().toLocalDateTime() : null
+									);
+							periodOfTime.setEndDate(
+									elem.getEnddate() != null ?
+											elem.getEnddate().toLocalDateTime() : null
+									);
+							return periodOfTime;
+						}).collect(Collectors.toList())
+						: new ArrayList<>();
+				if( dsTemporalList.size() > 0) {
+					if((dsTemporalList.get(0).getStartDate() == null || temporal.getEndDate() == null || dsTemporalList.get(0).getStartDate().isBefore(temporal.getEndDate()))
+							&& (temporal.getStartDate() == null || dsTemporalList.get(0).getEndDate() == null || temporal.getStartDate().isBefore(dsTemporalList.get(0).getEndDate()))
+							&& (dsTemporalList.get(0).getStartDate() == null || dsTemporalList.get(0).getEndDate() == null || dsTemporalList.get(0).getStartDate().isBefore(dsTemporalList.get(0).getEndDate()))
 							&& (temporal.getStartDate() == null || temporal.getEndDate() == null || temporal.getStartDate().isBefore(temporal.getEndDate())))
 						tempDatasetList.add(ds);
 				}
@@ -139,42 +226,51 @@ public class FilterSearch {
 		return datasetList;
 	}
 
-	private static List<DataProduct> filterByOrganizations(List<DataProduct> datasetList, ArrayList<String> orgIds, List<Distribution> distributionList, List<WebService> webserviceList) {
-		if(!orgIds.isEmpty()) {
-			ArrayList<DataProduct> tempDatasetList = new ArrayList<>();
+	private static List<EDMDataproduct> filterByOrganizations(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+		if(parameters.containsKey("organisations")) {
+			List<String> organisations = Arrays.asList(parameters.get("organisations").toString().split(","));
+
+			HashSet<EDMDataproduct> tempDatasetList = new HashSet<>();
 			datasetList.forEach(ds -> {
-				for(String organizationID : ds.getPublisher().stream().map(LinkedEntity::getInstanceId).collect(Collectors.toList())) {
-					if(orgIds.contains(organizationID)) {
-						tempDatasetList.add(ds);
+
+				List<String> value = new ArrayList<>();
+				for (EDMEdmEntityId edmMetaId : ds.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList())) {
+					if (edmMetaId.getOrganizationsByMetaId() != null && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
+						ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
+						value.add(list.get(0).getMetaId());
 					}
 				}
-				for(Distribution distr : distributionList) {
-					ds.getDistribution().forEach(subDistr -> {
-						if(subDistr.getInstanceId().equals(distr.getInstanceId())) {
-							webserviceList.forEach(ws -> {
-								if(distr.getAccessService()!=null && distr.getAccessService().getInstanceId().equals(ws.getInstanceId())){
-									for(String orgId : orgIds) {
-										if(ws.getProvider()!=null && (orgId.contains(ws.getProvider().getInstanceId()) || ws.getProvider().getInstanceId().contains(orgId))) {
-											tempDatasetList.add(ds);
-										}	
-									}	
-								}
-							});
-						}
-					});
+
+				List<EDMEdmEntityId> provider = ds.getIsDistributionsByInstanceId().stream()
+						.map(EDMIsDistribution::getDistributionByInstanceDistributionId)
+						.filter(Objects::nonNull)
+						.map(EDMDistribution::getWebserviceByAccessService)
+						.filter(Objects::nonNull)
+						.map(EDMWebservice::getEdmEntityIdByProvider)
+						.filter(Objects::nonNull).collect(Collectors.toList());
+				for (EDMEdmEntityId edmMetaId : provider){
+					if (edmMetaId.getOrganizationsByMetaId() != null && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
+						ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
+						value.add(list.get(0).getMetaId());
+					}
 				}
+
+				if(!Collections.disjoint(organisations, value)){
+					tempDatasetList.add(ds);
+				}
+
 			});
-			datasetList = tempDatasetList;
+			datasetList = new ArrayList<>(tempDatasetList);
 		}
 		return datasetList;
 	}
 
-	private static List<DataProduct> filterByKeywords(List<DataProduct> datasetList, Map<String,Object> parameters) {
+	private static List<EDMDataproduct> filterByKeywords(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
 		if(parameters.containsKey("keywords")) {
-			ArrayList<DataProduct> tempDatasetList = new ArrayList<>();
-			List<String> keywords = Arrays.asList(parameters.get("keywords").toString().split(",")).stream().map(kw -> new String(Base64.decodeBase64(kw))).collect(Collectors.toList());
+			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
+			String[] keywords = parameters.get("keywords").toString().split(",");
 			datasetList.forEach(ds -> {
-				if(!Collections.disjoint(Arrays.stream(ds.getKeywords().split(",\t")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()), Arrays.asList(keywords))){
+				if(!Collections.disjoint(Arrays.stream(ds.getKeywords().split(",")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()), Arrays.asList(keywords))){
 					tempDatasetList.add(ds);
 				}
 			});
@@ -183,61 +279,111 @@ public class FilterSearch {
 		return datasetList;
 	}
 
-	private static List<DataProduct> filterByFullText(List<DataProduct> datasetList, Map<String,Object> parameters, List<Distribution> distributionList, List<WebService> webserviceList) {
+	private static List<EDMDataproduct> filterByFullText(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
 		if(parameters.containsKey("q")) {
-			HashSet<DataProduct> tempDatasetList = new HashSet<>();
-			HashSet<Distribution> tempDistributionList = new HashSet<>();
-			HashSet<String> webservicesIDs = new HashSet<String>();
-			String[] qS = parameters.get("q").toString().toLowerCase().split(",");
+			HashSet<EDMDataproduct> tempDatasetList = new HashSet<>();
+			String[] qs = parameters.get("q").toString().toLowerCase().split(",");
 
-			datasetList.forEach(ds -> {
-				if(!Collections.disjoint(Arrays.stream(ds.getKeywords().split(",")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()), Arrays.asList(qS)))
-					tempDatasetList.add(ds);
-			});
+			for (EDMDataproduct edmDataproduct : datasetList) {
+				Map<String, Boolean> qSMap = Arrays.stream(qs)
+						.collect(Collectors.toMap(
+								key -> key, value -> Boolean.FALSE
+								));
 
-			webserviceList.forEach(ws -> {
-				if(ws.getDescription() != null && Utils.stringContainsItemFromList(ws.getDescription().toLowerCase(),qS)) {
-					webservicesIDs.add(ws.getUid());
-				}
-				if(ws.getName() != null && Utils.stringContainsItemFromList(ws.getName().toLowerCase(),qS)) {
-					webservicesIDs.add(ws.getUid());
-				}
-				if(!Collections.disjoint(Arrays.stream(ws.getKeywords()!=null? ws.getKeywords().split(",") : new String().split(",")).map(String::toLowerCase).map(String::trim).map(e->e.toLowerCase()).collect(Collectors.toList()), Arrays.asList(qS)))
-					webservicesIDs.add(ws.getUid());
-			});
+				if(Objects.nonNull(edmDataproduct.getKeywords())){
+					List<String> dataproductKeywords = Arrays.stream(edmDataproduct.getKeywords().split(","))
+							.map(String::toLowerCase)
+							.map(String::trim)
+							.collect(Collectors.toList());
 
-			distributionList.forEach(ds -> {
-
-				if(ds.getDescription() != null && ds.getDescription().size()>0
-						&& ds.getTitle() != null && ds.getTitle().size()>0) {
-					for(String descriptionItem : ds.getDescription()) {
-						if(Utils.stringContainsItemFromList(descriptionItem.toLowerCase(),qS)) tempDistributionList.add(ds);
-					}
-					for(String titleItem : ds.getTitle()) {
-						if(Utils.stringContainsItemFromList(titleItem.toLowerCase(),qS)) tempDistributionList.add(ds);
+					for (String q : qSMap.keySet()) {
+						if (dataproductKeywords.contains(q)) qSMap.put(q, Boolean.TRUE);
 					}
 				}
 
-				if(ds.getAccessService()!=null && webservicesIDs.contains(ds.getAccessService().getUid())) {
-					tempDistributionList.add(ds);
+
+				if (edmDataproduct.getIsDistributionsByInstanceId() != null && !edmDataproduct.getIsDistributionsByInstanceId().isEmpty()) {
+					for (EDMDistribution edmDistribution : edmDataproduct.getIsDistributionsByInstanceId().stream().map(EDMIsDistribution::getDistributionByInstanceDistributionId).collect(Collectors.toList())) {
+
+						//distribution title
+						if (edmDistribution.getDistributionTitlesByInstanceId() != null) {
+							edmDistribution.getDistributionTitlesByInstanceId()
+							.stream().map(EDMDistributionTitle::getTitle)
+							.forEach(title ->
+							{
+								for (String q : qSMap.keySet()) {
+									if (title.toLowerCase().contains(q)) {
+										qSMap.put(q, Boolean.TRUE);
+									}
+								}
+							}
+									);
+						}
+
+						//distribution description
+						if (edmDistribution.getDistributionDescriptionsByInstanceId() != null) {
+							edmDistribution.getDistributionDescriptionsByInstanceId()
+							.stream().map(EDMDistributionDescription::getDescription)
+							.forEach(description ->
+							{
+								for (String q : qSMap.keySet()) {
+									if (description.toLowerCase().contains(q)) {
+										qSMap.put(q, Boolean.TRUE);
+									}
+								}
+							}
+									);
+						}
+
+						//webservice
+						if (edmDistribution.getWebserviceByAccessService() != null) {
+							EDMWebservice edmWebservice = edmDistribution.getWebserviceByAccessService();
+
+							//webservice title
+							if (edmWebservice.getName() != null) {
+								for (String q : qSMap.keySet()) {
+									if (edmWebservice.getName().toLowerCase().contains(q)) {
+										qSMap.put(q, Boolean.TRUE);
+									}
+								}
+							}
+
+							//webservice description
+							if (edmWebservice.getDescription() != null) {
+								for (String q : qSMap.keySet()) {
+									if (edmWebservice.getDescription().toLowerCase().contains(q)) {
+										qSMap.put(q, Boolean.TRUE);
+									}
+								}
+							}
+
+							if(Objects.nonNull(edmWebservice.getKeywords())){
+								List<String> webserviceKeywords = Arrays.stream(edmWebservice.getKeywords().split(","))
+										.map(String::toLowerCase)
+										.map(String::trim)
+										.collect(Collectors.toList());
+
+								for (String q : qSMap.keySet()) {
+									if (webserviceKeywords.contains(q)) qSMap.put(q, Boolean.TRUE);
+								}
+							}
+
+						}
+
+					}
 				}
-			});
 
-			List<String> distributionsIDs = tempDistributionList.stream().map(e->e.getUid()).collect(Collectors.toList());
-
-			datasetList.forEach(ds -> {
-				if(ds.getDistribution().stream().anyMatch(id -> distributionsIDs.contains(id.getUid()))) {
-					tempDatasetList.add(ds);
-				}
-			});
-
+				//take a dataproduct onlly if every element of the freetext search is satisfied
+				if (qSMap.values().stream().allMatch(b -> b)) tempDatasetList.add(edmDataproduct);
+			}
 
 			datasetList = new ArrayList<>(tempDatasetList);
-
 		}
+
 		return datasetList;
 
 	}
+
 
 	private static ArrayList<String> checkOrganizations(Map<String,Object> parameters) {
 		OrganizationDBAPI orgadbapi = new OrganizationDBAPI();
@@ -260,8 +406,8 @@ public class FilterSearch {
 		try {
 			if(parameters.containsKey("schema:startDate")) temporal.setStartDate(convertToLocalDateTimeViaSqlTimestamp(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(parameters.get("schema:startDate").toString().replace("T", " ").replace("Z", ""))));
 			if(parameters.containsKey("schema:endDate")) temporal.setEndDate(convertToLocalDateTimeViaSqlTimestamp(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(parameters.get("schema:endDate").toString().replace("T", " ").replace("Z", ""))));
-		} catch (ParseException e1) {
-			LOGGER.error("Error occurs during search caused by Date parsing {}",e1);
+		} catch (java.text.ParseException e) {
+			LOGGER.error("Error occurs during search caused by Date parsing {}",e);
 		}
 		return temporal;
 	}
