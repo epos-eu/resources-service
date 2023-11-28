@@ -60,7 +60,7 @@ public class AvailableFormatsGeneration {
 									.originalFormat(pv)
 									.format("application/vnd.ogc.wms_xml")
 									.href(EnvironmentVariables.API_HOST+ API_PATH_EXECUTE_OGC + distribution.getMetaId())
-									.label("WMS".toUpperCase())
+									.label("WMS".toLowerCase())
 									.description(AvailableFormatType.ORIGINAL)
 									.build());
 						} else if (pv.equals("json") && (op.getTemplate().contains("service=WFS") ||
@@ -74,7 +74,7 @@ public class AvailableFormatsGeneration {
 									.originalFormat(pv)
 									.format("application/epos.geo+json")
 									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + "json")
-									.label("GEOJSON (" + pv + ")")
+									.label("geojson" + pv.toLowerCase() + ")")
 									.description(AvailableFormatType.ORIGINAL)
 									.build());
 							
@@ -95,7 +95,7 @@ public class AvailableFormatsGeneration {
 									.originalFormat(pv)
 									.format("application/epos.geo+json")
 									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
-									.label("GEOJSON (" + pv + ")")
+									.label("geojson (" + pv.toLowerCase() + ")")
 									.description(AvailableFormatType.ORIGINAL)
 									.build());
 						}
@@ -106,7 +106,7 @@ public class AvailableFormatsGeneration {
 					            .stream()
 					            .map(EDMOperationReturns::getReturns)
 					            .forEach(returns -> {
-					                String format = returns.toUpperCase();
+					                String format = returns.toLowerCase();
 					                AvailableFormatType formatType = AvailableFormatType.ORIGINAL;
 
 					                if (returns.contains("geojson") || returns.contains("geo+json")) {
@@ -151,7 +151,7 @@ public class AvailableFormatsGeneration {
 
 					                formats.add(new AvailableFormat.AvailableFormatBuilder()
 					                        .originalFormat(param.getEncodingFormat())
-					                        .format(format.toLowerCase())
+					                        .format(format)
 					                        .href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + param.getEncodingFormat())
 					                        .label(format.toLowerCase())
 					                        .description(formatType)
@@ -299,7 +299,7 @@ public class AvailableFormatsGeneration {
                     .originalFormat(format)
                     .format(format)
                     .href(list.stream().collect(Collectors.toList()).get(0).getInstanceOperationId())
-                    .label(format.toUpperCase())
+                    .label(format.toLowerCase())
                     .description(AvailableFormatType.ORIGINAL)
                     .build());
 
