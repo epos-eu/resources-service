@@ -26,16 +26,15 @@ public class SearchGenerationJPA {
 
 	private static final String PARAMETER__SCIENCE_DOMAIN = "sciencedomains";
 	private static final String PARAMETER__SERVICE_TYPE = "servicetypes";
+	
+	public static List<EDMDataproduct> dataproducts;
 
 	public static SearchResponse generate(Map<String,Object> parameters) {
 
 		LOGGER.info("Requests start - JPA method");
 
 		long startTime = System.currentTimeMillis();
-		EntityManager em = new DBService().getEntityManager();
-
-		List<EDMDataproduct> dataproducts = getFromDB(em, EDMDataproduct.class, "dataproduct.findAllByState", "STATE", "PUBLISHED");
-		em.close();
+		
 
 		LOGGER.info("Apply filter using input parameters: "+parameters.toString());
 		dataproducts = FilterSearch.doFilters(dataproducts, parameters);
@@ -267,6 +266,5 @@ public class SearchGenerationJPA {
 		return response;
 
 	}
-
 
 }

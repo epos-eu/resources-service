@@ -21,157 +21,23 @@ public class AvailableFormatsGeneration {
 		List<AvailableFormat> formats = new ArrayList<>();
 		//available formats
 		EDMWebservice webserviceByAccessService = distribution.getWebserviceByAccessService();
-		//if(webserviceByAccessService !=null && webserviceByAccessService.getSupportedOperationByInstanceId() != null) {
-		//	for( EDMOperation op : webserviceByAccessService.getSupportedOperationByInstanceId().stream().map(EDMSupportedOperation::getOperationByInstanceOperationId).collect(Collectors.toList())){
 		if (webserviceByAccessService != null && webserviceByAccessService.getSupportedOperationByInstanceId() != null) {
 		    webserviceByAccessService.getSupportedOperationByInstanceId().stream()
 		        .map(EDMSupportedOperation::getOperationByInstanceOperationId)
 		        .forEach(op -> {
-				//if (op.getUid() != null && distribution.getAccessURLByInstanceId() != null && distribution.getAccessURLByInstanceId().stream().map(EDMDistributionAccessURL::getInstanceOperationId).collect(Collectors.toList()).contains(op.getInstanceId()) ) {
 				if (op.getUid() != null &&
 					    distribution.getAccessURLByInstanceId() != null &&
 					    distribution.getAccessURLByInstanceId()
 					        .stream()
 					        .anyMatch(url -> op.getInstanceId().equals(url.getInstanceOperationId()))) {
-					/*boolean isWMS = false;
+					boolean isWMS = false;
 					
 					for (EDMMapping map : op.getMappingsByInstanceId() != null ? op.getMappingsByInstanceId() : new ArrayList<EDMMapping>()) {
 						if (map.getProperty() != null && map.getProperty().contains("encodingFormat")) {
 							for (String pv : map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList())) {
+								
 								if (pv.equals("image/png")) {
 									isWMS = true;
-								}
-							}
-						}
-					}*/
-					boolean isWMS = op.getMappingsByInstanceId()
-					        .stream()
-					        .filter(map -> map.getProperty() != null && map.getProperty().contains("encodingFormat"))
-					        .flatMap(map -> map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue))
-					        .anyMatch(pv -> pv.equals("image/png"));
-
-					op.getMappingsByInstanceId()
-			        .stream()
-			        .filter(map -> map.getProperty() != null && map.getProperty().contains("encodingFormat"))
-			        .flatMap(map -> map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue))
-			        .forEach(pv -> {
-			        	if (pv.equals("image/png")) {
-							formats.add(new AvailableFormat.AvailableFormatBuilder()
-									.originalFormat(pv)
-									.format("application/vnd.ogc.wms_xml")
-									.href(EnvironmentVariables.API_HOST+ API_PATH_EXECUTE_OGC + distribution.getMetaId())
-									.label("WMS".toLowerCase())
-									.description(AvailableFormatType.ORIGINAL)
-									.build());
-						} else if (pv.equals("json") && (op.getTemplate().contains("service=WFS") ||
-			                    op.getMappingsByInstanceId().stream().anyMatch(e ->
-	                            e.getVariable().equals("service") &&
-	                                    (e.getMappingParamvaluesById().stream()
-	                                            .map(EDMMappingParamvalue::getParamvalue)
-	                                            .collect(Collectors.toList()).contains("WFS") ||
-	                                            e.getDefaultvalue().contains("WFS"))))) {
-							formats.add(new AvailableFormat.AvailableFormatBuilder()
-									.originalFormat(pv)
-									.format("application/epos.geo+json")
-									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + "json")
-									.label("geojson" + pv.toLowerCase() + ")")
-									.description(AvailableFormatType.ORIGINAL)
-									.build());
-							
-						} else if (pv.contains("geo%2Bjson")) {
-							formats.add(new AvailableFormat.AvailableFormatBuilder()
-									.originalFormat(pv)
-									.format("application/epos.geo+json")
-									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
-									.label("GEOJSON (" + pv + ")")
-									.description(AvailableFormatType.ORIGINAL)
-									.build());
-						}  else if (((pv.toLowerCase().contains("geojson") || pv.toLowerCase().contains("geo+json") || pv.toLowerCase().contains("geo-json")) ||
-			                    (pv.toLowerCase().contains("epos.table.geo+json") || pv.toLowerCase().contains("epos.map.geo+json"))) &&
-			                    op.getSoftwareapplicationOperationsByInstanceId().stream()
-			                            .map(EDMSoftwareapplicationOperation::getSoftwareapplicationByInstanceSoftwareapplicationId)
-			                            .collect(Collectors.toList()).isEmpty()) {
-							formats.add(new AvailableFormat.AvailableFormatBuilder()
-									.originalFormat(pv)
-									.format("application/epos.geo+json")
-									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
-									.label("geojson (" + pv.toLowerCase() + ")")
-									.description(AvailableFormatType.ORIGINAL)
-									.build());
-						} else {
-							formats.add(new AvailableFormat.AvailableFormatBuilder()
-									.originalFormat(pv)
-									.format(pv)
-									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
-									.label(pv.toLowerCase())
-									.description(AvailableFormatType.ORIGINAL)
-									.build());
-						}
-			        });
-					
-					if (op.getOperationReturnsByInstanceId() != null && formats.isEmpty()) {
-					    op.getOperationReturnsByInstanceId()
-					            .stream()
-					            .map(EDMOperationReturns::getReturns)
-					            .forEach(returns -> {
-					                String format = returns.toLowerCase();
-					                AvailableFormatType formatType = AvailableFormatType.ORIGINAL;
-
-					                if (returns.contains("geojson") || returns.contains("geo+json")) {
-					                    formatType = AvailableFormatType.ORIGINAL;
-					                    format = "application/epos.geo+json";
-					                }
-
-					                formats.add(new AvailableFormat.AvailableFormatBuilder()
-					                        .originalFormat(returns)
-					                        .format(format)
-					                        .href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + returns)
-					                        .label(format.toLowerCase())
-					                        .description(formatType)
-					                        .build());
-					            });
-					}
-
-					if (!isWMS && op.getSoftwareapplicationOperationsByInstanceId() != null) {
-					    op.getSoftwareapplicationOperationsByInstanceId()
-					            .stream()
-					            .map(EDMSoftwareapplicationOperation::getSoftwareapplicationByInstanceSoftwareapplicationId)
-					            .filter(s -> s.getSoftwareapplicationParametersByInstanceId() != null)
-					            .flatMap(s -> s.getSoftwareapplicationParametersByInstanceId().stream())
-					            .map(elem -> {
-					                Parameter parameter = new Parameter();
-					                parameter.setEncodingFormat(elem.getEncodingformat());
-					                parameter.setAction(Parameter.ActionEnum.fromValue(elem.getAction()));
-					                parameter.setConformsTo(elem.getConformsto());
-					                return parameter;
-					            })
-					            .forEach(param -> {
-					                String format = param.getEncodingFormat().toUpperCase();
-					                AvailableFormatType formatType = AvailableFormatType.CONVERTED;
-
-					                if (format.equals("APPLICATION/EPOS.GEO+JSON") ||
-					                        format.equals("APPLICATION/EPOS.TABLE.GEO+JSON") ||
-					                        format.equals("APPLICATION/EPOS.MAP.GEO+JSON")) {
-					                    format = param.getEncodingFormat();
-					                } else if (format.equals("COVJSON")) {
-					                    format = "covjson";
-					                }
-
-					                formats.add(new AvailableFormat.AvailableFormatBuilder()
-					                        .originalFormat(param.getEncodingFormat())
-					                        .format(format)
-					                        .href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + param.getEncodingFormat())
-					                        .label(format.toLowerCase())
-					                        .description(formatType)
-					                        .build());
-					            });
-					}
-					
-					
-					/*for (EDMMapping map : op.getMappingsByInstanceId() != null ? op.getMappingsByInstanceId() : new ArrayList<EDMMapping>()) {
-						if (map.getProperty() != null && map.getProperty().contains("encodingFormat")) {
-							for (String pv : map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList())) {
-								if (pv.equals("image/png")) {
 									formats.add(new AvailableFormat.AvailableFormatBuilder()
 											.originalFormat(pv)
 											.format("application/vnd.ogc.wms_xml")
@@ -221,8 +87,8 @@ public class AvailableFormatsGeneration {
 								}
 							}
 						}
-					}*/
-					/*if (op.getOperationReturnsByInstanceId() != null && formats.isEmpty()) {
+					}
+					if (op.getOperationReturnsByInstanceId() != null && formats.isEmpty()) {
 						for (String returns : op.getOperationReturnsByInstanceId().stream().map(EDMOperationReturns::getReturns).collect(Collectors.toList())) {
 							if (returns.contains("geojson") || returns.contains("geo+json")) {
 								formats.add(new AvailableFormat.AvailableFormatBuilder()
@@ -242,8 +108,8 @@ public class AvailableFormatsGeneration {
 										.build());
 							}
 						}
-					}*/
-					/*if (!isWMS && op.getSoftwareapplicationOperationsByInstanceId() != null) {
+					}
+					if (!isWMS && op.getSoftwareapplicationOperationsByInstanceId() != null) {
 						for (EDMSoftwareapplication s : op.getSoftwareapplicationOperationsByInstanceId().stream().map(EDMSoftwareapplicationOperation::getSoftwareapplicationByInstanceSoftwareapplicationId).collect(Collectors.toList())) {
 							if (s.getSoftwareapplicationParametersByInstanceId() != null) {
 								ArrayList<Parameter> parameterList = new ArrayList<>();
@@ -282,11 +148,11 @@ public class AvailableFormatsGeneration {
 								}
 							}
 						}
-					}*/
+					}
 				}
 			});
 		}
-		/*if(distribution.getAccessURLByInstanceId()!=null && webserviceByAccessService ==null && distribution.getAccessURLByInstanceId().size() > 0) {
+		if(distribution.getAccessURLByInstanceId()!=null && webserviceByAccessService ==null && distribution.getAccessURLByInstanceId().size() > 0) {
 			String[] uri = distribution.getFormat().split("\\/");
 			String format = uri[uri.length-1];
 			formats.add(new AvailableFormat.AvailableFormatBuilder()
@@ -296,23 +162,7 @@ public class AvailableFormatsGeneration {
 					.label(format.toUpperCase())
 					.description(AvailableFormatType.ORIGINAL)
 					.build());
-		}*/
-		Optional.ofNullable(distribution.getAccessURLByInstanceId())
-        .filter(list -> webserviceByAccessService == null && !list.isEmpty())
-        .map(list -> {
-            String[] uri = distribution.getFormat().split("/");
-            String format = uri[uri.length - 1];
-
-            formats.add(new AvailableFormat.AvailableFormatBuilder()
-                    .originalFormat(format)
-                    .format(format)
-                    .href(list.stream().collect(Collectors.toList()).get(0).getInstanceOperationId())
-                    .label(format.toLowerCase())
-                    .description(AvailableFormatType.ORIGINAL)
-                    .build());
-
-            return list;
-        });
+		}
 		return formats;
 	}
 

@@ -1,18 +1,25 @@
 package org.epos.api.routines;
 
+import static org.epos.handler.dbapi.util.DBUtil.getFromDB;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+
 import org.apache.commons.lang3.StringUtils;
 import org.epos.api.core.SearchGenerationJPA;
 import org.epos.api.core.ZabbixExecutor;
 import org.epos.api.facets.Facets;
 import org.epos.api.utility.Utils;
+import org.epos.handler.dbapi.model.EDMDataproduct;
+import org.epos.handler.dbapi.service.DBService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -37,7 +44,7 @@ public class ScheduledRuntimes {
 		facetsUpdater();
 		LOGGER.info("[StartUp Task - Monitoring] Done");
 		LOGGER.info("[StartUp Task - Search Check] Executing search query check");
-		SearchGenerationJPA.generate(new HashMap<String, Object>());
+		dataproductSearchUpdater();
 		LOGGER.info("[StartUp Task - Search Check] Done");
 		LOGGER.info("[Resources Service Startup Completed] -----------------------------------------------");
     }
@@ -96,6 +103,19 @@ public class ScheduledRuntimes {
 			// TODO Auto-generated catch block
 			LOGGER.error(e.getLocalizedMessage());
 		}
+		LOGGER.info("[Scheduled Task - Facets] Facets successfully updated");
+	}
+	
+	@Scheduled(fixedRate = 60000, initialDelay = 0)
+	@Async
+	public void dataproductSearchUpdater() {
+		LOGGER.info("[Scheduled Task - DataProducts Search] Updating dataProducts Search information");
+
+		EntityManager em = new DBService().getEntityManager();
+
+		SearchGenerationJPA.dataproducts = getFromDB(em, EDMDataproduct.class, "dataproduct.findAllByState", "STATE", "PUBLISHED");
+		em.close();
+		
 		LOGGER.info("[Scheduled Task - Facets] Facets successfully updated");
 	}
 
