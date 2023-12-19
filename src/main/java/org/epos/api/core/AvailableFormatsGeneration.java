@@ -42,7 +42,7 @@ public class AvailableFormatsGeneration {
 											.originalFormat(pv)
 											.format("application/vnd.ogc.wms_xml")
 											.href(EnvironmentVariables.API_HOST+ API_PATH_EXECUTE_OGC + distribution.getMetaId())
-											.label("WMS".toUpperCase())
+											.label("wms")
 											.description(AvailableFormatType.ORIGINAL)
 											.build());
 								} else if (pv.equals("json") &&
@@ -53,7 +53,7 @@ public class AvailableFormatsGeneration {
 											.originalFormat(pv)
 											.format("application/epos.geo+json")
 											.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + "json")
-											.label("GEOJSON (" + pv + ")")
+											.label("GeoJson (" + pv.toLowerCase() + ")")
 											.description(AvailableFormatType.ORIGINAL)
 											.build());
 								} else if (pv.contains("geo%2Bjson")) {
@@ -61,7 +61,7 @@ public class AvailableFormatsGeneration {
 											.originalFormat(pv)
 											.format("application/epos.geo+json")
 											.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
-											.label("GEOJSON (" + pv + ")")
+											.label("GeoJson (" + pv.toLowerCase() + ")")
 											.description(AvailableFormatType.ORIGINAL)
 											.build());
 								} else if (
@@ -73,7 +73,7 @@ public class AvailableFormatsGeneration {
 											.originalFormat(pv)
 											.format("application/epos.geo+json")
 											.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
-											.label("GEOJSON (" + pv + ")")
+											.label("GeoJson (" + pv.toLowerCase() + ")")
 											.description(AvailableFormatType.ORIGINAL)
 											.build());
 								} else {
@@ -81,7 +81,7 @@ public class AvailableFormatsGeneration {
 											.originalFormat(pv)
 											.format(pv)
 											.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
-											.label(pv.toUpperCase())
+											.label(pv.toLowerCase())
 											.description(AvailableFormatType.ORIGINAL)
 											.build());
 								}
