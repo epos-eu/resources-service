@@ -16,7 +16,7 @@ public class AvailableFormatsGeneration {
 	private static final String API_PATH_EXECUTE_OGC  = EnvironmentVariables.API_CONTEXT+"/ogcexecute/";
 	private static final String API_FORMAT = "?format=";
 
-	public static List<AvailableFormat> generate(EDMDistribution distribution) {
+	public static synchronized List<AvailableFormat> generate(EDMDistribution distribution) {
 
 		List<AvailableFormat> formats = new ArrayList<>();
 		//available formats

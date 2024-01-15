@@ -45,7 +45,7 @@ public class FilterSearch {
 
 
 
-	public static List<EDMDataproduct> doFilters(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	public static synchronized List<EDMDataproduct> doFilters(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
 
 		datasetList = filterByFullText(datasetList, parameters);
 		datasetList = filterByKeywords(datasetList, parameters);
@@ -58,7 +58,7 @@ public class FilterSearch {
 		return datasetList;
 	}
 	
-	private static List<EDMDataproduct> filterByScienceDomain(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	private static synchronized List<EDMDataproduct> filterByScienceDomain(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
 		if(parameters.containsKey(PARAMETER__SCIENCE_DOMAIN)) {
 			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
 			List<String> scienceDomainsParameters = List.of(parameters.get(PARAMETER__SCIENCE_DOMAIN).toString().split(","));
@@ -81,7 +81,7 @@ public class FilterSearch {
 	}
 
 
-	private static List<EDMDataproduct> filterByServiceType(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	private static synchronized List<EDMDataproduct> filterByServiceType(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
 		if (parameters.containsKey(PARAMETER__SERVICE_TYPE)) {
 			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
 			List<String> serviceTypesParameters = List.of(parameters.get(PARAMETER__SERVICE_TYPE).toString().split(","));
@@ -117,7 +117,7 @@ public class FilterSearch {
 	}
 
 
-	private static List<EDMDataproduct> filterByBoundingBox(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	private static synchronized List<EDMDataproduct> filterByBoundingBox(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
 		//check if the bbox passed inside the parameters is complete, if not exit and return the whole list of dataproduct
 		if (!parameters.containsKey(NORTHEN_LAT)
 				|| !parameters.containsKey(SOUTHERN_LAT)
@@ -194,7 +194,7 @@ public class FilterSearch {
 	}
 
 
-	private static List<EDMDataproduct> filterByDateRange(List<EDMDataproduct> datasetList, PeriodOfTime temporal) {
+	private static synchronized List<EDMDataproduct> filterByDateRange(List<EDMDataproduct> datasetList, PeriodOfTime temporal) {
 		if(temporal.getStartDate()!=null && temporal.getEndDate()!=null) {
 			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
 			datasetList.forEach(ds -> {
@@ -226,7 +226,7 @@ public class FilterSearch {
 		return datasetList;
 	}
 
-	private static List<EDMDataproduct> filterByOrganizations(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	private static synchronized List<EDMDataproduct> filterByOrganizations(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
 		if(parameters.containsKey("organisations")) {
 			List<String> organisations = Arrays.asList(parameters.get("organisations").toString().split(","));
 
@@ -265,7 +265,7 @@ public class FilterSearch {
 		return datasetList;
 	}
 
-	private static List<EDMDataproduct> filterByKeywords(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	private static synchronized List<EDMDataproduct> filterByKeywords(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
 		if(parameters.containsKey("keywords")) {
 			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
 			String[] keywords = parameters.get("keywords").toString().split(",");
@@ -279,7 +279,7 @@ public class FilterSearch {
 		return datasetList;
 	}
 
-	private static List<EDMDataproduct> filterByFullText(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	private static synchronized List<EDMDataproduct> filterByFullText(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
 		if(parameters.containsKey("q")) {
 			HashSet<EDMDataproduct> tempDatasetList = new HashSet<>();
 			String[] qs = parameters.get("q").toString().toLowerCase().split(",");
@@ -385,7 +385,7 @@ public class FilterSearch {
 	}
 
 
-	private static ArrayList<String> checkOrganizations(Map<String,Object> parameters) {
+	private static synchronized ArrayList<String> checkOrganizations(Map<String,Object> parameters) {
 		OrganizationDBAPI orgadbapi = new OrganizationDBAPI();
 		orgadbapi.setMetadataMode(false);
 		ArrayList<String> orgIds = new ArrayList<String>();
@@ -401,7 +401,7 @@ public class FilterSearch {
 		return orgIds;
 	}
 
-	public static PeriodOfTime checkTemporalExtent(Map<String,Object> parameters) {
+	public static synchronized PeriodOfTime checkTemporalExtent(Map<String,Object> parameters) {
 		PeriodOfTime temporal = new PeriodOfTime();
 		try {
 			if(parameters.containsKey("schema:startDate")) temporal.setStartDate(convertToLocalDateTimeViaSqlTimestamp(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(parameters.get("schema:startDate").toString().replace("T", " ").replace("Z", ""))));
@@ -412,7 +412,7 @@ public class FilterSearch {
 		return temporal;
 	}
 
-	public static LocalDateTime convertToLocalDateTimeViaSqlTimestamp(Date dateToConvert) {
+	public static synchronized LocalDateTime convertToLocalDateTimeViaSqlTimestamp(Date dateToConvert) {
 		return new java.sql.Timestamp(
 				dateToConvert.getTime()).toLocalDateTime();
 	}

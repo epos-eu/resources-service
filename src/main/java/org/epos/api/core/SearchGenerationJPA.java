@@ -29,7 +29,7 @@ public class SearchGenerationJPA {
 	
 	public static List<EDMDataproduct> dataproducts;
 
-	public static SearchResponse generate(Map<String,Object> parameters) {
+	public static synchronized SearchResponse generate(Map<String,Object> parameters) {
 
 		LOGGER.info("Requests start - JPA method");
 

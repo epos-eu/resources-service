@@ -33,7 +33,7 @@ public class DetailsItemGenerationJPA {
 	private static final String API_PATH_DETAILS = EnvironmentVariables.API_CONTEXT + "/resources/details/";
 	private static final String EMAIL_SENDER = EnvironmentVariables.API_CONTEXT + "/sender/send-email?id=";
 
-	public static Distribution generate(Map<String,Object> parameters) {
+	public static synchronized Distribution generate(Map<String,Object> parameters) {
 
 		LOGGER.info("Parameters {}", parameters);
 

@@ -39,7 +39,7 @@ public class MonitoringGeneration {
 
 	private static final DBAPIClient dbapi = new DBAPIClient();
 
-	public static List<MonitoringBean> generate() {
+	public static synchronized List<MonitoringBean> generate() {
 		
 		EntityManager em = new DBService().getEntityManager();
 
