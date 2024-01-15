@@ -42,7 +42,7 @@ public interface MonitoringApi {
 			@ApiResponse(responseCode = "404", description = "Not Found") })
 	@RequestMapping(value = "/resources/monitoring",
 	produces = { "*/*" }, 
-	method = {RequestMethod.GET,,RequestMethod.OPTIONS})
+	method = {RequestMethod.GET,RequestMethod.OPTIONS})
 	ResponseEntity<List<MonitoringBean>> monitoringUsingGet();
 
 }
