@@ -26,14 +26,15 @@ public class SearchGenerationJPA {
 
 	private static final String PARAMETER__SCIENCE_DOMAIN = "sciencedomains";
 	private static final String PARAMETER__SERVICE_TYPE = "servicetypes";
-	
-	public static List<EDMDataproduct> dataproducts;
 
-	public static synchronized SearchResponse generate(Map<String,Object> parameters) {
+	public static SearchResponse generate(Map<String,Object> parameters) {
 
 		LOGGER.info("Requests start - JPA method");
+		EntityManager em = new DBService().getEntityManager();
 
 		long startTime = System.currentTimeMillis();
+		
+		List<EDMDataproduct> dataproducts  = getFromDB(em, EDMDataproduct.class, "dataproduct.findAllByState", "STATE", "PUBLISHED");
 		
 
 		LOGGER.info("Apply filter using input parameters: "+parameters.toString());
