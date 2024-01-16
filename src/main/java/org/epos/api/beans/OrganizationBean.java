@@ -7,26 +7,29 @@ public class OrganizationBean implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private String uid;
+	private String id;
     private String logo;
     private String url;
     private String name;
     private String country;
     
-	public OrganizationBean(String uid, String logo, String url, String name, String country) {
+	public OrganizationBean(String id, String logo, String url, String name, String country) {
 		super();
-		this.uid = uid;
+		this.id = id;
 		this.logo = logo;
 		this.url = url;
 		this.name = name;
 		this.country = country;
 	}
-	public String getUid() {
-		return uid;
+
+	public String getId() {
+		return id;
 	}
-	public void setUid(String uid) {
-		this.uid = uid;
+
+	public void setId(String id) {
+		this.id = id;
 	}
+
 	public String getLogo() {
 		return logo;
 	}
