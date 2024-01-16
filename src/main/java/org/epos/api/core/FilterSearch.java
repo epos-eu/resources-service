@@ -17,6 +17,7 @@ import org.epos.handler.dbapi.model.EDMDistributionTitle;
 import org.epos.handler.dbapi.model.EDMEdmEntityId;
 import org.epos.handler.dbapi.model.EDMIsDistribution;
 import org.epos.handler.dbapi.model.EDMOrganization;
+import org.epos.handler.dbapi.model.EDMOrganizationLegalname;
 import org.epos.handler.dbapi.model.EDMPublisher;
 import org.epos.handler.dbapi.model.EDMWebservice;
 import org.epos.handler.dbapi.model.EDMWebserviceCategory;
@@ -54,10 +55,17 @@ public class FilterSearch {
 		datasetList = filterByBoundingBox(datasetList, parameters);
 		datasetList = filterByScienceDomain(datasetList, parameters);
 		datasetList = filterByServiceType(datasetList, parameters);
-		
+
 		return datasetList;
 	}
 	
+	public static List<EDMOrganization> doOrganisationsFilters(List<EDMOrganization> organisationsList, Map<String,Object> parameters) {
+
+		organisationsList = filterOrganisationsByFullText(organisationsList, parameters);
+
+		return organisationsList;
+	}
+
 	private static List<EDMDataproduct> filterByScienceDomain(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
 		if(parameters.containsKey(PARAMETER__SCIENCE_DOMAIN)) {
 			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
@@ -381,6 +389,47 @@ public class FilterSearch {
 		}
 
 		return datasetList;
+
+	}
+
+	private static List<EDMOrganization> filterOrganisationsByFullText(List<EDMOrganization> organisationsList, Map<String,Object> parameters) {
+		if(parameters.containsKey("q")) {
+			HashSet<EDMOrganization> tempDatasetList = new HashSet<>();
+			String[] qs = parameters.get("q").toString().toLowerCase().split(",");
+
+			for (EDMOrganization edmOrganisation : organisationsList) {
+				Map<String, Boolean> qSMap = Arrays.stream(qs)
+						.collect(Collectors.toMap(
+								key -> key, value -> Boolean.FALSE
+								));
+
+				if (edmOrganisation.getOrganizationLegalnameByInstanceId() != null && !edmOrganisation.getOrganizationLegalnameByInstanceId().isEmpty()) {
+					for (EDMOrganization edmOrganisation1 : edmOrganisation.getOrganizationLegalnameByInstanceId().stream().map(EDMOrganizationLegalname::getOrganizationIdByInstanceOrganizationId).collect(Collectors.toList())) {
+
+						//distribution title
+						if (edmOrganisation1.getOrganizationLegalnameByInstanceId() != null) {
+							edmOrganisation1.getOrganizationLegalnameByInstanceId()
+							.stream().map(EDMOrganizationLegalname::getLegalname)
+							.forEach(title ->
+							{
+								for (String q : qSMap.keySet()) {
+									if (title.toLowerCase().contains(q)) {
+										qSMap.put(q, Boolean.TRUE);
+									}
+								}
+							});
+						}
+					}
+				}
+
+				//take a dataproduct onlly if every element of the freetext search is satisfied
+				if (qSMap.values().stream().allMatch(b -> b)) tempDatasetList.add(edmOrganisation);
+			}
+
+			organisationsList = new ArrayList<>(tempDatasetList);
+		}
+
+		return organisationsList;
 
 	}
 

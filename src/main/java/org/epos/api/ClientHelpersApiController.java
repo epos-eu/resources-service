@@ -6,10 +6,13 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.epos.api.beans.Distribution;
+import org.epos.api.beans.OrganizationBean;
 import org.epos.api.beans.SearchResponse;
 import org.epos.api.core.DetailsItemGenerationJPA;
 import org.epos.api.core.SearchGenerationJPA;
 import org.epos.api.utility.Utils;
+import org.epos.eposdatamodel.Organization;
+import org.epos.handler.dbapi.model.EDMOrganization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -183,4 +186,5 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		
 		return standardRequest("SEARCH", requestParameters);
     }
+
 }

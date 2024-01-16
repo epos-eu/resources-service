@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.epos.api.core.DetailsItemGenerationJPA;
 import org.epos.api.core.MonitoringGeneration;
+import org.epos.api.core.OrganisationsGeneration;
 import org.epos.api.core.SearchGenerationJPA;
 import org.epos.api.utility.Utils;
 import org.slf4j.Logger;
@@ -59,6 +60,9 @@ abstract class ApiController<T> {
 			break;
 		case "MONITORING":
 			response = Utils.gson.toJson(MonitoringGeneration.generate());
+			break;
+		case "ORGANISATIONS":
+			response = Utils.gson.toJson(OrganisationsGeneration.generate(requestParams));
 			break;
 		default:
 			break;

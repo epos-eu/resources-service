@@ -14,7 +14,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import org.epos.api.beans.Distribution;
+import org.epos.api.beans.OrganizationBean;
 import org.epos.api.beans.SearchResponse;
+import org.epos.eposdatamodel.Organization;
+import org.epos.handler.dbapi.model.EDMOrganization;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;

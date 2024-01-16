@@ -1,20 +1,25 @@
 package org.epos.api.beans;
 
-import java.util.List;
+import java.io.Serializable;
 
-
-public class OrganizationBean {
+public class OrganizationBean implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String uid;
     private String logo;
     private String url;
     private String name;
+    private String country;
     
-	public OrganizationBean(String uid, String logo, String url, String object) {
+	public OrganizationBean(String uid, String logo, String url, String name, String country) {
 		super();
 		this.uid = uid;
 		this.logo = logo;
 		this.url = url;
-		this.name = object;
+		this.name = name;
+		this.country = country;
 	}
 	public String getUid() {
 		return uid;
@@ -39,6 +44,12 @@ public class OrganizationBean {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getCountry() {
+		return country;
+	}
+	public void setCountry(String country) {
+		this.country = country;
 	}
     
     
