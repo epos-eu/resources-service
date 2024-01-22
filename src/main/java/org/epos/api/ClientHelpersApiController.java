@@ -177,7 +177,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		
 		// < validation >
 		try {
-			if(!StringUtils.isBlank(startDate)) Utils.convertDateUsingPattern(endDate, Utils.EPOSINTERNALFORMAT, Utils.EPOSINTERNALFORMAT);
+			if(!StringUtils.isBlank(startDate)) Utils.convertDateUsingPattern(startDate, Utils.EPOSINTERNALFORMAT, Utils.EPOSINTERNALFORMAT);
 			if(!StringUtils.isBlank(endDate)) Utils.convertDateUsingPattern(endDate, Utils.EPOSINTERNALFORMAT, Utils.EPOSINTERNALFORMAT);
 		} catch (ParseException e1) { 
 			LOGGER.error(String.format("Invalid date format specified (use the format '%s')", Utils.EPOSINTERNALFORMAT),e1);

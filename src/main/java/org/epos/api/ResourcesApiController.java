@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.StringUtils;
+import org.epos.api.beans.OrganizationBean;
 import org.epos.api.utility.Utils;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Organization;
@@ -230,7 +231,7 @@ public class ResourcesApiController extends ApiController implements ResourcesAp
 	}
 */
 	@Override
-	public ResponseEntity<List<Organization>> organisationUsingGet(@Parameter(in = ParameterIn.QUERY, description = "the id of organisation" ,required=false,schema=@Schema()) @Valid @RequestParam(value = "id", required = false) String id,@Parameter(in = ParameterIn.QUERY, description = "q" ,schema=@Schema()) @Valid @RequestParam(value = "q", required = false) String q, 
+	public ResponseEntity<List<OrganizationBean>> organisationUsingGet(@Parameter(in = ParameterIn.QUERY, description = "the id of organisation" ,required=false,schema=@Schema()) @Valid @RequestParam(value = "id", required = false) String id,@Parameter(in = ParameterIn.QUERY, description = "q" ,schema=@Schema()) @Valid @RequestParam(value = "q", required = false) String q, 
 			@Parameter(in = ParameterIn.QUERY, description = "country" ,schema=@Schema()) @Valid @RequestParam(value = "country", required = false) String country) {
 		Map<String,Object> requestParams = new HashMap<String, Object>();
 		if(id!=null) {

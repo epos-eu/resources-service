@@ -2,11 +2,7 @@ package org.epos.api.beans;
 
 import java.io.Serializable;
 
-public class OrganizationBean implements Serializable{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class OrganizationBean{
 	private String id;
     private String logo;
     private String url;

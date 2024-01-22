@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import org.epos.api.beans.OrganizationBean;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Organization;
 import org.epos.eposdatamodel.Person;
@@ -96,7 +98,7 @@ public interface ResourcesApi {
 
 	@Operation(summary = "organisation operation", description = "organisation endpoint", tags={ "Resources Service" })
 	@ApiResponses(value = { 
-			@ApiResponse(responseCode = "200", description = "ok.", content = @Content(mediaType = "*/*", schema = @Schema(implementation = Organization.class))),
+			@ApiResponse(responseCode = "200", description = "ok.", content = @Content(mediaType = "*/*", schema = @Schema(implementation = OrganizationBean.class))),
 
 			@ApiResponse(responseCode = "201", description = "Created."),
 
@@ -114,7 +116,7 @@ public interface ResourcesApi {
 	@RequestMapping(value = "/resources/organizations",
 	produces = { "*/*" }, 
 	method = RequestMethod.GET)
-	ResponseEntity<List<Organization>> organisationUsingGet(@Parameter(in = ParameterIn.QUERY, description = "the id of organization" ,required=false,schema=@Schema()) @Valid @RequestParam(value = "id", required = false) String id,@Parameter(in = ParameterIn.QUERY, description = "q" ,schema=@Schema()) @Valid @RequestParam(value = "q", required = false) String q, 
+	ResponseEntity<List<OrganizationBean>> organisationUsingGet(@Parameter(in = ParameterIn.QUERY, description = "the id of organization" ,required=false,schema=@Schema()) @Valid @RequestParam(value = "id", required = false) String id,@Parameter(in = ParameterIn.QUERY, description = "q" ,schema=@Schema()) @Valid @RequestParam(value = "q", required = false) String q, 
 			@Parameter(in = ParameterIn.QUERY, description = "country" ,schema=@Schema()) @Valid @RequestParam(value = "country", required = false) String country);
 
 

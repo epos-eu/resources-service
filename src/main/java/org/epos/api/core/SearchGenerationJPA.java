@@ -149,7 +149,7 @@ public class SearchGenerationJPA {
 		                    .setDataproductCategories(categoryList.isEmpty() ? null : categoryList)
 		                    .build();
 
-		            if (EnvironmentVariables.MONITORING.equals("true")) {
+		            if (EnvironmentVariables.MONITORING != null && EnvironmentVariables.MONITORING.equals("true")) {
 		                discoveryItem.setStatus(ZabbixExecutor.getInstance().getStatusInfoFromSha(discoveryItem.getSha256id()));
 		                discoveryItem.setStatusTimestamp(ZabbixExecutor.getInstance().getStatusTimestampInfoFromSha(discoveryItem.getSha256id()));
 		            }
@@ -237,7 +237,7 @@ public class SearchGenerationJPA {
 					.findFirst()
 					.orElse("");
 			NodeFilters node = new NodeFilters(legalName);
-			node.setId(r.getMetaId());
+			node.setId(r.getInstanceId());
 			organisationsNodes.addChild(node);
 		});
 

@@ -245,7 +245,7 @@ public class FilterSearch {
 				for (EDMEdmEntityId edmMetaId : ds.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList())) {
 					if (edmMetaId.getOrganizationsByMetaId() != null && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
 						ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
-						value.add(list.get(0).getMetaId());
+						value.add(list.get(0).getInstanceId());
 					}
 				}
 
@@ -259,7 +259,7 @@ public class FilterSearch {
 				for (EDMEdmEntityId edmMetaId : provider){
 					if (edmMetaId.getOrganizationsByMetaId() != null && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
 						ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
-						value.add(list.get(0).getMetaId());
+						value.add(list.get(0).getInstanceId());
 					}
 				}
 
