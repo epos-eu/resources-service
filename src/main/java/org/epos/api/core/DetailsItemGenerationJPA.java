@@ -179,7 +179,7 @@ public class DetailsItemGenerationJPA {
 		distribution.setTemporalCoverage(tc);
 
 		if (dp.getPublishersByInstanceId() != null) {
-			List<DataServiceProvider> dataProviders = getProviders(dp.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList()));
+			List<DataServiceProvider> dataProviders = DataServiceProviderGeneration.getProviders(dp.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList()));
 			distribution.setDataProvider(dataProviders);
 		}
 
@@ -204,7 +204,7 @@ public class DetailsItemGenerationJPA {
 			distribution.setServiceName(Optional.ofNullable(ws.getName()).orElse(null));
 
 			if (ws.getEdmEntityIdByProvider() != null) {
-				List<DataServiceProvider> serviceProviders = getProviders(List.of(ws.getEdmEntityIdByProvider()));
+				List<DataServiceProvider> serviceProviders = DataServiceProviderGeneration.getProviders(List.of(ws.getEdmEntityIdByProvider()));
 				if (!serviceProviders.isEmpty()){
 					distribution.setServiceProvider(serviceProviders.get(0));
 				}
@@ -359,67 +359,5 @@ public class DetailsItemGenerationJPA {
 		
 		return distribution;
 	}
-	
-	private static List<DataServiceProvider> getProviders(List<EDMEdmEntityId> organizationsCollection) {
-		List<EDMOrganization> organizations = new ArrayList<>();
-		for (EDMEdmEntityId edmMetaId : organizationsCollection) {
-			if (edmMetaId.getOrganizationsByMetaId() != null && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
-				ArrayList<EDMOrganization> list = edmMetaId.getOrganizationsByMetaId().stream()
-						.filter(e -> e.getState().equals(State.PUBLISHED.toString()))
-						.collect(Collectors.toCollection(ArrayList::new));
-				organizations.addAll(list);
-			}
-		}
 
-		List<DataServiceProvider> organizationStructure = new ArrayList<>();
-		for (EDMOrganization org : organizations) {
-			// only take into account the organization with legalname
-			if (org.getOrganizationLegalnameByInstanceId() != null && !org.getOrganizationLegalnameByInstanceId().isEmpty()) {
-
-				String mainOrganizationLegalName;
-				List<DataServiceProvider> relatedOrganizations = new ArrayList<>();
-
-				mainOrganizationLegalName = org.getOrganizationLegalnameByInstanceId().stream()
-						.map(EDMOrganizationLegalname::getLegalname)
-						.collect(Collectors.joining("."));
-
-				if (Objects.nonNull(org.getSon()) && !org.getSon().isEmpty()) {
-					relatedOrganizations.addAll(
-							org.getSon().stream()
-							.filter(relatedOrganization ->
-							relatedOrganization.getOrganizationLegalnameByInstanceId() != null &&
-							!relatedOrganization.getOrganizationLegalnameByInstanceId().isEmpty())
-							.map(relatedOrganization -> {
-
-								String relatedOrganizationLegalName = relatedOrganization.getOrganizationLegalnameByInstanceId()
-										.stream().map(EDMOrganizationLegalname::getLegalname)
-										.collect(Collectors.joining("."));
-								DataServiceProvider relatedDataprovider = new DataServiceProvider();
-								relatedDataprovider.setDataProviderLegalName(relatedOrganizationLegalName);
-								relatedDataprovider.setDataProviderUrl(relatedOrganization.getUrl());
-								if(relatedOrganization.getAddressByAddressId()!=null)relatedDataprovider.setCountry(relatedOrganization.getAddressByAddressId().getCountry());
-								return relatedDataprovider;
-
-							})
-							.collect(Collectors.toList())
-							);
-					relatedOrganizations.sort(Comparator.comparing(DataServiceProvider::getDataProviderLegalName));
-				}
-
-				DataServiceProvider dataServiceProvider = new DataServiceProvider();
-				dataServiceProvider.setDataProviderLegalName(mainOrganizationLegalName);
-				dataServiceProvider.setRelatedDataProvider(relatedOrganizations);
-				dataServiceProvider.setDataProviderUrl(org.getUrl());
-				if(org.getAddressByAddressId()!=null) dataServiceProvider.setCountry(org.getAddressByAddressId().getCountry());
-
-				organizationStructure.add(dataServiceProvider);
-
-			}
-
-		}
-
-
-		organizationStructure.sort(Comparator.comparing(DataServiceProvider::getDataProviderLegalName));
-		return organizationStructure;
-	}
 }

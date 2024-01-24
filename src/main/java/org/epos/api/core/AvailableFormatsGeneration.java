@@ -26,7 +26,6 @@ public class AvailableFormatsGeneration {
 					for (EDMMapping map : op.getMappingsByInstanceId() != null ? op.getMappingsByInstanceId() : new ArrayList<EDMMapping>()) {
 						if (map.getProperty() != null && map.getProperty().contains("encodingFormat")) {
 							for (String pv : map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList())) {
-								System.out.println(pv);
 								if (pv.equals("image/png")) {
 									formats.add(new AvailableFormat.AvailableFormatBuilder()
 											.originalFormat(pv)
@@ -142,7 +141,7 @@ public class AvailableFormatsGeneration {
 				}
 			}
 		}
-		if(distribution.getAccessURLByInstanceId()!=null && webserviceByAccessService ==null && distribution.getAccessURLByInstanceId().size() > 0) {
+		if(distribution.getAccessURLByInstanceId()!=null && webserviceByAccessService ==null && distribution.getAccessURLByInstanceId().size() > 0 && distribution.getFormat()!=null) {
 			String[] uri = distribution.getFormat().split("\\/");
 			String format = uri[uri.length-1];
 			formats.add(new AvailableFormat.AvailableFormatBuilder()

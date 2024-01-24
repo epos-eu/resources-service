@@ -4,6 +4,9 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.epos.api.beans.DataServiceProvider;
+import org.epos.api.beans.NodeFilters;
 import org.epos.api.utility.BBoxToPolygon;
 import org.epos.eposdatamodel.*;
 import org.epos.handler.dbapi.dbapiimplementation.OrganizationDBAPI;
@@ -240,9 +243,34 @@ public class FilterSearch {
 
 			HashSet<EDMDataproduct> tempDatasetList = new HashSet<>();
 			datasetList.forEach(ds -> {
+				
+				List<DataServiceProvider> providers = new ArrayList<DataServiceProvider>();
+				providers.addAll(DataServiceProviderGeneration.getProviders(ds.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList())));
+				providers.addAll(DataServiceProviderGeneration.getProviders(ds.getIsDistributionsByInstanceId().stream()
+						.map(EDMIsDistribution::getDistributionByInstanceDistributionId)
+						.filter(Objects::nonNull)
+						.map(EDMDistribution::getWebserviceByAccessService)
+						.filter(Objects::nonNull)
+						.map(EDMWebservice::getEdmEntityIdByProvider)
+						.filter(Objects::nonNull).collect(Collectors.toList())));
+				
+				
 
 				List<String> value = new ArrayList<>();
-				for (EDMEdmEntityId edmMetaId : ds.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList())) {
+				
+				
+				providers.forEach(resource->{
+					value.add(resource.getInstanceid());
+					//LOGGER.info("Number of related retrieved "+resource.getRelatedDataProvider().size());
+					resource.getRelatedDataProvider().forEach(related ->{
+						value.add(related.getInstanceid());
+					});
+					//LOGGER.info("Number of related retrieved "+resource.getRelatedDataServiceProvider().size());
+					resource.getRelatedDataServiceProvider().forEach(related ->{
+						value.add(related.getInstanceid());
+					});
+				});
+				/*for (EDMEdmEntityId edmMetaId : ds.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList())) {
 					if (edmMetaId.getOrganizationsByMetaId() != null && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
 						ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
 						value.add(list.get(0).getInstanceId());
@@ -261,7 +289,7 @@ public class FilterSearch {
 						ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
 						value.add(list.get(0).getInstanceId());
 					}
-				}
+				}*/
 
 				if(!Collections.disjoint(organisations, value)){
 					tempDatasetList.add(ds);
