@@ -130,7 +130,7 @@ public class Utils {
 	public static Boolean checkStringPattern(String inputString, String inputPattern) {
 		return Pattern.matches(inputPattern, inputString);
 	}
-	
+
 	public static Boolean checkStringPatternSingleQuotes(String inputPattern) {
 		return inputPattern.equals("^'[^']*'$");
 	}
@@ -142,7 +142,7 @@ public class Utils {
 		return pattern;
 	}
 
-	public static String convertDateUsingPattern(String dateString, String inputFormat, String outputFormat) throws ParseException {
+	public static String convertDateUsingPattern(String dateString, String inputFormat, String outputFormat) {
 		if(isValidFormat(convertISOPatternToJavaFormatPattern(outputFormat), dateString)) return dateString;
 		if(inputFormat==null) inputFormat=EPOSINTERNALFORMAT;
 		if(outputFormat==null) outputFormat=EPOSINTERNALFORMAT;
@@ -151,9 +151,17 @@ public class Utils {
 		String dateConverted = null;
 
 		if(outputFormat.equals("YYYY.yyy")) {
-			dateConverted = Float.toString(fromDateToDecimalYear(new SimpleDateFormat("yyyy-MM-dd").parse(dateString)));
+			try {
+				dateConverted = Float.toString(fromDateToDecimalYear(new SimpleDateFormat("yyyy-MM-dd").parse(dateString)));
+			} catch (ParseException e) {
+				System.err.println(e.getLocalizedMessage());
+			}
 		} else if(inputFormat.equals("YYYY.yyy")) {
-			dateConverted = fromDecimalYearToDate(Float.parseFloat(dateString));
+			try {
+				dateConverted = fromDecimalYearToDate(Float.parseFloat(dateString));
+			} catch (NumberFormatException | ParseException e) {
+				System.err.println(e.getLocalizedMessage());
+			}
 		}
 		else {
 			if(!isValidFormat(convertISOPatternToJavaFormatPattern(inputFormat), dateString)) {
@@ -166,8 +174,16 @@ public class Utils {
 			LocalDateTime lDate = null;
 			LOGGER.debug( "convert date: "+ dateString+ " "+inputFormat);
 			if(dateString.contains(" ")) dateString = dateString.split(" ")[0];
-			DateTime dt = new DateTime(dateString);
-			LOGGER.debug( "convert date, as iso: "+ dt.toDateTimeISO());
+			DateTime dt = null;
+			try {
+				dt = new DateTime(dateString);
+				LOGGER.debug( "convert date, as iso: "+ dt.toDateTimeISO());
+			}catch(IllegalArgumentException e) {
+				System.err.println(e.getLocalizedMessage());
+			}
+			
+			if(dt == null) return null;
+			
 			try {
 				lDate = org.joda.time.LocalDateTime.parse(dt.toString(), format);
 			}catch(Exception e) {

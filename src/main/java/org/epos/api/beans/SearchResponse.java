@@ -15,12 +15,17 @@ public class SearchResponse implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private Node results;
 	private ArrayList<NodeFilters> filters;
+	private String errorMessage;
 
 	public SearchResponse(Node results, ArrayList<NodeFilters> filters) {
 		this.results = results.getChildren()!=null? results.getChildren().get(0) : null;
 		this.filters = filters;
 	}
 
+	public SearchResponse(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+	
 	public Node getResults() {
 		return results;
 	}
@@ -35,6 +40,14 @@ public class SearchResponse implements Serializable {
 
 	public void setFilters(ArrayList<NodeFilters> filters) {
 		this.filters = filters;
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
 	}
 
 	@Override

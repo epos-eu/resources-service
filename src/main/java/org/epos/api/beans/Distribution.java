@@ -11,6 +11,9 @@ public class Distribution implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	private String errorMessage;
+	
 	private transient String productid;
 	private transient String distributionid;
 	private String operationid;
@@ -53,6 +56,10 @@ public class Distribution implements Serializable {
 	private List<ServiceParameter> serviceParameters;
 	
 	public Distribution() {}
+	
+	public Distribution(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
 
 	public Distribution(String productid, String distributionid, String operationid, String href, String id, String uid,
 						String type, String title, String description, String license, String downloadURL, List<String> keywords,
@@ -93,6 +100,14 @@ public class Distribution implements Serializable {
 	}
 
 
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
 
 	public String getProductid() {
 		return productid;
