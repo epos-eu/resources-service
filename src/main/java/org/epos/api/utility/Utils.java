@@ -165,7 +165,7 @@ public class Utils {
 			DateTimeFormatter format = org.joda.time.format.DateTimeFormat.forPattern(inputFormat);
 			LocalDateTime lDate = null;
 			LOGGER.debug( "convert date: "+ dateString+ " "+inputFormat);
-
+			if(dateString.contains(" ")) dateString = dateString.split(" ")[0];
 			DateTime dt = new DateTime(dateString);
 			LOGGER.debug( "convert date, as iso: "+ dt.toDateTimeISO());
 			try {
