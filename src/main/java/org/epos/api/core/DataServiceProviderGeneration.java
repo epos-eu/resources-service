@@ -15,7 +15,6 @@ import org.epos.handler.dbapi.model.EDMOrganizationLegalname;
 public class DataServiceProviderGeneration {
 
 	public static List<DataServiceProvider> getProviders(List<EDMEdmEntityId> organizationsCollection) {
-		System.out.println(organizationsCollection.size());
 		List<EDMOrganization> organizations = new ArrayList<>();
 		for (EDMEdmEntityId edmMetaId : organizationsCollection) {
 			if (edmMetaId.getOrganizationsByMetaId() != null && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
@@ -25,9 +24,6 @@ public class DataServiceProviderGeneration {
 				organizations.addAll(list);
 			}
 		}
-
-		System.out.println(organizations.size());
-		System.out.println(organizations);
 		List<DataServiceProvider> organizationStructure = new ArrayList<>();
 		for (EDMOrganization org : organizations) {
 
@@ -40,12 +36,8 @@ public class DataServiceProviderGeneration {
 				mainOrganizationLegalName = org.getOrganizationLegalnameByInstanceId().stream()
 						.map(EDMOrganizationLegalname::getLegalname)
 						.collect(Collectors.joining("."));
-
-				System.out.println(mainOrganizationLegalName);
 				
 				if (Objects.nonNull(org.getSon()) && !org.getSon().isEmpty()) {
-
-					System.out.println("son: "+org.getSon().size());
 					relatedOrganizations.addAll(
 							org.getSon().stream()
 							.filter(relatedOrganization ->
@@ -81,9 +73,7 @@ public class DataServiceProviderGeneration {
 				if(org.getAddressByAddressId()!=null) dataServiceProvider.setCountry(org.getAddressByAddressId().getCountry());
 
 				organizationStructure.add(dataServiceProvider);
-
 			}
-
 		}
 
 

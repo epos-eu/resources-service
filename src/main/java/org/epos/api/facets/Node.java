@@ -14,6 +14,7 @@ public class Node
 	private Collection<DiscoveryItem> distributions = null;
     private String ddss = null;
     private String id = null;
+    private String code = null;
     private String name;
     
     public Node()
@@ -72,6 +73,16 @@ public class Node
 		this.id = id;
 	}
 
+	public String getCode() {
+		return code;
+	}
+
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+
 	public List<Node> getChildren() {
 		return children;
 	}
@@ -80,10 +91,12 @@ public class Node
 		this.children = children;
 	}
 
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(children, ddss, distributions, id, name);
+		return Objects.hash(children, code, ddss, distributions, id, name);
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -94,17 +107,17 @@ public class Node
 		if (getClass() != obj.getClass())
 			return false;
 		Node other = (Node) obj;
-		return Objects.equals(children, other.children) && Objects.equals(ddss, other.ddss)
-				&& Objects.equals(distributions, other.distributions) && Objects.equals(id, other.id)
-				&& Objects.equals(name, other.name);
+		return Objects.equals(children, other.children) && Objects.equals(code, other.code)
+				&& Objects.equals(ddss, other.ddss) && Objects.equals(distributions, other.distributions)
+				&& Objects.equals(id, other.id) && Objects.equals(name, other.name);
 	}
 
 
 	@Override
 	public String toString() {
 		return "Node [children=" + children + ", distributions=" + distributions + ", ddss=" + ddss + ", id=" + id
-				+ ", name=" + name + "]";
+				+ ", code=" + code + ", name=" + name + "]";
 	}
 
-
+	
 }

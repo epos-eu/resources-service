@@ -36,8 +36,10 @@ public class Facets {
 		List<Category> categoriesList = categories.getAll().stream().filter(e->e.getUid().contains("category:")).collect(Collectors.toList());
 
 		for(CategoryScheme scheme : categorySchemesList) {
+			System.out.println(scheme);
 			JsonObject facetDomain = new JsonObject();
 			facetDomain.addProperty("name", scheme.getTitle());
+			facetDomain.addProperty("code", scheme.getCode());
 			facetDomain.add("children", recursiveChildren(categoriesList, scheme.getInstanceId(),null));
 			domainsFacets.add(facetDomain);
 		}
