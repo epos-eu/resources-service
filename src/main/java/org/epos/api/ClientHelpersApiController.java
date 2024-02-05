@@ -68,7 +68,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			@Parameter(in = ParameterIn.QUERY, description = "sciencedomains" ,schema=@Schema()) @Valid @RequestParam(value = "sciencedomains", required = false) String sciencedomains,
 			@Parameter(in = ParameterIn.QUERY, description = "servicetypes" ,schema=@Schema()) @Valid @RequestParam(value = "servicetypes", required = false) String servicetypes,
 			@Parameter(in = ParameterIn.QUERY, description = "organisations" ,schema=@Schema()) @Valid @RequestParam(value = "organisations", required = false) String organisations,
-			@Parameter(in = ParameterIn.QUERY, description = "facetstype {categories, dataproviders, serviceproviders}" ,schema=@Schema()) @Valid @RequestParam(value = "facetstype", required = false) String facetsType,
+			@Parameter(in = ParameterIn.QUERY, description = "facetstype {categories, dataproviders, serviceproviders}" ,schema=@Schema(allowableValues = {"categories", "dataproviders", "serviceproviders"})) @Valid @RequestParam(value = "facetstype", required = false) String facetsType,
 			@Parameter(in = ParameterIn.QUERY, description = "facets" ,schema=@Schema()) @Valid @RequestParam(value = "facets", required = false) Boolean facets) {
 		Map<String,Object> requestParameters = new HashMap<>();
 

@@ -40,6 +40,10 @@ public class Facets {
 			JsonObject facetDomain = new JsonObject();
 			facetDomain.addProperty("name", scheme.getTitle());
 			facetDomain.addProperty("code", scheme.getCode());
+			facetDomain.addProperty("linkUrl", scheme.getHomepage());
+			facetDomain.addProperty("id", scheme.getOrderitemnumber());
+			facetDomain.addProperty("imgUrl", scheme.getLogo());
+			facetDomain.addProperty("color", scheme.getColor());
 			facetDomain.add("children", recursiveChildren(categoriesList, scheme.getInstanceId(),null));
 			domainsFacets.add(facetDomain);
 		}
@@ -55,7 +59,6 @@ public class Facets {
 		JsonArray children = new JsonArray();
 		if(father==null) {
 			for(Category cat : categoriesList) {
-				if(cat.getName().equals("Geochemical data")) System.out.println("FOUND Geochemical Data in FATHER NULL");
 				if(cat.getInScheme()!=null && cat.getInScheme().equals(domain)) {
 					if(cat.getBroader()==null) {
 						JsonObject facetsObject = new JsonObject();
@@ -72,7 +75,6 @@ public class Facets {
 			}
 		} else {
 			for(Category cat : categoriesList) {
-				if(cat.getName().equals("Geochemical data")) System.out.println("FOUND Geochemical Data in FATHER "+father);
 				if(cat.getInScheme()!=null && cat.getInScheme().equals(domain)) {
 					if(cat.getBroader()!=null && cat.getBroader().contains(father)) {
 						JsonObject facetsObject = new JsonObject();

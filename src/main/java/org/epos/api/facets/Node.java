@@ -15,6 +15,9 @@ public class Node
     private String ddss = null;
     private String id = null;
     private String code = null;
+    private String linkUrl = null;
+    private String imgUrl = null;
+    private String color = null;
     private String name;
     
     public Node()
@@ -80,6 +83,35 @@ public class Node
 
 	public void setCode(String code) {
 		this.code = code;
+	}
+	
+	public String getLinkUrl() {
+		return linkUrl;
+	}
+
+
+	public void setLinkUrl(String linkUrl) {
+		this.linkUrl = linkUrl;
+	}
+
+
+	public String getImgUrl() {
+		return imgUrl;
+	}
+
+
+	public void setImgUrl(String imgUrl) {
+		this.imgUrl = imgUrl;
+	}
+
+
+	public String getColor() {
+		return color;
+	}
+
+
+	public void setColor(String color) {
+		this.color = color;
 	}
 
 
