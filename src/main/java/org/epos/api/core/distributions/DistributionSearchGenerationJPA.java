@@ -1,10 +1,15 @@
-package org.epos.api.core;
+package org.epos.api.core.distributions;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.epos.api.beans.DataServiceProvider;
 import org.epos.api.beans.DiscoveryItem;
 import org.epos.api.beans.SearchResponse;
 import org.epos.api.beans.DiscoveryItem.DiscoveryItemBuilder;
+import org.epos.api.core.AvailableFormatsGeneration;
+import org.epos.api.core.DataServiceProviderGeneration;
+import org.epos.api.core.EnvironmentVariables;
+import org.epos.api.core.ZabbixExecutor;
+import org.epos.api.core.filtersearch.DistributionFilterSearch;
 import org.epos.api.beans.NodeFilters;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.Node;
@@ -19,9 +24,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import static org.epos.handler.dbapi.util.DBUtil.getFromDB;
 
-public class SearchGenerationJPA {
+public class DistributionSearchGenerationJPA {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SearchGenerationJPA.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DistributionSearchGenerationJPA.class);
 
 	private static final String API_PATH_DETAILS  = EnvironmentVariables.API_CONTEXT+"/resources/details/";
 
@@ -39,7 +44,7 @@ public class SearchGenerationJPA {
 
 
 		LOGGER.info("Apply filter using input parameters: "+parameters.toString());
-		dataproducts = FilterSearch.doFilters(dataproducts, parameters);
+		dataproducts = DistributionFilterSearch.doFilters(dataproducts, parameters);
 
 		Map<String, DiscoveryItem> discoveryMap = new HashMap<String, DiscoveryItem>();
 
@@ -162,8 +167,10 @@ public class SearchGenerationJPA {
 								.setSha256id(DigestUtils.sha256Hex(distribution.getUid()))
 								.setDataprovider(facetsDataProviders)
 								.setServiceProvider(facetsServiceProviders)
-								.setDataproductCategories(categoryList.isEmpty() ? null : categoryList)
+								.setCategories(categoryList.isEmpty() ? null : categoryList)
 								.build();
+						
+						System.out.println(discoveryItem);
 
 						if (EnvironmentVariables.MONITORING != null && EnvironmentVariables.MONITORING.equals("true")) {
 							discoveryItem.setStatus(ZabbixExecutor.getInstance().getStatusInfoFromSha(discoveryItem.getSha256id()));
@@ -254,29 +261,17 @@ public class SearchGenerationJPA {
 			node.setId(resource.getInstanceid());
 			organisationsNodes.addChild(node);
 
-			//LOGGER.info("Number of related retrieved "+resource.getRelatedDataProvider().size());
 			resource.getRelatedDataProvider().forEach(relatedData ->{
 				NodeFilters relatedNodeDataProvider = new NodeFilters(relatedData.getDataProviderLegalName());
 				relatedNodeDataProvider.setId(relatedData.getInstanceid());
 				organisationsNodes.addChild(relatedNodeDataProvider);
 			});
-			//LOGGER.info("Number of related retrieved "+resource.getRelatedDataServiceProvider().size());
 			resource.getRelatedDataServiceProvider().forEach(relatedDataService ->{
 				NodeFilters relatedNodeDataServiceProvider = new NodeFilters(relatedDataService.getDataProviderLegalName());
 				relatedNodeDataServiceProvider.setId(relatedDataService.getInstanceid());
 				organisationsNodes.addChild(relatedNodeDataServiceProvider);
 			});
 		});
-		/*organizationsCollection.forEach(r -> {
-			String legalName = r.getOrganizationLegalnameByInstanceId().stream()
-					.map(EDMOrganizationLegalname::getLegalname)
-					.findFirst()
-					.orElse("");
-			NodeFilters node = new NodeFilters(legalName);
-			node.setId(r.getInstanceId());
-			organisationsNodes.addChild(node);
-		});*/
-
 		
 		NodeFilters scienceDomainsNodes = new NodeFilters(PARAMETER__SCIENCE_DOMAIN);
 		scienceDomains.forEach(r ->

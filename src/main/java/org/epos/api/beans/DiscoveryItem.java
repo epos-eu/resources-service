@@ -17,41 +17,14 @@ public class DiscoveryItem implements Serializable {
 	private String uid;
 	private transient String sha256id;
 	private transient Set<String> dataprovider;
+	private transient Set<String> facilityprovider;
 	private transient Set<String> serviceprovider;
-	private transient List<String> dataproductCategories;
+	private transient List<String> categories;
 	private String title;
 	private String description;
 	private int status = 0;
 	private String statusTimestamp;
 	private List<AvailableFormat> availableFormats;
-	
-	@Override
-	public int hashCode() {
-		return Objects.hash(availableFormats, description, href, id, status, statusTimestamp, title, uid);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		DiscoveryItem other = (DiscoveryItem) obj;
-		return Objects.equals(availableFormats, other.availableFormats)
-				&& Objects.equals(description, other.description) && Objects.equals(href, other.href)
-				&& Objects.equals(id, other.id) && status == other.status
-				&& Objects.equals(statusTimestamp, other.statusTimestamp) && Objects.equals(title, other.title)
-				&& Objects.equals(uid, other.uid);
-	}
-
-	@Override
-	public String toString() {
-		return "DiscoveryItem [href=" + href + ", id=" + id + ", uid=" + uid + ", title=" + title
-				+ ", description=" + description + ", status=" + status + ", statusTimestamp=" + statusTimestamp
-				+ ", availableFormats=" + availableFormats + "]";
-	}
 	
 	public DiscoveryItem() {}
 
@@ -62,7 +35,8 @@ public class DiscoveryItem implements Serializable {
 		this.sha256id = builder.sha256id;
 		this.dataprovider = builder.dataprovider;
 		this.serviceprovider = builder.serviceprovider;
-		this.dataproductCategories = builder.dataproductCategories;
+		this.facilityprovider = builder.facilityprovider;
+		this.categories = builder.categories;
 		this.title = builder.title;
 		this.description = builder.description;
 		this.status = builder.status;
@@ -118,12 +92,12 @@ public class DiscoveryItem implements Serializable {
 		this.serviceprovider = serviceprovider;
 	}
 
-	public List<String> getDataproductCategories() {
-		return dataproductCategories;
+	public List<String> getCategories() {
+		return categories;
 	}
 
-	public void setDataproductCategories(List<String> dataproductCategories) {
-		this.dataproductCategories = dataproductCategories;
+	public void setCategories(List<String> categories) {
+		this.categories = categories;
 	}
 
 	public String getTitle() {
@@ -166,6 +140,14 @@ public class DiscoveryItem implements Serializable {
 		this.availableFormats = availableFormats;
 	}
 
+	public Set<String> getFacilityprovider() {
+		return facilityprovider;
+	}
+
+	public void setFacilityprovider(Set<String> facilityprovider) {
+		this.facilityprovider = facilityprovider;
+	}
+
 	public static class DiscoveryItemBuilder{
 		
 		private String href;
@@ -174,7 +156,8 @@ public class DiscoveryItem implements Serializable {
 		private transient String sha256id;
 		private transient Set<String> dataprovider;
 		private transient Set<String> serviceprovider;
-		private transient List<String> dataproductCategories;
+		private transient Set<String> facilityprovider;
+		private transient List<String> categories;
 		private String title;
 		private String description;
 		private int status = 0;
@@ -206,8 +189,13 @@ public class DiscoveryItem implements Serializable {
 			return this;
 		}
 		
-		public DiscoveryItemBuilder setDataproductCategories(List<String> dataproductCategories) {
-			this.dataproductCategories = dataproductCategories;
+		public DiscoveryItemBuilder setFacilityProvider(Set<String> facilityprovider) {
+			this.facilityprovider = facilityprovider;
+			return this;
+		}
+		
+		public DiscoveryItemBuilder setCategories(List<String> categories) {
+			this.categories = categories;
 			return this;
 		}
 
@@ -240,5 +228,39 @@ public class DiscoveryItem implements Serializable {
             return new DiscoveryItem(this);
         }
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(availableFormats, description, href, id, status, statusTimestamp, title, uid);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DiscoveryItem other = (DiscoveryItem) obj;
+		return Objects.equals(availableFormats, other.availableFormats)
+				&& Objects.equals(description, other.description) && Objects.equals(href, other.href)
+				&& Objects.equals(id, other.id) && status == other.status
+				&& Objects.equals(statusTimestamp, other.statusTimestamp) && Objects.equals(title, other.title)
+				&& Objects.equals(uid, other.uid);
+	}
+
+	@Override
+	public String toString() {
+		return "DiscoveryItem [href=" + href + ", id=" + id + ", uid=" + uid + ", sha256id=" + sha256id
+				+ ", dataprovider=" + dataprovider + ", facilityprovider=" + facilityprovider + ", serviceprovider="
+				+ serviceprovider + ", categories=" + categories + ", title=" + title + ", description=" + description
+				+ ", status=" + status + ", statusTimestamp=" + statusTimestamp + ", availableFormats="
+				+ availableFormats + "]";
+	}
+	
+	
+	
+	
 	
 }

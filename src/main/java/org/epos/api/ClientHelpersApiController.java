@@ -41,6 +41,14 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		this.objectMapper = objectMapper;
 		this.request = request;
 	}
+	
+	/**
+	 * 
+	 * 
+	 * RESOURCES
+	 * 
+	 * 
+	 */
 
 	public ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The distribution ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id){
 
@@ -227,6 +235,141 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		}
 
 		return standardRequest("SEARCH", requestParameters);
+	}
+	
+	
+	/**
+	 * 
+	 * 
+	 * FACILITIES
+	 * 
+	 * 
+	 */
+
+	@Override
+	public ResponseEntity<Distribution> facilityDiscoveryGetUsingGET(String id) {
+		if(id==null) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+
+		try {
+			id=java.net.URLDecoder.decode(id, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "id: "+ id, e); 
+			Distribution errorResponse = new Distribution(e.getLocalizedMessage());
+			return ResponseEntity.badRequest().body(errorResponse);
+		}
+		Map<String,Object> requestParams = Map.of("id", id);
+
+		return standardRequest("FACILITYDETAILS", requestParams);
+	}
+
+	@Override
+	public ResponseEntity<SearchResponse> facilitySearchUsingGet(@Valid String q, @Valid String bbox,
+			@Valid String keywords, @Valid String facilitytypes, @Valid String equipmenttypes,
+			@Valid String organisations, @Valid String facetsType, @Valid Boolean facets) {
+		Map<String,Object> requestParameters = new HashMap<>();
+
+		if(!StringUtils.isBlank(q)) {
+			try {
+				q = java.net.URLDecoder.decode(q, StandardCharsets.UTF_8.name());
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "q: "+ q, e);
+				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+			requestParameters.put("q", q);
+		}
+		
+		if(!StringUtils.isBlank(bbox)){
+			try {
+				bbox = java.net.URLDecoder.decode(bbox, StandardCharsets.UTF_8.name());
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "bbox: "+ bbox, e);
+				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+			try {
+				String[] bboxSplit = bbox.split(",");
+				requestParameters.put("epos:northernmostLatitude",bboxSplit[0]);
+				requestParameters.put("epos:easternmostLongitude",bboxSplit[1]);
+				requestParameters.put("epos:southernmostLatitude",bboxSplit[2]);
+				requestParameters.put("epos:westernmostLongitude",bboxSplit[3]);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "bbox: "+ bbox, e);
+				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+		}
+		if(!StringUtils.isBlank(keywords)) {
+			try {
+				keywords=java.net.URLDecoder.decode(keywords, StandardCharsets.UTF_8.name());
+				keywords = keywords.replace(" ", "");
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "keywords: "+ keywords, e);
+				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+			requestParameters.put("keywords", keywords);
+		}
+		if(!StringUtils.isBlank(facilitytypes)) {
+			try {
+				facilitytypes=java.net.URLDecoder.decode(facilitytypes, StandardCharsets.UTF_8.name());
+				facilitytypes = facilitytypes.replace(" ", "");
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "facilitytypes: "+ facilitytypes, e);
+				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+			requestParameters.put("facilitytypes", facilitytypes);
+		}
+		if(!StringUtils.isBlank(equipmenttypes)) {
+			try {
+				equipmenttypes=java.net.URLDecoder.decode(equipmenttypes, StandardCharsets.UTF_8.name());
+				equipmenttypes = equipmenttypes.replace(" ", "");
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "equipmenttype: "+ equipmenttypes, e);
+				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+			requestParameters.put("equipmenttype", equipmenttypes);
+		}
+		if(!StringUtils.isBlank(organisations)) {
+			try {
+				organisations=java.net.URLDecoder.decode(organisations, StandardCharsets.UTF_8.name());
+				organisations = organisations.replace(" ", "");
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "organisations: "+ organisations, e);
+				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+			requestParameters.put("organisations", organisations);
+		}
+
+
+		if(facets==null) requestParameters.put("facets", System.getenv("FACETS_DEFAULT"));
+		else requestParameters.put("facets", Boolean.toString(facets));
+
+		if(facetsType==null) requestParameters.put("facetstype", System.getenv("FACETS_TYPE_DEFAULT"));
+		else {
+			try {
+				facetsType=java.net.URLDecoder.decode(facetsType, StandardCharsets.UTF_8.name());
+				facetsType = facetsType.replace(" ", "");
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "facetsType: "+ facetsType, e);
+				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+			if(!(facetsType.equals("categories") || facetsType.equals("facilityproviders"))) {
+				SearchResponse errorResponse = new SearchResponse("The facets type is not a valid type, supported types: [categories, facilityproviders]");
+				return ResponseEntity.badRequest().body(errorResponse);
+
+			}
+			requestParameters.put("facetstype", facetsType);
+		}
+
+
+		return standardRequest("FACILITYSEARCH", requestParameters);
 	}
 
 }

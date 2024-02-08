@@ -1,4 +1,4 @@
-package org.epos.api.core;
+package org.epos.api.core.filtersearch;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -6,10 +6,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.epos.api.beans.DataServiceProvider;
-import org.epos.api.beans.NodeFilters;
+import org.epos.api.core.DataServiceProviderGeneration;
 import org.epos.api.utility.BBoxToPolygon;
 import org.epos.eposdatamodel.*;
-import org.epos.handler.dbapi.dbapiimplementation.OrganizationDBAPI;
 import org.epos.handler.dbapi.model.EDMCategory;
 import org.epos.handler.dbapi.model.EDMDataproduct;
 import org.epos.handler.dbapi.model.EDMDataproductCategory;
@@ -17,10 +16,7 @@ import org.epos.handler.dbapi.model.EDMDataproductSpatial;
 import org.epos.handler.dbapi.model.EDMDistribution;
 import org.epos.handler.dbapi.model.EDMDistributionDescription;
 import org.epos.handler.dbapi.model.EDMDistributionTitle;
-import org.epos.handler.dbapi.model.EDMEdmEntityId;
 import org.epos.handler.dbapi.model.EDMIsDistribution;
-import org.epos.handler.dbapi.model.EDMOrganization;
-import org.epos.handler.dbapi.model.EDMOrganizationLegalname;
 import org.epos.handler.dbapi.model.EDMPublisher;
 import org.epos.handler.dbapi.model.EDMWebservice;
 import org.epos.handler.dbapi.model.EDMWebserviceCategory;
@@ -33,9 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class FilterSearch {
+public class DistributionFilterSearch {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FilterSearch.class); 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DistributionFilterSearch.class); 
 
 
 	private static final String NORTHEN_LAT  = "epos:northernmostLatitude";
@@ -45,8 +41,6 @@ public class FilterSearch {
 
 	private static final String PARAMETER__SCIENCE_DOMAIN = "sciencedomains";
 	private static final String PARAMETER__SERVICE_TYPE = "servicetypes";
-
-
 
 
 	public static List<EDMDataproduct> doFilters(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
@@ -60,13 +54,6 @@ public class FilterSearch {
 		datasetList = filterByServiceType(datasetList, parameters);
 
 		return datasetList;
-	}
-	
-	public static List<EDMOrganization> doOrganisationsFilters(List<EDMOrganization> organisationsList, Map<String,Object> parameters) {
-
-		organisationsList = filterOrganisationsByFullText(organisationsList, parameters);
-
-		return organisationsList;
 	}
 
 	private static List<EDMDataproduct> filterByScienceDomain(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
@@ -204,7 +191,6 @@ public class FilterSearch {
 		return datasetList;
 	}
 
-
 	private static List<EDMDataproduct> filterByDateRange(List<EDMDataproduct> datasetList, PeriodOfTime temporal) {
 		if(temporal.getStartDate()!=null && temporal.getEndDate()!=null) {
 			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
@@ -243,7 +229,7 @@ public class FilterSearch {
 
 			HashSet<EDMDataproduct> tempDatasetList = new HashSet<>();
 			datasetList.forEach(ds -> {
-				
+
 				List<DataServiceProvider> providers = new ArrayList<DataServiceProvider>();
 				providers.addAll(DataServiceProviderGeneration.getProviders(ds.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList())));
 				providers.addAll(DataServiceProviderGeneration.getProviders(ds.getIsDistributionsByInstanceId().stream()
@@ -253,12 +239,12 @@ public class FilterSearch {
 						.filter(Objects::nonNull)
 						.map(EDMWebservice::getEdmEntityIdByProvider)
 						.filter(Objects::nonNull).collect(Collectors.toList())));
-				
-				
+
+
 
 				List<String> value = new ArrayList<>();
-				
-				
+
+
 				providers.forEach(resource->{
 					value.add(resource.getInstanceid());
 					//LOGGER.info("Number of related retrieved "+resource.getRelatedDataProvider().size());
@@ -270,26 +256,6 @@ public class FilterSearch {
 						value.add(related.getInstanceid());
 					});
 				});
-				/*for (EDMEdmEntityId edmMetaId : ds.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList())) {
-					if (edmMetaId.getOrganizationsByMetaId() != null && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
-						ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
-						value.add(list.get(0).getInstanceId());
-					}
-				}
-
-				List<EDMEdmEntityId> provider = ds.getIsDistributionsByInstanceId().stream()
-						.map(EDMIsDistribution::getDistributionByInstanceDistributionId)
-						.filter(Objects::nonNull)
-						.map(EDMDistribution::getWebserviceByAccessService)
-						.filter(Objects::nonNull)
-						.map(EDMWebservice::getEdmEntityIdByProvider)
-						.filter(Objects::nonNull).collect(Collectors.toList());
-				for (EDMEdmEntityId edmMetaId : provider){
-					if (edmMetaId.getOrganizationsByMetaId() != null && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
-						ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
-						value.add(list.get(0).getInstanceId());
-					}
-				}*/
 
 				if(!Collections.disjoint(organisations, value)){
 					tempDatasetList.add(ds);
@@ -420,63 +386,6 @@ public class FilterSearch {
 
 	}
 
-	private static List<EDMOrganization> filterOrganisationsByFullText(List<EDMOrganization> organisationsList, Map<String,Object> parameters) {
-		if(parameters.containsKey("q")) {
-			HashSet<EDMOrganization> tempDatasetList = new HashSet<>();
-			String[] qs = parameters.get("q").toString().toLowerCase().split(",");
-
-			for (EDMOrganization edmOrganisation : organisationsList) {
-				Map<String, Boolean> qSMap = Arrays.stream(qs)
-						.collect(Collectors.toMap(
-								key -> key, value -> Boolean.FALSE
-								));
-
-				if (edmOrganisation.getOrganizationLegalnameByInstanceId() != null && !edmOrganisation.getOrganizationLegalnameByInstanceId().isEmpty()) {
-					for (EDMOrganization edmOrganisation1 : edmOrganisation.getOrganizationLegalnameByInstanceId().stream().map(EDMOrganizationLegalname::getOrganizationIdByInstanceOrganizationId).collect(Collectors.toList())) {
-
-						//distribution title
-						if (edmOrganisation1.getOrganizationLegalnameByInstanceId() != null) {
-							edmOrganisation1.getOrganizationLegalnameByInstanceId()
-							.stream().map(EDMOrganizationLegalname::getLegalname)
-							.forEach(title ->
-							{
-								for (String q : qSMap.keySet()) {
-									if (title.toLowerCase().contains(q)) {
-										qSMap.put(q, Boolean.TRUE);
-									}
-								}
-							});
-						}
-					}
-				}
-
-				//take a dataproduct onlly if every element of the freetext search is satisfied
-				if (qSMap.values().stream().allMatch(b -> b)) tempDatasetList.add(edmOrganisation);
-			}
-
-			organisationsList = new ArrayList<>(tempDatasetList);
-		}
-
-		return organisationsList;
-
-	}
-
-
-	private static ArrayList<String> checkOrganizations(Map<String,Object> parameters) {
-		OrganizationDBAPI orgadbapi = new OrganizationDBAPI();
-		orgadbapi.setMetadataMode(false);
-		ArrayList<String> orgIds = new ArrayList<String>();
-		if(parameters.containsKey("organisations")) {
-			Arrays.asList(parameters.get("organisations").toString().split(",")).forEach(orgString->{
-				for(Organization org : orgadbapi.getAllByState(State.PUBLISHED)) {
-					if(org.getInstanceId()!=null && org.getInstanceId().equals(orgString)) {
-						orgIds.add(org.getInstanceId());
-					}
-				}
-			});
-		}
-		return orgIds;
-	}
 
 	public static PeriodOfTime checkTemporalExtent(Map<String,Object> parameters) {
 		PeriodOfTime temporal = new PeriodOfTime();

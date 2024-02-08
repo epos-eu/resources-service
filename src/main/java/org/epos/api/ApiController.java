@@ -20,10 +20,12 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.epos.api.core.DetailsItemGenerationJPA;
 import org.epos.api.core.MonitoringGeneration;
-import org.epos.api.core.OrganisationsGeneration;
-import org.epos.api.core.SearchGenerationJPA;
+import org.epos.api.core.distributions.DistributionDetailsGenerationJPA;
+import org.epos.api.core.distributions.DistributionSearchGenerationJPA;
+import org.epos.api.core.facilities.FacilityDetailsItemGenerationJPA;
+import org.epos.api.core.facilities.FacilitySearchGenerationJPA;
+import org.epos.api.core.organizations.OrganisationsGeneration;
 import org.epos.api.utility.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,10 +55,16 @@ abstract class ApiController<T> {
 		
 		switch(service) {
 		case "SEARCH":
-			response = Utils.gson.toJson(SearchGenerationJPA.generate(requestParams));
+			response = Utils.gson.toJson(DistributionSearchGenerationJPA.generate(requestParams));
 			break;
 		case "DETAILS":
-			response = Utils.gson.toJson(DetailsItemGenerationJPA.generate(requestParams));
+			response = Utils.gson.toJson(DistributionDetailsGenerationJPA.generate(requestParams));
+			break;
+		case "FACILITYSEARCH":
+			response = Utils.gson.toJson(FacilitySearchGenerationJPA.generate(requestParams));
+			break;
+		case "FACILITYDETAILS":
+			response = Utils.gson.toJson(FacilityDetailsItemGenerationJPA.generate(requestParams));
 			break;
 		case "MONITORING":
 			response = Utils.gson.toJson(MonitoringGeneration.generate());

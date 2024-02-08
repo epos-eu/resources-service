@@ -19,6 +19,7 @@ import org.epos.handler.dbapi.model.EDMOperation;
 import org.epos.handler.dbapi.service.DBService;
 import org.epos.api.beans.Distribution;
 import org.epos.api.beans.MonitoringBean;
+import org.epos.api.core.distributions.DistributionDetailsGenerationJPA;
 import org.epos.eposdatamodel.ContactPoint;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Identifier;
@@ -66,7 +67,7 @@ public class MonitoringGeneration {
 			params.put("id", dx.getMetaId());
 			params.put("useDefaults", "true");
 			
-			Distribution distribution = DetailsItemGenerationJPA.generate(params);
+			Distribution distribution = DistributionDetailsGenerationJPA.generate(params);
 			
 			HashMap<String, Object> parametersMap = new HashMap<>();
 

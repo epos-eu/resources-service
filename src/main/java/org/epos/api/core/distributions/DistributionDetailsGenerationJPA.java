@@ -1,7 +1,10 @@
-package org.epos.api.core;
+package org.epos.api.core.distributions;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.epos.api.beans.AvailableContactPoints.AvailableContactPointsBuilder;
+import org.epos.api.core.AvailableFormatsGeneration;
+import org.epos.api.core.DataServiceProviderGeneration;
+import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.beans.DataServiceProvider;
 import org.epos.api.beans.DiscoveryItem;
 import org.epos.api.beans.Distribution;
@@ -26,9 +29,9 @@ import java.util.stream.Collectors;
 
 import static org.epos.handler.dbapi.util.DBUtil.getFromDB;
 
-public class DetailsItemGenerationJPA {
+public class DistributionDetailsGenerationJPA {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DetailsItemGenerationJPA.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DistributionDetailsGenerationJPA.class);
 
 	private static final String API_PATH_DETAILS = EnvironmentVariables.API_CONTEXT + "/resources/details/";
 	private static final String EMAIL_SENDER = EnvironmentVariables.API_CONTEXT + "/sender/send-email?id=";
@@ -348,7 +351,7 @@ public class DetailsItemGenerationJPA {
 				.setSha256id(DigestUtils.sha256Hex(distribution.getUid()))
 				.setDataprovider(facetsDataProviders)
 				.setServiceProvider(facetsServiceProviders)
-				.setDataproductCategories(categoryList.isEmpty()? null : categoryList)
+				.setCategories(categoryList.isEmpty()? null : categoryList)
 				.build());
 		
 		FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList);

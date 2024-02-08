@@ -12,8 +12,8 @@ import javax.persistence.EntityManager;
 
 import org.epos.api.ClientHelpersApiController;
 import org.epos.api.beans.SearchResponse;
-import org.epos.api.core.SearchGenerationJPA;
 import org.epos.api.core.ZabbixExecutor;
+import org.epos.api.core.distributions.DistributionSearchGenerationJPA;
 import org.epos.api.facets.Facets;
 import org.epos.api.utility.Utils;
 import org.epos.handler.dbapi.model.EDMOrganization;

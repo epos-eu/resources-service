@@ -11,7 +11,7 @@ import org.epos.api.beans.DiscoveryItem;
 
 public class FacetsGeneration {
 
-	public static Node generateOnlyFacetsTree(ArrayList<DiscoveryItem> discoveryList) {
+	public static Node generateOnlyFacetsTree() {
 		FacetsNodeTree fnt = new FacetsNodeTree(true);
 		return fnt.getFacets();
 	}
@@ -21,9 +21,9 @@ public class FacetsGeneration {
 		fnt.getNodes().forEach(node -> {
 			List<DiscoveryItem> distributionsItem = new ArrayList<>();
 			for(DiscoveryItem dp : discoveryList) {
-				if(dp.getDataproductCategories() == null) continue;//System.err.println(dp.getTitle());
+				if(dp.getCategories() == null) continue;//System.err.println(dp.getTitle());
 				else {
-					if(node.getDdss()!=null && dp.getDataproductCategories().contains(node.getDdss())){
+					if(node.getDdss()!=null && dp.getCategories().contains(node.getDdss())){
 						if(!distributionsItem.stream().anyMatch(p -> p.getId().equals(dp.getId())))
 							distributionsItem.add(dp);
 					}

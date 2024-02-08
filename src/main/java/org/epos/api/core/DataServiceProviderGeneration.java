@@ -36,7 +36,7 @@ public class DataServiceProviderGeneration {
 				mainOrganizationLegalName = org.getOrganizationLegalnameByInstanceId().stream()
 						.map(EDMOrganizationLegalname::getLegalname)
 						.collect(Collectors.joining("."));
-				
+
 				if (Objects.nonNull(org.getSon()) && !org.getSon().isEmpty()) {
 					relatedOrganizations.addAll(
 							org.getSon().stream()
@@ -80,5 +80,4 @@ public class DataServiceProviderGeneration {
 		organizationStructure.sort(Comparator.comparing(DataServiceProvider::getDataProviderLegalName));
 		return organizationStructure;
 	}
-
 }

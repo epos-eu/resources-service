@@ -260,6 +260,14 @@ public class ResourcesApiController extends ApiController implements ResourcesAp
 			}
 			requestParams = Map.of("country", country);
 		}
+		if(type!=null) {
+			try {
+				type=java.net.URLDecoder.decode(type, StandardCharsets.UTF_8.name());
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "type: "+ type, e); 
+			}
+			requestParams = Map.of("type", type);
+		}
 
 		return standardRequest("ORGANISATIONS", requestParams);
 	}
