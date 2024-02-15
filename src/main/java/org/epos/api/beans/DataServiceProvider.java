@@ -1,6 +1,9 @@
 package org.epos.api.beans;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class DataServiceProvider {
@@ -11,6 +14,7 @@ public class DataServiceProvider {
 	private String uid;
 	private String metaid;
 	private String instanceid;
+	private List<HashMap<String, String>> identifiers;
 	
 	private List<DataServiceProvider> relatedDataServiceProvider;
 
@@ -76,6 +80,15 @@ public class DataServiceProvider {
 
 	public void setRelatedDataServiceProvider(List<DataServiceProvider> relatedDataServiceProvider) {
 		this.relatedDataServiceProvider = relatedDataServiceProvider;
+	}
+
+	public List<HashMap<String, String>> getIdentifiers() {
+		if(identifiers == null) identifiers = new ArrayList<HashMap<String, String>>();
+		return identifiers;
+	}
+
+	public void setIdentifiers(List<HashMap<String, String>> identifiers) {
+		this.identifiers = identifiers;
 	}
 
 	@Override

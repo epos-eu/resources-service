@@ -2,6 +2,7 @@ package org.epos.api.core;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -51,9 +52,15 @@ public class DataServiceProviderGeneration {
 								DataServiceProvider relatedDataprovider = new DataServiceProvider();
 								relatedDataprovider.setDataProviderLegalName(relatedOrganizationLegalName);
 								relatedDataprovider.setDataProviderUrl(relatedOrganization.getUrl());
-								relatedDataprovider.setUid(relatedOrganization.getInstanceId());
+								relatedDataprovider.setUid(relatedOrganization.getUid());
 								relatedDataprovider.setInstanceid(relatedOrganization.getInstanceId());
-								relatedDataprovider.setMetaid(relatedOrganization.getInstanceId());
+								relatedDataprovider.setMetaid(relatedOrganization.getMetaId());
+								relatedOrganization.getOrganizationIdentifiersByInstanceId().forEach(identifier -> {
+									HashMap<String,String> singleIdentifier = new HashMap<String,String>();
+									singleIdentifier.put("type",identifier.getType());
+									singleIdentifier.put("value",identifier.getIdentifier());
+									relatedDataprovider.getIdentifiers().add(singleIdentifier);
+								});
 								if(relatedOrganization.getAddressByAddressId()!=null)relatedDataprovider.setCountry(relatedOrganization.getAddressByAddressId().getCountry());
 								return relatedDataprovider;
 
@@ -67,9 +74,15 @@ public class DataServiceProviderGeneration {
 				dataServiceProvider.setDataProviderLegalName(mainOrganizationLegalName);
 				dataServiceProvider.setRelatedDataProvider(relatedOrganizations);
 				dataServiceProvider.setDataProviderUrl(org.getUrl());
-				dataServiceProvider.setUid(org.getInstanceId());
+				dataServiceProvider.setUid(org.getUid());
 				dataServiceProvider.setInstanceid(org.getInstanceId());
-				dataServiceProvider.setMetaid(org.getInstanceId());
+				dataServiceProvider.setMetaid(org.getMetaId());
+				org.getOrganizationIdentifiersByInstanceId().forEach(identifier -> {
+					HashMap<String,String> singleIdentifier = new HashMap<String,String>();
+					singleIdentifier.put("type",identifier.getType());
+					singleIdentifier.put("value",identifier.getIdentifier());
+					dataServiceProvider.getIdentifiers().add(singleIdentifier);
+				});
 				if(org.getAddressByAddressId()!=null) dataServiceProvider.setCountry(org.getAddressByAddressId().getCountry());
 
 				organizationStructure.add(dataServiceProvider);

@@ -67,13 +67,13 @@ public class MonitoringGeneration {
 			params.put("id", dx.getMetaId());
 			params.put("useDefaults", "true");
 			
-			Distribution distribution = DistributionDetailsGenerationJPA.generate(params);
-			
+			//Distribution distribution = DistributionDetailsGenerationJPA.generate(params);
+			Distribution distribution = null;
 			HashMap<String, Object> parametersMap = new HashMap<>();
 
 			if(distribution!=null) {
 				
-				if(distribution.getParameters()!=null) {
+				/*if(distribution.getParameters()!=null) {
 					distribution.getParameters().forEach(p -> {
 						if (p.getValue() != null && !p.getValue().equals(""))
 							parametersMap.put(p.getName(), p.getValue());
@@ -92,7 +92,7 @@ public class MonitoringGeneration {
 					
 					compiledUrl = java.net.URLDecoder.decode(compiledUrl, StandardCharsets.UTF_8);
 					mb.setOriginalURL(compiledUrl);
-				}
+				}*/
 
 				//DDSS
 				for(DataProduct d : datasetList) {

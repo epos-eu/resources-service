@@ -4,6 +4,8 @@ import java.util.Map;
 
 import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.core.ZabbixExecutor;
+import org.epos.api.core.distributions.DistributionDetailsGenerationJPA;
+import org.epos.api.core.distributions.DistributionSearchGenerationJPA;
 import org.epos.api.core.organizations.OrganisationsGeneration;
 import org.epos.api.facets.Facets;
 import com.google.gson.Gson;
@@ -20,16 +22,15 @@ public class Tests {
 		}
 		
 		Map<String, Object> headers = new HashMap<String, Object>();
-		headers.put("type", "dataproviders");
-		headers.put("country", "IT");
+		headers.put("id", "c1ad29f8-4f75-4095-8bb3-8f79caa76f7d");
+		//headers.put("country", "IT");
 		
 		try {
 			System.out.println(Facets.getInstance().generateFacetsFromDatabase());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println(gson.toJsonTree(OrganisationsGeneration.generate(headers)));
+		System.out.println(gson.toJsonTree(DistributionDetailsGenerationJPA.generate(headers)));
 
 		//EntityManager em = new DBService().getEntityManager();
 		//List<EDMFacility> facilities  = getFromDB(em, EDMFacility.class, "facility.findAllByState", "STATE", "PUBLISHED");
