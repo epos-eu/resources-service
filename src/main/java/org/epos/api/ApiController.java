@@ -17,6 +17,8 @@ package org.epos.api;
  ******************************************************************************/
 
 import java.util.Map;
+import java.util.TreeMap;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
@@ -74,6 +76,10 @@ abstract class ApiController<T> {
 			break;
 		default:
 			break;
+		}
+		//ordering response
+		if(response!=null) {
+			response = Utils.gson.toJson(Utils.gson.fromJson(response, TreeMap.class));			
 		}
 		
 		if(response!=null) {

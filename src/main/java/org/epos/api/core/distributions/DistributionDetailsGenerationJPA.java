@@ -205,15 +205,17 @@ public class DistributionDetailsGenerationJPA {
 				contact.put("id", contactpoint.getInstanceId());
 				contact.put("metaid", contactpoint.getMetaId());
 				contact.put("uid", contactpoint.getUid());
-				contactpoint.getEdmEntityIdByMetaPersonId().getPeopleByMetaId().forEach(person->{
-					if(person.getState().equals("PUBLISHED")) {
-						HashMap<String,Object> relatedPerson = new HashMap<String, Object>();
-						relatedPerson.put("id",person.getInstanceId());
-						relatedPerson.put("metaid",person.getMetaId());
-						relatedPerson.put("uid",person.getUid());
-						contact.put("person", relatedPerson);
-					}
-				});
+				if(contactpoint.getEdmEntityIdByMetaPersonId()!=null && contactpoint.getEdmEntityIdByMetaPersonId().getPeopleByMetaId()!=null) {
+					contactpoint.getEdmEntityIdByMetaPersonId().getPeopleByMetaId().forEach(person->{
+						if(person.getState().equals("PUBLISHED")) {
+							HashMap<String,Object> relatedPerson = new HashMap<String, Object>();
+							relatedPerson.put("id",person.getInstanceId());
+							relatedPerson.put("metaid",person.getMetaId());
+							relatedPerson.put("uid",person.getUid());
+							contact.put("person", relatedPerson);
+						}
+					});
+				}
 				dataproduct.getContactPoints().add(contact);
 			}
 			distribution.getAvailableContactPoints()
@@ -254,15 +256,17 @@ public class DistributionDetailsGenerationJPA {
 				contact.put("id", contactpoint.getInstanceId());
 				contact.put("metaid", contactpoint.getMetaId());
 				contact.put("uid", contactpoint.getUid());
-				contactpoint.getEdmEntityIdByMetaPersonId().getPeopleByMetaId().forEach(person->{
-					if(person.getState().equals("PUBLISHED")) {
-						HashMap<String,String> relatedPerson = new HashMap<String, String>();
-						relatedPerson.put("id",person.getInstanceId());
-						relatedPerson.put("metaid",person.getMetaId());
-						relatedPerson.put("uid",person.getUid());
-						contact.put("person", relatedPerson);
-					}
-				});
+				if(contactpoint.getEdmEntityIdByMetaPersonId()!=null && contactpoint.getEdmEntityIdByMetaPersonId().getPeopleByMetaId()!=null) {
+					contactpoint.getEdmEntityIdByMetaPersonId().getPeopleByMetaId().forEach(person->{
+						if(person.getState().equals("PUBLISHED")) {
+							HashMap<String,String> relatedPerson = new HashMap<String, String>();
+							relatedPerson.put("id",person.getInstanceId());
+							relatedPerson.put("metaid",person.getMetaId());
+							relatedPerson.put("uid",person.getUid());
+							contact.put("person", relatedPerson);
+						}
+					});
+				}
 				webservice.getContactPoints().add(contact);
 			}
 
