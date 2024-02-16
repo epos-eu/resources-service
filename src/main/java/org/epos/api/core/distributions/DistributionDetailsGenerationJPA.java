@@ -143,16 +143,25 @@ public class DistributionDetailsGenerationJPA {
 		 */
 
 		DataProduct dataproduct = new DataProduct();
-		
-		dataproduct.setType(dp.getType());
-		dataproduct.setVersion(dp.getVersion());
 
-		dp.getDataproductIdentifiersByInstanceId().forEach(identifier -> {
+		dataproduct.setType(dp.getType());
+		dataproduct.setVersion(dp.getVersioninfo());
+		dataproduct.setUid(dp.getUid());
+		dataproduct.setId(dp.getInstanceId());
+
+		if(dp.getDataproductIdentifiersByInstanceId()==null || dp.getDataproductIdentifiersByInstanceId().isEmpty()) {
 			HashMap<String,String> singleIdentifier = new HashMap<String,String>();
-			singleIdentifier.put("type",identifier.getType());
-			singleIdentifier.put("value",identifier.getIdentifier());
+			singleIdentifier.put("type","plain");
+			singleIdentifier.put("value",dp.getUid());
 			dataproduct.getIdentifiers().add(singleIdentifier);
-		});
+		}else {
+			dp.getDataproductIdentifiersByInstanceId().forEach(identifier -> {
+				HashMap<String,String> singleIdentifier = new HashMap<String,String>();
+				singleIdentifier.put("type",identifier.getType());
+				singleIdentifier.put("value",identifier.getIdentifier());
+				dataproduct.getIdentifiers().add(singleIdentifier);
+			});
+		}
 
 		if (dp.getDataproductSpatialsByInstanceId() != null) {
 			for (EDMDataproductSpatial s : dp.getDataproductSpatialsByInstanceId())
@@ -188,7 +197,7 @@ public class DistributionDetailsGenerationJPA {
 			List<DataServiceProvider> dataProviders = DataServiceProviderGeneration.getProviders(dp.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList()));
 			dataproduct.setDataProvider(dataProviders);
 		}
-		
+
 		if(!dp.getContactpointDataproductsByInstanceId().isEmpty()) {
 			for(EDMContactpointDataproduct contacts : dp.getContactpointDataproductsByInstanceId()) {
 				HashMap<String,Object> contact = new HashMap<String, Object>();
@@ -226,7 +235,7 @@ public class DistributionDetailsGenerationJPA {
 			HashMap<String,String> prov = new HashMap<String, String>();
 			prov.put("id", instance.getId());
 			prov.put("provenance", instance.getProvenance());
-			
+			dataproduct.getProvenance().add(prov);
 		});
 
 		distribution.getRelatedDataProducts().add(dataproduct);
@@ -238,7 +247,7 @@ public class DistributionDetailsGenerationJPA {
 		 */
 		if (ws != null) {
 			Webservice webservice = new Webservice();
-			
+
 			for(EDMContactpointWebservice contacts : ws.getContactpointWebservicesByInstanceId()) {
 				HashMap<String,Object> contact = new HashMap<String, Object>();
 				EDMContactpoint contactpoint = contacts.getContactpointByInstanceContactpointId();
@@ -326,8 +335,6 @@ public class DistributionDetailsGenerationJPA {
 				for(EDMOperation op : operations) {
 					if(operationsIdRelatedToDistribution!=null && operationsIdRelatedToDistribution.contains(op.getInstanceId())){
 						Operation operation = new Operation();
-
-						System.out.println(op);
 
 						operation.setMethod(op.getMethod());
 						operation.setEndpoint(op.getTemplate());

@@ -240,11 +240,11 @@ public class DataProduct implements Serializable {
 	}
 
 	public List<Map<String,String>> getProvenance() {
+		if(provenance==null) provenance = new ArrayList<Map<String,String>>();
 		return provenance;
 	}
 
 	public void setProvenance(List<Map<String,String>> provenance) {
-		if(provenance==null) provenance = new ArrayList<Map<String,String>>();
 		this.provenance = provenance;
 	}
 
