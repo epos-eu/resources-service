@@ -34,7 +34,7 @@ public class FacilityDetailsItemGenerationJPA {
 
 	private static final String API_PATH_DETAILS = EnvironmentVariables.API_CONTEXT + "/facilities/details/";
 	private static final String EMAIL_SENDER = EnvironmentVariables.API_CONTEXT + "/sender/send-email?id=";
-	private static final String API_PATH_EXECUTE  = EnvironmentVariables.API_CONTEXT+"/equipmentsexecute/";
+	private static final String API_PATH_EXECUTE  = EnvironmentVariables.API_CONTEXT+"/facilities/equipments/";
 	private static final String API_FORMAT = "?format=";
 
 	public static Facility generate(Map<String,Object> parameters) {

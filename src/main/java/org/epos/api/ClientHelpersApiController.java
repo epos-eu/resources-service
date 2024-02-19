@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.epos.api.beans.Distribution;
 import org.epos.api.beans.SearchResponse;
 import org.epos.api.utility.Utils;
+import org.epos.library.feature.FeaturesCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -370,6 +371,52 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 
 
 		return standardRequest("FACILITYSEARCH", requestParameters);
+	}
+	
+	/**
+	 * 
+	 * 
+	 * EQUIPMENTS
+	 * 
+	 * 
+	 */
+
+	@Override
+	public ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(String id, String format) {
+		if(id==null) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		Map<String,Object> requestParameters = new HashMap<>();
+
+		try {
+			id=java.net.URLDecoder.decode(id, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "id: "+ id, e); 
+			Distribution errorResponse = new Distribution(e.getLocalizedMessage());
+			return ResponseEntity.badRequest().body(errorResponse);
+		}
+		requestParameters.put("id", id);
+		
+
+		try {
+			format=java.net.URLDecoder.decode(format, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "format: "+ format, e); 
+			Distribution errorResponse = new Distribution(e.getLocalizedMessage());
+			return ResponseEntity.badRequest().body(errorResponse);
+		}
+
+		format = format.replaceAll(" ", "+");
+		System.out.println(format);
+		
+		if(format.equals("json/plain") || format.equals("application/epos.geo+json"))
+			requestParameters.put("format", format);
+		else {
+			Distribution errorResponse = new Distribution("No valid format");
+			return ResponseEntity.badRequest().body(errorResponse);
+		}
+
+		return standardRequest("EQUIPMENTDETAILS", requestParameters);
 	}
 
 }

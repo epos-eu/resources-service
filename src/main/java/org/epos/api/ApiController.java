@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.epos.api.core.MonitoringGeneration;
 import org.epos.api.core.distributions.DistributionDetailsGenerationJPA;
 import org.epos.api.core.distributions.DistributionSearchGenerationJPA;
+import org.epos.api.core.facilities.EquipmentsDetailsItemGenerationJPA;
 import org.epos.api.core.facilities.FacilityDetailsItemGenerationJPA;
 import org.epos.api.core.facilities.FacilitySearchGenerationJPA;
 import org.epos.api.core.organizations.OrganisationsGeneration;
@@ -65,6 +66,9 @@ abstract class ApiController<T> {
 			break;
 		case "FACILITYDETAILS":
 			response = Utils.gson.toJson(FacilityDetailsItemGenerationJPA.generate(requestParams));
+			break;
+		case "EQUIPMENTDETAILS":
+			response = Utils.gson.toJson(EquipmentsDetailsItemGenerationJPA.generate(requestParams));
 			break;
 		case "MONITORING":
 			response = Utils.gson.toJson(MonitoringGeneration.generate());

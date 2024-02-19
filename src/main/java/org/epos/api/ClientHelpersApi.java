@@ -16,8 +16,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.epos.api.beans.Distribution;
 import org.epos.api.beans.OrganizationBean;
 import org.epos.api.beans.SearchResponse;
+import org.epos.eposdatamodel.Equipment;
 import org.epos.eposdatamodel.Organization;
 import org.epos.handler.dbapi.model.EDMOrganization;
+import org.epos.library.feature.FeaturesCollection;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -138,6 +140,29 @@ public interface ClientHelpersApi {
 			@Parameter(in = ParameterIn.QUERY, description = "organisations" ,schema=@Schema()) @Valid @RequestParam(value = "organisations", required = false) String organisations,
 			@Parameter(in = ParameterIn.QUERY, description = "facetstype {categories, facilityprovider}" ,schema=@Schema()) @Valid @RequestParam(value = "facetstype", required = false) String facetsType,
 			@Parameter(in = ParameterIn.QUERY, description = "facets" ,schema=@Schema()) @Valid @RequestParam(value = "facets", required = false) Boolean facets);
+
+	@Operation(summary = "metadata resources details", description = "returns detailed information useful to contextualise the discovery phase", tags={ "Resources Service" })
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "200", description = "ok.", content = @Content(mediaType = "application/json", schema = @Schema(oneOf = {FeaturesCollection.class, Equipment.class}))),
+        
+        @ApiResponse(responseCode = "201", description = "Created."),
+        
+        @ApiResponse(responseCode = "204", description = "No content."),
+        
+        @ApiResponse(responseCode = "301", description = "Moved Permanently."),
+        
+        @ApiResponse(responseCode = "400", description = "Bad request."),
+        
+        @ApiResponse(responseCode = "401", description = "Access token is missing or invalid"),
+        
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        
+        @ApiResponse(responseCode = "404", description = "Not Found") })
+    @RequestMapping(value = "/facilities/equipments/{instance_id}",
+        produces = { "application/json" }, 
+        method = RequestMethod.GET)
+    ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The facility ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id, 
+    		@Parameter(in = ParameterIn.QUERY, description = "format {json/plain, application/epos.geo+json}" ,schema=@Schema()) @Valid @RequestParam(value = "format", required = false) String format);
 
 
 }

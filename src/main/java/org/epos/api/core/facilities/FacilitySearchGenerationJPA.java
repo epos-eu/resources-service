@@ -28,7 +28,7 @@ public class FacilitySearchGenerationJPA {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FacilitySearchGenerationJPA.class);
 
 	private static final String API_PATH_DETAILS  = EnvironmentVariables.API_CONTEXT+"/facilities/details/";
-	private static final String API_PATH_EXECUTE  = EnvironmentVariables.API_CONTEXT+"/equipmentsexecute/";
+	private static final String API_PATH_EXECUTE  = EnvironmentVariables.API_CONTEXT+"/facilities/equipments/";
 	private static final String API_FORMAT = "?format=";
 
 	private static final String PARAMETER_FACILITY_TYPES = "facilitytypes";
