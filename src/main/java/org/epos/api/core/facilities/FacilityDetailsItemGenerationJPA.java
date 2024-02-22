@@ -36,7 +36,7 @@ public class FacilityDetailsItemGenerationJPA {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FacilityDetailsItemGenerationJPA.class);
 
 	private static final String API_PATH_DETAILS = EnvironmentVariables.API_CONTEXT + "/facilities/details/";
-	private static final String API_PATH_EXECUTE_EQUIPMENTS  = EnvironmentVariables.API_CONTEXT+"/equipments/details/";
+	private static final String API_PATH_EXECUTE_EQUIPMENTS  = EnvironmentVariables.API_CONTEXT+"/equipments/";
 	private static final String API_FORMAT = "?format=";
 
 	public static Object generate(Map<String,Object> parameters) {
@@ -218,7 +218,7 @@ public class FacilityDetailsItemGenerationJPA {
 		link.setAuthenticatedDownload(false);
 		link.setLabel("Equipments");
 		link.setType("application/epos.table.geo+json");
-		link.setHref(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + facilitySelected.getMetaId() + API_FORMAT + "application/epos.geo+json");
+		link.setHref(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getMetaId());
 		
 		feature.addSimpleProperty("@epos_links",List.of(link));
 

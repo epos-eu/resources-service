@@ -54,7 +54,7 @@ public class EquipmentsDetailsItemGenerationJPA {
 
 		List<Equipment> equipmentList = null;
 		
-		if(parameters.containsKey("id")) {
+		if(parameters.containsKey("id") && !parameters.get("id").equals("all")) {
 			equipmentList = List.of(new EquipmentDBAPI().getByInstanceId(parameters.get("id").toString()));
 		}else {
 			equipmentList = new EquipmentDBAPI().getAllByState(State.PUBLISHED);

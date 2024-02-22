@@ -252,6 +252,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		if(id==null) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
+		if(format==null) format="json/plain";
 
 		Map<String,Object> requestParameters = new HashMap<>();
 		
@@ -395,6 +396,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 	@Override
 	public ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(String id, String facilityid, String format) {
 		if(id==null) id="all";
+		if(format==null) format="json/plain";
 		
 		Map<String,Object> requestParameters = new HashMap<>();
 
@@ -407,15 +409,17 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		}
 		requestParameters.put("id", id);
 		
-		try {
-			facilityid=java.net.URLDecoder.decode(facilityid, StandardCharsets.UTF_8.name());
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "facilityid: "+ facilityid, e); 
-			Distribution errorResponse = new Distribution(e.getLocalizedMessage());
-			return ResponseEntity.badRequest().body(errorResponse);
+		if(facilityid!=null) {
+			try {
+				facilityid=java.net.URLDecoder.decode(facilityid, StandardCharsets.UTF_8.name());
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "facilityid: "+ facilityid, e); 
+				Distribution errorResponse = new Distribution(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+			requestParameters.put("facilityid", facilityid);
+				
 		}
-		requestParameters.put("facilityid", facilityid);
-		
 
 		try {
 			format=java.net.URLDecoder.decode(format, StandardCharsets.UTF_8.name());
