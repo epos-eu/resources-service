@@ -248,11 +248,13 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 	 */
 
 	@Override
-	public ResponseEntity<Distribution> facilityDiscoveryGetUsingGET(String id) {
+	public ResponseEntity<Object> facilityDiscoveryGetUsingGET(String id, String format) {
 		if(id==null) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
+		Map<String,Object> requestParameters = new HashMap<>();
+		
 		try {
 			id=java.net.URLDecoder.decode(id, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
@@ -260,9 +262,18 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			Distribution errorResponse = new Distribution(e.getLocalizedMessage());
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
-		Map<String,Object> requestParams = Map.of("id", id);
+		requestParameters.put("id", id);
+		
+		format = format.replaceAll(" ", "+");
+		System.out.println(format);
+		
+		if(format.equals("json/plain") || format.equals("application/epos.geo+json"))
+			requestParameters.put("format", format);
+		else {
+			requestParameters.put("format", "json/plain");
+		}
 
-		return standardRequest("FACILITYDETAILS", requestParams);
+		return standardRequest("FACILITYDETAILS", requestParameters);
 	}
 
 	@Override
@@ -382,10 +393,9 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 	 */
 
 	@Override
-	public ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(String id, String format) {
-		if(id==null) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		}
+	public ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(String id, String facilityid, String format) {
+		if(id==null) id="all";
+		
 		Map<String,Object> requestParameters = new HashMap<>();
 
 		try {
@@ -396,6 +406,15 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
 		requestParameters.put("id", id);
+		
+		try {
+			facilityid=java.net.URLDecoder.decode(facilityid, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "facilityid: "+ facilityid, e); 
+			Distribution errorResponse = new Distribution(e.getLocalizedMessage());
+			return ResponseEntity.badRequest().body(errorResponse);
+		}
+		requestParameters.put("facilityid", facilityid);
 		
 
 		try {

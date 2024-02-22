@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import org.epos.api.beans.Distribution;
+import org.epos.api.beans.Facility;
 import org.epos.api.beans.OrganizationBean;
 import org.epos.api.beans.SearchResponse;
 import org.epos.eposdatamodel.Equipment;
@@ -91,7 +92,7 @@ public interface ClientHelpersApi {
 	
 	@Operation(summary = "metadata resources details", description = "returns detailed information useful to contextualise the discovery phase", tags={ "Resources Service" })
     @ApiResponses(value = { 
-        @ApiResponse(responseCode = "200", description = "ok.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Distribution.class))),
+        @ApiResponse(responseCode = "200", description = "ok.", content = @Content(mediaType = "application/json", schema = @Schema(oneOf = {FeaturesCollection.class, Facility.class}))),
         
         @ApiResponse(responseCode = "201", description = "Created."),
         
@@ -109,7 +110,8 @@ public interface ClientHelpersApi {
     @RequestMapping(value = "/facilities/details/{instance_id}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<Distribution> facilityDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The facility ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id);
+    ResponseEntity<Object> facilityDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The facility ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id, 
+    		@Parameter(in = ParameterIn.QUERY, description = "format {json/plain, application/epos.geo+json}" ,schema=@Schema()) @Valid @RequestParam(value = "format", required = false) String format);
 
 
 	@Operation(summary = "search operation", description = "Search endpoint", tags={ "Resources Service" })
@@ -158,10 +160,11 @@ public interface ClientHelpersApi {
         @ApiResponse(responseCode = "403", description = "Forbidden"),
         
         @ApiResponse(responseCode = "404", description = "Not Found") })
-    @RequestMapping(value = "/facilities/equipments/{instance_id}",
+    @RequestMapping(value = "/equipments/{instance_id}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The facility ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id, 
+    ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The equipment ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id, 
+    		@Parameter(in = ParameterIn.QUERY, description = "The facility ID" ,schema=@Schema()) @Valid @RequestParam(value = "facilityid", required = false) String facilityid,
     		@Parameter(in = ParameterIn.QUERY, description = "format {json/plain, application/epos.geo+json}" ,schema=@Schema()) @Valid @RequestParam(value = "format", required = false) String format);
 
 

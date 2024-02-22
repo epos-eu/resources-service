@@ -43,12 +43,12 @@ public class Facility implements Serializable {
 	
 	// WEBSERVICE
 	
-	private String serviceName;
-	private String serviceDescription;
-	private DataServiceProvider serviceProvider;
-	private SpatialInfo serviceSpatial;
-	private TemporalCoverage serviceTemporalCoverage;
-	private String serviceEndpoint;
+	//private String serviceName;
+	//private String serviceDescription;
+	//private DataServiceProvider serviceProvider;
+	//private SpatialInfo serviceSpatial;
+	//private TemporalCoverage serviceTemporalCoverage;
+	//private String serviceEndpoint;
 	//private String serviceDocumentation;
 	private List<String> serviceType;
 	//private String endpoint;
@@ -160,44 +160,6 @@ public class Facility implements Serializable {
 	public void setAvailableFormats(List<AvailableFormat> availableFormats) {
 		this.availableFormats = availableFormats;
 	}
-	public String getServiceName() {
-		return serviceName;
-	}
-	public void setServiceName(String serviceName) {
-		this.serviceName = serviceName;
-	}
-	public String getServiceDescription() {
-		return serviceDescription;
-	}
-	public void setServiceDescription(String serviceDescription) {
-		this.serviceDescription = serviceDescription;
-	}
-	public DataServiceProvider getServiceProvider() {
-		return serviceProvider;
-	}
-	public void setServiceProvider(DataServiceProvider serviceProvider) {
-		this.serviceProvider = serviceProvider;
-	}
-	public SpatialInfo getServiceSpatial() {
-		if(serviceSpatial ==  null) serviceSpatial = new SpatialInfo();
-		return serviceSpatial;
-	}
-	public void setServiceSpatial(SpatialInfo serviceSpatial) {
-		this.serviceSpatial = serviceSpatial;
-	}
-	public TemporalCoverage getServiceTemporalCoverage() {
-		if(serviceTemporalCoverage ==  null) serviceTemporalCoverage = new TemporalCoverage();
-		return serviceTemporalCoverage;
-	}
-	public void setServiceTemporalCoverage(TemporalCoverage serviceTemporalCoverage) {
-		this.serviceTemporalCoverage = serviceTemporalCoverage;
-	}
-	public String getServiceEndpoint() {
-		return serviceEndpoint;
-	}
-	public void setServiceEndpoint(String serviceEndpoint) {
-		this.serviceEndpoint = serviceEndpoint;
-	}
 	public List<String> getServiceType() {
 		if(serviceType==null) serviceType = new ArrayList<String>();
 		return serviceType;
@@ -211,9 +173,7 @@ public class Facility implements Serializable {
 	@Override
 	public int hashCode() {
 		return Objects.hash(availableContactPoints, availableFormats, categories, description, errorMessage,
-				facilityProvider, href, id, internalID, keywords, operationid, serviceDescription, serviceEndpoint,
-				serviceName, serviceProvider, serviceSpatial, serviceTemporalCoverage, serviceType, spatial, title,
-				type, uid);
+				facilityProvider, href, id, internalID, keywords, operationid, serviceType, spatial, title, type, uid);
 	}
 	@Override
 	public boolean equals(Object obj) {
@@ -231,12 +191,6 @@ public class Facility implements Serializable {
 				&& Objects.equals(facilityProvider, other.facilityProvider) && Objects.equals(href, other.href)
 				&& Objects.equals(id, other.id) && Objects.equals(internalID, other.internalID)
 				&& Objects.equals(keywords, other.keywords) && Objects.equals(operationid, other.operationid)
-				&& Objects.equals(serviceDescription, other.serviceDescription)
-				&& Objects.equals(serviceEndpoint, other.serviceEndpoint)
-				&& Objects.equals(serviceName, other.serviceName)
-				&& Objects.equals(serviceProvider, other.serviceProvider)
-				&& Objects.equals(serviceSpatial, other.serviceSpatial)
-				&& Objects.equals(serviceTemporalCoverage, other.serviceTemporalCoverage)
 				&& Objects.equals(serviceType, other.serviceType) && Objects.equals(spatial, other.spatial)
 				&& Objects.equals(title, other.title) && Objects.equals(type, other.type)
 				&& Objects.equals(uid, other.uid);
@@ -247,14 +201,8 @@ public class Facility implements Serializable {
 				+ ", categories=" + categories + ", id=" + id + ", uid=" + uid + ", type=" + type + ", title=" + title
 				+ ", description=" + description + ", keywords=" + keywords + ", facilityProvider=" + facilityProvider
 				+ ", internalID=" + internalID + ", spatial=" + spatial + ", availableContactPoints="
-				+ availableContactPoints + ", availableFormats=" + availableFormats + ", serviceName=" + serviceName
-				+ ", serviceDescription=" + serviceDescription + ", serviceProvider=" + serviceProvider
-				+ ", serviceSpatial=" + serviceSpatial + ", serviceTemporalCoverage=" + serviceTemporalCoverage
-				+ ", serviceEndpoint=" + serviceEndpoint + ", serviceType=" + serviceType + "]";
+				+ availableContactPoints + ", availableFormats=" + availableFormats + ", serviceType=" + serviceType
+				+ "]";
 	}
-
-	//private List<ServiceParameter> serviceParameters;
 	
-	
-
 }

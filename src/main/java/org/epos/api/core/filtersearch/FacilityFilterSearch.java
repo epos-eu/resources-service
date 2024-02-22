@@ -57,7 +57,7 @@ public class FacilityFilterSearch {
 				categories
 				.stream()
 				.filter(cat -> cat.getUid().equals(facility.getType()))
-				.map(EDMCategory::getUid)
+				.map(EDMCategory::getId)
 				.forEach(facilityTypes::add);
 
 				if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){
@@ -81,7 +81,7 @@ public class FacilityFilterSearch {
 						categories
 						.stream()
 						.filter(cat -> cat.getUid().equals(item.getEquipmentByInstanceEquipmentId().getType()))
-						.map(EDMCategory::getUid)
+						.map(EDMCategory::getId)
 						.forEach(facilityTypes::add);
 					}
 					if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){

@@ -33,13 +33,17 @@ public class EquipmentsDetailsItemGenerationJPA {
 		LOGGER.info("Parameters {}", parameters);
 
 		EntityManager em = new DBService().getEntityManager();
-
-		List<EDMFacility> facilitySelectedList = getFromDB(em, EDMFacility.class,
-				"facility.findAllByMetaId",
-				"METAID", parameters.get("id"));
+		List<EDMFacility> facilitySelectedList = null;
+		if(parameters.containsKey("facilityid")) {
+			facilitySelectedList = getFromDB(em, EDMFacility.class,
+					"facility.findAllByMetaId",
+					"METAID", parameters.get("facilityid").toString());
+		}else {
+			facilitySelectedList = getFromDB(em, EDMFacility.class,
+					"facility.findAll");
+		}
 
 		List<EDMCategory> categoriesFromDB = getFromDB(em, EDMCategory.class, "EDMCategory.findAll");
-
 
 		System.out.println(facilitySelectedList.toString());
 
@@ -48,7 +52,13 @@ public class EquipmentsDetailsItemGenerationJPA {
 
 		System.out.println(facilitySelectedList.toString());
 
-		List<Equipment> equipmentList = new EquipmentDBAPI().getAllByState(State.PUBLISHED);
+		List<Equipment> equipmentList = null;
+		
+		if(parameters.containsKey("id")) {
+			equipmentList = List.of(new EquipmentDBAPI().getByInstanceId(parameters.get("id").toString()));
+		}else {
+			equipmentList = new EquipmentDBAPI().getAllByState(State.PUBLISHED);
+		}
 		List<Equipment> returnList = new ArrayList<Equipment>();
 
 		for(Equipment equipment : equipmentList) {
@@ -58,8 +68,6 @@ public class EquipmentsDetailsItemGenerationJPA {
 				}
 			}
 		}
-
-		System.out.println(returnList.toString());
 
 		if(parameters.containsKey("format") && parameters.get("format").toString().equals("application/epos.geo+json"))
 			return generateAsGeoJson(facilitySelectedList.get(0),categoriesFromDB, returnList);
@@ -77,49 +85,6 @@ public class EquipmentsDetailsItemGenerationJPA {
 		for(Equipment equipment : equipmentList) {
 
 			Feature feature = new Feature();
-
-			//COMMON FOR FACILITY
-			feature.addSimpleProperty("Facility name", Optional.ofNullable(facilitySelected.getTitle()).orElse(""));
-			feature.addSimpleProperty("Facility description", Optional.ofNullable(facilitySelected.getDescription()).orElse(""));
-			feature.addSimpleProperty("Facility type", Optional.ofNullable(categoriesFromDB
-					.stream()
-					.filter(cat -> cat.getUid().equals(facilitySelected.getType())).map(EDMCategory::getName).collect(Collectors.toList())).get().toString());
-
-			for(EDMFacilitySpatial loc : facilitySelected.getFacilitySpatialsByInstanceId()) {
-				String location = loc.getLocation();
-				boolean isPoint = location.contains("POINT");
-				location = location.replaceAll("POLYGON", "").replaceAll("POINT", "").replaceAll("\\(", "").replaceAll("\\)", "");
-				String[] coordinates = location.split("\\,");
-				Geometry geometry = null;
-
-				if(isPoint) {
-					geometry = new Point();
-					for(String coo : coordinates) {
-						String[] cooz = coo.split(" ");
-						if(cooz.length==2) {
-							((Point) geometry).setCoordinates(new PointCoordinates(Double.parseDouble(cooz[0]), Double.parseDouble(cooz[1])));
-						}else {
-							((Point) geometry).setCoordinates(new PointCoordinates(Double.parseDouble(cooz[1]), Double.parseDouble(cooz[2])));
-						}
-					}
-				}else {
-					geometry = new Polygon();
-					ArrayList<PointCoordinates> deep = new ArrayList<PointCoordinates>();
-					for(String coo : coordinates) {
-						String[] cooz = coo.split(" ");
-						if(cooz.length==2) {
-							deep.add(new PointCoordinates(Double.parseDouble(cooz[0]), Double.parseDouble(cooz[1])));
-						}else {
-							deep.add(new PointCoordinates(Double.parseDouble(cooz[1]), Double.parseDouble(cooz[2])));
-						}
-					}
-					((Polygon) geometry).setStartingPoint(deep.get(0));
-					for(int i = 1; i<deep.size();i++)
-						((Polygon) geometry).addAdditionalPoint(deep.get(i));	
-				}
-				feature.setGeometry(geometry);
-			}
-
 
 			feature.addSimpleProperty("Name", Optional.ofNullable(equipment.getName()).orElse(""));
 			feature.addSimpleProperty("Description", Optional.ofNullable(equipment.getDescription()).orElse(""));
