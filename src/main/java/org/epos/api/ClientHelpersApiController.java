@@ -248,7 +248,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 	 */
 
 	@Override
-	public ResponseEntity<Object> facilityDiscoveryGetUsingGET(String id, String format) {
+	public ResponseEntity<Object> facilityDiscoveryGetUsingGET(String id, String equipmenttypes, String format) {
 		if(id==null) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
@@ -264,6 +264,17 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
 		requestParameters.put("id", id);
+		
+		if(equipmenttypes!=null) {
+			try {
+				equipmenttypes=java.net.URLDecoder.decode(equipmenttypes, StandardCharsets.UTF_8.name());
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "equipmenttypes: "+ equipmenttypes, e); 
+				Distribution errorResponse = new Distribution(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+			requestParameters.put("equipmenttypes", equipmenttypes);
+		}
 		
 		format = format.replaceAll(" ", "+");
 		System.out.println(format);
@@ -394,7 +405,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 	 */
 
 	@Override
-	public ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(String id, String facilityid, String format) {
+	public ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(String id, String facilityid, String equipmenttypes, String format) {
 		if(id==null) id="all";
 		if(format==null) format="json/plain";
 		
@@ -418,7 +429,17 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("facilityid", facilityid);
-				
+		}
+		
+		if(equipmenttypes!=null) {
+			try {
+				equipmenttypes=java.net.URLDecoder.decode(equipmenttypes, StandardCharsets.UTF_8.name());
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "equipmenttypes: "+ equipmenttypes, e); 
+				Distribution errorResponse = new Distribution(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+			requestParameters.put("equipmenttypes", equipmenttypes);
 		}
 
 		try {

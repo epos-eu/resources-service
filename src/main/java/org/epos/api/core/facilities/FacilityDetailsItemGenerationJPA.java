@@ -57,7 +57,7 @@ public class FacilityDetailsItemGenerationJPA {
 		if (facilitySelected == null) return null;
 
 		if(parameters.containsKey("format") && parameters.get("format").toString().equals("application/epos.geo+json"))
-			return generateAsGeoJson(facilitySelectedList.get(0));
+			return generateAsGeoJson(facilitySelectedList.get(0), parameters.containsKey("equipmenttypes")? parameters.get("equipmenttypes").toString() : null);
 		else {
 			Collection<EDMFacilityService> ws = facilitySelected.getFacilityServicesByInstanceId() != null ? facilitySelected.getFacilityServicesByInstanceId() : null;
 			if (ws == null && facilitySelected.getFacilitiesByInstanceId() != null) return null;
@@ -160,7 +160,7 @@ public class FacilityDetailsItemGenerationJPA {
 		}
 	}
 
-	public static FeaturesCollection generateAsGeoJson(EDMFacility facilitySelected) {
+	public static FeaturesCollection generateAsGeoJson(EDMFacility facilitySelected, String equipmenttypes) {
 
 		EntityManager em = new DBService().getEntityManager();
 		
@@ -218,7 +218,7 @@ public class FacilityDetailsItemGenerationJPA {
 		link.setAuthenticatedDownload(false);
 		link.setLabel("Equipments");
 		link.setType("application/epos.table.geo+json");
-		link.setHref(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getMetaId());
+		link.setHref(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getMetaId() + (equipmenttypes!=null? "&equipmenttypes="+equipmenttypes : ""));
 		
 		feature.addSimpleProperty("@epos_links",List.of(link));
 

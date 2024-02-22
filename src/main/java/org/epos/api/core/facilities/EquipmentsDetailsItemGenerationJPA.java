@@ -45,12 +45,8 @@ public class EquipmentsDetailsItemGenerationJPA {
 
 		List<EDMCategory> categoriesFromDB = getFromDB(em, EDMCategory.class, "EDMCategory.findAll");
 
-		System.out.println(facilitySelectedList.toString());
-
 		if (facilitySelectedList.stream().noneMatch(facSelected -> facSelected.getState().equals("PUBLISHED")))
 			return null;
-
-		System.out.println(facilitySelectedList.toString());
 
 		List<Equipment> equipmentList = null;
 		
@@ -59,6 +55,23 @@ public class EquipmentsDetailsItemGenerationJPA {
 		}else {
 			equipmentList = new EquipmentDBAPI().getAllByState(State.PUBLISHED);
 		}
+
+		
+		List<String> scienceDomainsParameters = List.of(parameters.get("equipmenttypes").toString().split(","));
+		List<Equipment> tempEquipmentList = new ArrayList<Equipment>();
+		for(Equipment item : equipmentList) {
+			List<String> facilityTypes = new ArrayList<String>();
+			categoriesFromDB
+			.stream()
+			.filter(cat -> cat.getUid().equals(item.getType()))
+			.map(EDMCategory::getId)
+			.forEach(facilityTypes::add);
+			if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){
+				tempEquipmentList.add(item);
+			}
+		}
+		equipmentList = tempEquipmentList;
+		
 		List<Equipment> returnList = new ArrayList<Equipment>();
 
 		for(Equipment equipment : equipmentList) {
