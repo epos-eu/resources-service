@@ -56,21 +56,22 @@ public class EquipmentsDetailsItemGenerationJPA {
 			equipmentList = new EquipmentDBAPI().getAllByState(State.PUBLISHED);
 		}
 
-		
-		List<String> scienceDomainsParameters = List.of(parameters.get("equipmenttypes").toString().split(","));
-		List<Equipment> tempEquipmentList = new ArrayList<Equipment>();
-		for(Equipment item : equipmentList) {
-			List<String> facilityTypes = new ArrayList<String>();
-			categoriesFromDB
-			.stream()
-			.filter(cat -> cat.getUid().equals(item.getType()))
-			.map(EDMCategory::getId)
-			.forEach(facilityTypes::add);
-			if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){
-				tempEquipmentList.add(item);
+		if(parameters.containsKey("equipmenttypes")) {
+			List<String> scienceDomainsParameters = List.of(parameters.get("equipmenttypes").toString().split(","));
+			List<Equipment> tempEquipmentList = new ArrayList<Equipment>();
+			for(Equipment item : equipmentList) {
+				List<String> facilityTypes = new ArrayList<String>();
+				categoriesFromDB
+				.stream()
+				.filter(cat -> cat.getUid().equals(item.getType()))
+				.map(EDMCategory::getId)
+				.forEach(facilityTypes::add);
+				if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){
+					tempEquipmentList.add(item);
+				}
 			}
+			equipmentList = tempEquipmentList;
 		}
-		equipmentList = tempEquipmentList;
 		
 		List<Equipment> returnList = new ArrayList<Equipment>();
 
