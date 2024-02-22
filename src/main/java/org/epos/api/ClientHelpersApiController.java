@@ -352,11 +352,11 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 				equipmenttypes=java.net.URLDecoder.decode(equipmenttypes, StandardCharsets.UTF_8.name());
 				equipmenttypes = equipmenttypes.replace(" ", "");
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "equipmenttype: "+ equipmenttypes, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "equipmenttypes: "+ equipmenttypes, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
-			requestParameters.put("equipmenttype", equipmenttypes);
+			requestParameters.put("equipmenttypes", equipmenttypes);
 		}
 		if(!StringUtils.isBlank(organisations)) {
 			try {

@@ -73,7 +73,7 @@ public class FacilityFilterSearch {
 
 		if(parameters.containsKey(PARAMETER_EQUIPMENT_TYPES)) {
 			ArrayList<EDMFacility> tempFacilityList = new ArrayList<>();
-			List<String> scienceDomainsParameters = List.of(parameters.get(PARAMETER_FACILITY_TYPES).toString().split(","));
+			List<String> scienceDomainsParameters = List.of(parameters.get(PARAMETER_EQUIPMENT_TYPES).toString().split(","));
 			facilityList.forEach(facility -> {
 				List<String> facilityTypes = new ArrayList<String>();
 				if(facility.getEquipmentFacilitiesByInstanceId()!=null) {

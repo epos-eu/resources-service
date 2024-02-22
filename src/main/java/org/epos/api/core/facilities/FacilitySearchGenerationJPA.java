@@ -28,6 +28,7 @@ public class FacilitySearchGenerationJPA {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FacilitySearchGenerationJPA.class);
 
 	private static final String API_PATH_DETAILS  = EnvironmentVariables.API_CONTEXT+"/facilities/details/";
+	private static final String API_PATH_EXECUTE_EQUIPMENTS  = EnvironmentVariables.API_CONTEXT+"/equipments/";
 	private static final String API_FORMAT = "?format=";
 
 	private static final String PARAMETER_FACILITY_TYPES = "facilitytypes";
@@ -112,7 +113,7 @@ public class FacilitySearchGenerationJPA {
 					.availableFormats(List.of(new AvailableFormat.AvailableFormatBuilder()
 							.originalFormat("application/epos.geo+json")
 							.format("application/epos.geo+json")
-							.href(EnvironmentVariables.API_HOST + API_PATH_DETAILS + facility.getMetaId() + API_FORMAT + "application/epos.geo+json")
+							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facility.getMetaId() + (parameters.containsKey("equipmenttypes")? "&equipmenttypes="+parameters.get("equipmenttypes") : ""))
 							.label("GEOJSON")
 							.description(AvailableFormatType.CONVERTED)
 							.build()))

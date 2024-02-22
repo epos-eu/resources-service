@@ -114,6 +114,41 @@ public class EquipmentsDetailsItemGenerationJPA {
 			feature.addSimpleProperty("Resolution", Optional.ofNullable(equipment.getResolution()).orElse(""));
 			feature.addSimpleProperty("Sample period", Optional.ofNullable(equipment.getSamplePeriod()).orElse(""));
 			feature.addSimpleProperty("Serial number", Optional.ofNullable(equipment.getSerialNumber()).orElse(""));
+			
+			for(Location loc : equipment.getSpatialExtent()) {
+				String location = loc.getLocation();
+				boolean isPoint = location.contains("POINT");
+				location = location.replaceAll("POLYGON", "").replaceAll("POINT", "").replaceAll("\\(", "").replaceAll("\\)", "");
+				String[] coordinates = location.split("\\,");
+				Geometry geometry = null;
+
+				if(isPoint) {
+					geometry = new Point();
+					for(String coo : coordinates) {
+						String[] cooz = coo.split(" ");
+						if(cooz.length==2) {
+							((Point) geometry).setCoordinates(new PointCoordinates(Double.parseDouble(cooz[0]), Double.parseDouble(cooz[1])));
+						}else {
+							((Point) geometry).setCoordinates(new PointCoordinates(Double.parseDouble(cooz[1]), Double.parseDouble(cooz[2])));
+						}
+					}
+				}else {
+					geometry = new Polygon();
+					ArrayList<PointCoordinates> deep = new ArrayList<PointCoordinates>();
+					for(String coo : coordinates) {
+						String[] cooz = coo.split(" ");
+						if(cooz.length==2) {
+							deep.add(new PointCoordinates(Double.parseDouble(cooz[0]), Double.parseDouble(cooz[1])));
+						}else {
+							deep.add(new PointCoordinates(Double.parseDouble(cooz[1]), Double.parseDouble(cooz[2])));
+						}
+					}
+					((Polygon) geometry).setStartingPoint(deep.get(0));
+					for(int i = 1; i<deep.size();i++)
+						((Polygon) geometry).addAdditionalPoint(deep.get(i));	
+				}
+				feature.setGeometry(geometry);
+			}
 
 			geojson.addFeature(feature);
 		}
