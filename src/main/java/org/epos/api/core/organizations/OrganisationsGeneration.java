@@ -34,7 +34,7 @@ public class OrganisationsGeneration {
 			organisations = getFromDB(em, EDMOrganization.class, "organization.findAllByState", "STATE", "PUBLISHED");
 			
 			if(parameters.containsKey("type")) {
-				List<EDMDataproduct> dataproducts  = getFromDB(em, EDMDataproduct.class, "dataproduct.findAllByState", "STATE", "PUBLISHED");
+				List<EDMDataproduct> dataproducts = getFromDB(em, EDMDataproduct.class, "dataproduct.findAllByState", "STATE", "PUBLISHED");
 				List<EDMOrganization> tempOrganizationList = new ArrayList<>();
 
 				Set<EDMEdmEntityId> organizationsEntityIds = new HashSet<>();
@@ -88,9 +88,13 @@ public class OrganisationsGeneration {
 				organisations = tempOrganizationList;
 			}
 
+			System.out.println(organisations.size());
 
 			LOGGER.info("Apply filter using input parameters: "+parameters.toString());
 			organisations = OrganizationFilterSearch.doFilters(organisations, parameters);
+
+			System.out.println(organisations.size());
+			
 			if(parameters.containsKey("country")) organisations = organisations.stream().filter(e->e.getAddressByAddressId()!=null && e.getAddressByAddressId().getCountry().equals(parameters.get("country"))).collect(Collectors.toList());
 		}
 		

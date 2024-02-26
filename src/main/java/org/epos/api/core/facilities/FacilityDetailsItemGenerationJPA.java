@@ -76,8 +76,6 @@ public class FacilityDetailsItemGenerationJPA {
 			facility.setId(Optional.ofNullable(facilitySelected.getMetaId()).orElse(null));
 			facility.setUid(Optional.ofNullable(facilitySelected.getUid()).orElse(null));
 
-
-
 			facility.setHref(EnvironmentVariables.API_HOST + API_PATH_DETAILS + facilitySelected.getMetaId());
 
 			List<String> keywords = new ArrayList<String>();

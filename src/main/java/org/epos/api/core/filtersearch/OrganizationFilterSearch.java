@@ -16,7 +16,7 @@ public class OrganizationFilterSearch {
 	public static List<EDMOrganization> doFilters(List<EDMOrganization> organisationsList, Map<String,Object> parameters) {
 
 		organisationsList = filterOrganisationsByFullText(organisationsList, parameters);
-		//organisationsList = filterOrganisationsByType(organisationsList, parameters);
+		organisationsList = filterOrganisationsByCountry(organisationsList, parameters);
 
 		return organisationsList;
 	}
@@ -56,6 +56,30 @@ public class OrganizationFilterSearch {
 			}
 
 			organisationsList = new ArrayList<>(tempDatasetList);
+		}
+
+		return organisationsList;
+
+	}
+	
+	private static List<EDMOrganization> filterOrganisationsByCountry(List<EDMOrganization> organisationsList, Map<String,Object> parameters) {
+		if(parameters.containsKey("country")) {
+			HashSet<EDMOrganization> tempOrganizationList = new HashSet<>();
+			String[] qs = parameters.get("country").toString().toLowerCase().split(",");
+
+			for (EDMOrganization edmOrganisation : organisationsList) {
+				Map<String, Boolean> qSMap = Arrays.stream(qs)
+						.collect(Collectors.toMap(
+								key -> key, value -> Boolean.FALSE
+								));
+				for (String q : qSMap.keySet()) {
+					if(edmOrganisation.getAddressByAddressId()!=null && edmOrganisation.getAddressByAddressId().getCountry()!=null && q.equals(edmOrganisation.getAddressByAddressId().getCountry().toLowerCase())) {
+						tempOrganizationList.add(edmOrganisation);
+					}
+				}
+			}
+
+			organisationsList = new ArrayList<>(tempOrganizationList);
 		}
 
 		return organisationsList;

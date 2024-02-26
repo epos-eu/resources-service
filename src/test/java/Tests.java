@@ -21,8 +21,10 @@ public class Tests {
 		}
 		
 		Map<String, Object> headers = new HashMap<String, Object>();
-		headers.put("id", "fcab79ad-f540-4ccd-9b62-2e37963f06c2");
-		headers.put("format", "application/epos.geo+json");
+		headers.put("type", "dataproviders,serviceproviders");
+		headers.put("country", "IT");
+		headers.put("q", "Istituto");
+		//headers.put("format", "application/epos.geo+json");
 		
 		try {
 			System.out.println(Facets.getInstance().generateFacetsFromDatabase());
@@ -30,7 +32,8 @@ public class Tests {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println(gson.toJsonTree(EquipmentsDetailsItemGenerationJPA.generate(headers)));
+		OrganisationsGeneration.generate(headers);
+		//System.out.println(gson.toJsonTree(OrganisationsGeneration.generate(headers)));
 
 		//EntityManager em = new DBService().getEntityManager();
 		//List<EDMFacility> facilities  = getFromDB(em, EDMFacility.class, "facility.findAllByState", "STATE", "PUBLISHED");
