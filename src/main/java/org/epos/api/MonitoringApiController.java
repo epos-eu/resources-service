@@ -2,9 +2,8 @@ package org.epos.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.epos.api.clienthelpers.model.MonitoringBean;
-import org.epos.configuration.repositories.CacheDataRepository;
-import org.epos.router_framework.types.ServiceType;
+import org.epos.api.beans.MonitoringBean;
+import org.epos.api.core.MonitoringGeneration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -26,20 +25,17 @@ public class MonitoringApiController extends ApiController implements Monitoring
 
 	private final HttpServletRequest request;
 
-    private final CacheDataRepository cacheDataRepository;
 
 	@org.springframework.beans.factory.annotation.Autowired
-	public MonitoringApiController(ObjectMapper objectMapper, HttpServletRequest request, CacheDataRepository cacheDataRepository) {
+	public MonitoringApiController(ObjectMapper objectMapper, HttpServletRequest request) {
 		super(request);
 		this.objectMapper = objectMapper;
 		this.request = request;
-		this.cacheDataRepository = cacheDataRepository;
 	}
 	
 	@Override
 	public ResponseEntity<List<MonitoringBean>> monitoringUsingGet() {
 	        
-		Map<String,Object> requestParameters = new HashMap<>();
-		return standardRequest(ServiceType.METADATA, requestParameters, cacheDataRepository);
+		return standardRequest("MONITORING", null);
 	}
 }
