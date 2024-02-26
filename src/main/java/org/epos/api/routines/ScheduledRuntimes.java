@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
+import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.core.ZabbixExecutor;
 import org.epos.api.facets.Facets;
 import org.epos.api.utility.Utils;
@@ -23,9 +24,9 @@ import com.google.gson.JsonObject;
 public class ScheduledRuntimes {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ScheduledRuntimes.class);
-	
+
 	@PostConstruct
-    public void onStartup() {
+	public void onStartup() {
 		LOGGER.info("[Resources Service Startup] -----------------------------------------------");
 		LOGGER.info("[StartUp Task - Monitoring] Updating monitoring information");
 		zabbixUpdater();
@@ -34,47 +35,49 @@ public class ScheduledRuntimes {
 		facetsUpdater();
 		LOGGER.info("[StartUp Task - Monitoring] Done");
 		LOGGER.info("[Resources Service Startup Completed] -----------------------------------------------");
-    }
+	}
 
 	@Scheduled(fixedRate = 60000, initialDelay = 0)
 	@Async
 	public void zabbixUpdater() {
-		LOGGER.info("[Scheduled Task - Monitoring] Updating monitoring information");
-		JsonObject hostResults = new JsonObject();
-		String auth;
-		try {
-			auth = ZabbixExecutor.auth();
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-			//String items = ZabbixExecutor.getItems(auth);
-			ArrayList<String> listOfIds = new ArrayList<String>();
-			Utils.gson.fromJson(ZabbixExecutor.getProblems(auth), JsonObject.class).get("result").getAsJsonArray()
-			.forEach(e->listOfIds.add(getSubString(e.getAsJsonObject().get("name").getAsString(),'"','"')));
+		if(EnvironmentVariables.MONITORING.equals("true")) {
+			LOGGER.info("[Scheduled Task - Monitoring] Updating monitoring information");
+			JsonObject hostResults = new JsonObject();
+			String auth;
+			try {
+				auth = ZabbixExecutor.auth();
+				DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+				//String items = ZabbixExecutor.getItems(auth);
+				ArrayList<String> listOfIds = new ArrayList<String>();
+				Utils.gson.fromJson(ZabbixExecutor.getProblems(auth), JsonObject.class).get("result").getAsJsonArray()
+				.forEach(e->listOfIds.add(getSubString(e.getAsJsonObject().get("name").getAsString(),'"','"')));
 
-			for(JsonElement item : Utils.gson.fromJson(ZabbixExecutor.getItems(auth), JsonObject.class).get("result").getAsJsonArray()) {
-				if(!item.getAsJsonObject().get("name").getAsString().contains("EPOS ICS-C")) {
-					JsonObject singleResult = new JsonObject();
+				for(JsonElement item : Utils.gson.fromJson(ZabbixExecutor.getItems(auth), JsonObject.class).get("result").getAsJsonArray()) {
+					if(!item.getAsJsonObject().get("name").getAsString().contains("EPOS ICS-C")) {
+						JsonObject singleResult = new JsonObject();
 
-					String id =  StringUtils.substringBetween(item.getAsJsonObject().get("key_").getAsString(), "[", "]");
-					singleResult.addProperty("name", item.getAsJsonObject().get("name").getAsString());
-					singleResult.addProperty("itemid", item.getAsJsonObject().get("itemid").getAsString());
-					singleResult.addProperty("key_", item.getAsJsonObject().get("key_").getAsString());
-					singleResult.addProperty("lastclock",item.getAsJsonObject().get("lastclock").getAsString());
-					singleResult.addProperty("lastvalue",item.getAsJsonObject().get("lastvalue").getAsString());
-					singleResult.addProperty("id", id);
-					singleResult.addProperty("status", (!listOfIds.contains(id))? 1 : 2);
-					singleResult.addProperty("timestamp",df.format(new Date(item.getAsJsonObject().get("lastclock").getAsLong()*1000)).replace(" ", "T")+"Z");
+						String id =  StringUtils.substringBetween(item.getAsJsonObject().get("key_").getAsString(), "[", "]");
+						singleResult.addProperty("name", item.getAsJsonObject().get("name").getAsString());
+						singleResult.addProperty("itemid", item.getAsJsonObject().get("itemid").getAsString());
+						singleResult.addProperty("key_", item.getAsJsonObject().get("key_").getAsString());
+						singleResult.addProperty("lastclock",item.getAsJsonObject().get("lastclock").getAsString());
+						singleResult.addProperty("lastvalue",item.getAsJsonObject().get("lastvalue").getAsString());
+						singleResult.addProperty("id", id);
+						singleResult.addProperty("status", (!listOfIds.contains(id))? 1 : 2);
+						singleResult.addProperty("timestamp",df.format(new Date(item.getAsJsonObject().get("lastclock").getAsLong()*1000)).replace(" ", "T")+"Z");
 
-					hostResults.add(id,singleResult);
+						hostResults.add(id,singleResult);
+					}
 				}
+				ZabbixExecutor.logout(auth);
+
+				ZabbixExecutor.getInstance().setHostResults(hostResults);
+
+			} catch (IOException | InterruptedException e) {
+				LOGGER.error(e.getLocalizedMessage());
 			}
-			ZabbixExecutor.logout(auth);
-
-			ZabbixExecutor.getInstance().setHostResults(hostResults);
-
-		} catch (IOException | InterruptedException e) {
-			LOGGER.error(e.getLocalizedMessage());
+			LOGGER.info("[Scheduled Task - Monitoring] Monitoring information successfully updated");
 		}
-		LOGGER.info("[Scheduled Task - Monitoring] Monitoring information successfully updated");
 	}
 
 	@Scheduled(fixedRate = 60000, initialDelay = 0)
@@ -92,7 +95,7 @@ public class ScheduledRuntimes {
 		}
 		LOGGER.info("[Scheduled Task - Facets] Facets successfully updated");
 	}
-	
+
 	private String getSubString(final String input, char characterStart, char characterEnd) {
 		if(input == null) {
 			return null;
