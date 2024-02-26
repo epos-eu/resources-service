@@ -14,6 +14,9 @@ import org.epos.library.geometries.Geometry;
 import org.epos.library.geometries.Point;
 import org.epos.library.geometries.PointCoordinates;
 import org.epos.library.geometries.Polygon;
+import org.epos.library.propertiestypes.PropertyDataKeys;
+import org.epos.library.propertiestypes.PropertyMapKeys;
+import org.epos.library.style.EposStyleItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,21 +102,27 @@ public class EquipmentsDetailsItemGenerationJPA {
 		for(Equipment equipment : equipmentList) {
 
 			Feature feature = new Feature();
+			
+			List<String> types = Optional.ofNullable(Optional.ofNullable(categoriesFromDB
+					.stream()
+					.filter(cat -> cat.getUid().equals(equipment.getType())).map(EDMCategory::getName).collect(Collectors.toList())).get()).orElse(null);
+			
+			List<String> categories = Optional.ofNullable(equipment.getCategory()).orElse(null);
 
-			feature.addSimpleProperty("Name", Optional.ofNullable(equipment.getName()).orElse(""));
-			feature.addSimpleProperty("Description", Optional.ofNullable(equipment.getDescription()).orElse(""));
+			feature.addSimpleProperty("Name", Optional.ofNullable(equipment.getName()).orElse(null));
+			feature.addSimpleProperty("Description", Optional.ofNullable(equipment.getDescription()).orElse(null));
 			feature.addSimpleProperty("Type", Optional.ofNullable(Optional.ofNullable(categoriesFromDB
 					.stream()
-					.filter(cat -> cat.getUid().equals(equipment.getType())).map(EDMCategory::getName).collect(Collectors.toList())).get().toString()).orElse(""));
-			feature.addSimpleProperty("Category", Optional.ofNullable(equipment.getCategory().toString()).orElse(""));
-			feature.addSimpleProperty("Dynamic range", Optional.ofNullable(equipment.getDynamicRange()).orElse(""));
-			feature.addSimpleProperty("Filter", Optional.ofNullable(equipment.getFilter()).orElse(""));
-			feature.addSimpleProperty("Manufacturer", Optional.ofNullable(equipment.getManufacturer() != null ? equipment.getManufacturer().getUid() : "").orElse(""));
-			feature.addSimpleProperty("Orientation", Optional.ofNullable(equipment.getOrientation()).orElse(""));
-			feature.addSimpleProperty("Page url", Optional.ofNullable(equipment.getPageURL()).orElse(""));
-			feature.addSimpleProperty("Resolution", Optional.ofNullable(equipment.getResolution()).orElse(""));
-			feature.addSimpleProperty("Sample period", Optional.ofNullable(equipment.getSamplePeriod()).orElse(""));
-			feature.addSimpleProperty("Serial number", Optional.ofNullable(equipment.getSerialNumber()).orElse(""));
+					.filter(cat -> cat.getUid().equals(equipment.getType())).map(EDMCategory::getName).collect(Collectors.toList())).get().toString()).orElse(null));
+			feature.addSimpleProperty("Category", Optional.ofNullable(equipment.getCategory().toString()).orElse(null));
+			feature.addSimpleProperty("Dynamic range", Optional.ofNullable(equipment.getDynamicRange()).orElse(null));
+			feature.addSimpleProperty("Filter", Optional.ofNullable(equipment.getFilter()).orElse(null));
+			feature.addSimpleProperty("Manufacturer", Optional.ofNullable(equipment.getManufacturer() != null ? equipment.getManufacturer().getUid() : null).orElse(null));
+			feature.addSimpleProperty("Orientation", Optional.ofNullable(equipment.getOrientation()).orElse(null));
+			feature.addSimpleProperty("Page url", Optional.ofNullable(equipment.getPageURL()).orElse(null));
+			feature.addSimpleProperty("Resolution", Optional.ofNullable(equipment.getResolution()).orElse(null));
+			feature.addSimpleProperty("Sample period", Optional.ofNullable(equipment.getSamplePeriod()).orElse(null));
+			feature.addSimpleProperty("Serial number", Optional.ofNullable(equipment.getSerialNumber()).orElse(null));
 			
 			for(Location loc : equipment.getSpatialExtent()) {
 				String location = loc.getLocation();
@@ -149,7 +158,23 @@ public class EquipmentsDetailsItemGenerationJPA {
 				}
 				feature.setGeometry(geometry);
 			}
-
+			List<Object> values = new ArrayList<Object>();
+			values.add("Name");
+			values.add("Description");
+			values.add("Type");
+			values.add("Category");
+			values.add("Dynamic range");
+			values.add("Filter");
+			values.add("Manufacturer");
+			values.add("Orientation");
+			values.add("Page url");
+			values.add("Resolution");
+			values.add("Sample period");
+			values.add("Serial number");
+			PropertyDataKeys pdk = new PropertyDataKeys(values);
+			PropertyMapKeys pmk = new PropertyMapKeys(values);
+			feature.addPropertyFromPropertyObject(pdk);
+			feature.addPropertyFromPropertyObject(pmk);
 			geojson.addFeature(feature);
 		}
 
