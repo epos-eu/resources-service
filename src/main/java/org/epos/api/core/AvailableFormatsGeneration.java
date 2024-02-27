@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 import org.epos.api.beans.AvailableFormat;
 import org.epos.api.enums.AvailableFormatType;
 import org.epos.eposdatamodel.Parameter;
@@ -14,7 +15,7 @@ public class AvailableFormatsGeneration {
 	private static final String API_PATH_EXECUTE  = EnvironmentVariables.API_CONTEXT+"/execute/";
 	private static final String API_PATH_EXECUTE_OGC  = EnvironmentVariables.API_CONTEXT+"/ogcexecute/";
 	private static final String API_FORMAT = "?format=";
-
+	
 	public static List<AvailableFormat> generate(EDMDistribution distribution) {
 
 		List<AvailableFormat> formats = new ArrayList<>();
@@ -26,7 +27,7 @@ public class AvailableFormatsGeneration {
 					for (EDMMapping map : op.getMappingsByInstanceId() != null ? op.getMappingsByInstanceId() : new ArrayList<EDMMapping>()) {
 						if (map.getProperty() != null && map.getProperty().contains("encodingFormat")) {
 							for (String pv : map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList())) {
-								if (pv.equals("image/png")) {
+								if (pv.startsWith("image/")) {
 									formats.add(new AvailableFormat.AvailableFormatBuilder()
 											.originalFormat(pv)
 											.format("application/vnd.ogc.wms_xml")
@@ -55,9 +56,9 @@ public class AvailableFormatsGeneration {
 											.build());
 								} else if (
 										((pv.toLowerCase().contains("geojson") || pv.toLowerCase().contains("geo+json") || pv.toLowerCase().contains("geo-json")) 
-										|| (pv.toLowerCase().contains("epos.table.geo+json") || pv.toLowerCase().contains("epos.map.geo+json")))
+												|| (pv.toLowerCase().contains("epos.table.geo+json") || pv.toLowerCase().contains("epos.map.geo+json")))
 										&& op.getSoftwareapplicationOperationsByInstanceId().stream().map(EDMSoftwareapplicationOperation::getSoftwareapplicationByInstanceSoftwareapplicationId).collect(Collectors.toList()).isEmpty()
-									) {
+										) {
 									formats.add(new AvailableFormat.AvailableFormatBuilder()
 											.originalFormat(pv)
 											.format("application/epos.geo+json")
