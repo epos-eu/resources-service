@@ -48,6 +48,8 @@ public class FacilityDetailsItemGenerationJPA {
 		List<EDMFacility> facilitySelectedList = getFromDB(em, EDMFacility.class,
 				"facility.findAllByMetaId",
 				"METAID", parameters.get("id"));
+		List<EDMCategory> categoriesFromDB = getFromDB(em, EDMCategory.class, "EDMCategory.findAll");
+		List<EDMOrganization> organizationForOwners  = getFromDB(em, EDMOrganization.class, "organization.findAllByState", "STATE", "PUBLISHED");
 
 		if (facilitySelectedList.stream().noneMatch(facSelected -> facSelected.getState().equals("PUBLISHED")))
 			return null;
@@ -88,18 +90,48 @@ public class FacilityDetailsItemGenerationJPA {
 			keywords.removeAll(Collections.singleton(null));
 			keywords.removeAll(Collections.singleton(""));
 			facility.setKeywords(new ArrayList<>(keywords));
+			
 
+			// Facility Types
+			List<EDMCategory> type = categoriesFromDB
+					.stream()
+					.filter(cat -> cat.getUid().equals(facilitySelected.getType())).collect(Collectors.toList());
+
+			
+			facility.setType(type.get(0).getName());
+			
+			
 			if (facilitySelected.getFacilitySpatialsByInstanceId() != null) {
 				for (EDMFacilitySpatial s : facilitySelected.getFacilitySpatialsByInstanceId())
 					facility.getSpatial().addPaths(SpatialInformation.doSpatial(s.getLocation()), SpatialInformation.checkPoint(s.getLocation()));
 			}
 
-
-			if (facilitySelected.getEdmEntityIdByOwner() != null) {
-				List<DataServiceProvider> dataProviders = DataServiceProviderGeneration.getProviders(List.of(facilitySelected.getEdmEntityIdByOwner()));
-				facility.setFacilityProvider(dataProviders);
+			Set<EDMEdmEntityId> organizationsEntityIds = new HashSet<>();
+			
+			if(facilitySelected.getEquipmentFacilitiesByInstanceId()!=null) {
+				for(EDMEquipmentFacility item : facilitySelected.getEquipmentFacilitiesByInstanceId()) {
+					EDMEquipment own = item.getEquipmentByInstanceEquipmentId();
+					
+					organizationForOwners.stream()
+					.map(EDMOrganization::getOwnsByInstanceId)
+					.filter(Objects::nonNull)
+					.forEach(organizationowner->{
+						
+						organizationowner.stream()
+						.filter(edmEntity -> edmEntity.getEntityMetaId().equals(own.getMetaId()))
+						.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
+						.map(EDMOrganization::getEdmEntityIdByMetaId)
+						.filter(Objects::nonNull)
+						.collect(Collectors.toList())
+						.forEach(organizationsEntityIds::add);
+						
+					});
+				}
 			}
-
+			
+			facility.setFacilityProvider(DataServiceProviderGeneration.getProviders(new ArrayList<EDMEdmEntityId>(organizationsEntityIds)));
+			
+			
 			facility.setAvailableFormats(List.of(new AvailableFormat.AvailableFormatBuilder()
 					.originalFormat("application/epos.geo+json")
 					.format("application/epos.geo+json")
