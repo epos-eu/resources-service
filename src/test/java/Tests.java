@@ -6,6 +6,7 @@ import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.core.ZabbixExecutor;
 import org.epos.api.core.facilities.EquipmentsDetailsItemGenerationJPA;
 import org.epos.api.core.facilities.FacilityDetailsItemGenerationJPA;
+import org.epos.api.core.facilities.FacilitySearchGenerationJPA;
 import org.epos.api.core.organizations.OrganisationsGeneration;
 import org.epos.api.facets.Facets;
 import com.google.gson.Gson;
@@ -26,11 +27,11 @@ public class Tests {
 		}
 		
 		Map<String, Object> headers = new HashMap<String, Object>();
-		headers.put("id", "ac205459-f386-442a-9bff-6c81b92ad2e9");
+		headers.put("organisations", "897f2233-709e-4b47-8dda-9ac4e294979f");
 		//headers.put("format", "application/epos.geo+json");
 		
 		//FacilityDetailsItemGenerationJPA.generate(headers);
-		System.out.println(gson.toJsonTree(FacilityDetailsItemGenerationJPA.generate(headers)));
+		System.out.println(gson.toJsonTree(FacilitySearchGenerationJPA.generate(headers)));
 
 		//EntityManager em = new DBService().getEntityManager();
 		//List<EDMFacility> facilities  = getFromDB(em, EDMFacility.class, "facility.findAllByState", "STATE", "PUBLISHED");

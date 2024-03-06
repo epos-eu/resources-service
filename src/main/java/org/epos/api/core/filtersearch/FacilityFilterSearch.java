@@ -154,25 +154,20 @@ public class FacilityFilterSearch {
 
 				List<EDMEdmEntityId> organizationsEntityIds = new ArrayList<>();
 
-				
-				if(fac.getEquipmentFacilitiesByInstanceId()!=null) {
-					for(EDMEquipmentFacility item : fac.getEquipmentFacilitiesByInstanceId()) {
-						EDMEquipment own = item.getEquipmentByInstanceEquipmentId();
-						organizationForOwners.stream()
-						.map(EDMOrganization::getOwnsByInstanceId)
-						.filter(Objects::nonNull)
-						.forEach(organizationowner->{
-							organizationowner.stream()
-							.filter(edmEntity -> edmEntity.getEntityMetaId().equals(own.getMetaId()))
-							.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
-							.map(EDMOrganization::getEdmEntityIdByMetaId)
-							.filter(Objects::nonNull)
-							.collect(Collectors.toList())
-							.forEach(organizationsEntityIds::add);
-							
-						});
-					}
-				}
+				organizationForOwners.stream()
+				.map(EDMOrganization::getOwnsByInstanceId)
+				.filter(Objects::nonNull)
+				.forEach(organizationowner->{
+					organizationowner.stream()
+					.filter(edmEntity -> edmEntity.getEntityMetaId().equals(fac.getMetaId()))
+					.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
+					.map(EDMOrganization::getEdmEntityIdByMetaId)
+					.filter(Objects::nonNull)
+					.collect(Collectors.toList())
+					.forEach(organizationsEntityIds::add);
+
+				});
+
 
 				List<DataServiceProvider> providers = new ArrayList<DataServiceProvider>();
 				providers.addAll(DataServiceProviderGeneration.getProviders(organizationsEntityIds));
@@ -200,7 +195,7 @@ public class FacilityFilterSearch {
 		return facilityList;
 	}
 
-	
+
 	private static List<EDMFacility> filterFacilityByKeywords(List<EDMFacility> facilityList, Map<String,Object> parameters) {
 		if(parameters.containsKey("keywords")) {
 			ArrayList<EDMFacility> tempFacilityList = new ArrayList<>();
