@@ -102,12 +102,6 @@ public class EquipmentsDetailsItemGenerationJPA {
 		for(Equipment equipment : equipmentList) {
 
 			Feature feature = new Feature();
-			
-			List<String> types = Optional.ofNullable(Optional.ofNullable(categoriesFromDB
-					.stream()
-					.filter(cat -> cat.getUid().equals(equipment.getType())).map(EDMCategory::getName).collect(Collectors.toList())).get()).orElse(null);
-			
-			List<String> categories = Optional.ofNullable(equipment.getCategory()).orElse(null);
 
 			feature.addSimpleProperty("Name", Optional.ofNullable(equipment.getName()).orElse(null));
 			feature.addSimpleProperty("Description", Optional.ofNullable(equipment.getDescription()).orElse(null));

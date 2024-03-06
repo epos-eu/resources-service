@@ -5,35 +5,32 @@ import java.util.Map;
 import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.core.ZabbixExecutor;
 import org.epos.api.core.facilities.EquipmentsDetailsItemGenerationJPA;
+import org.epos.api.core.facilities.FacilityDetailsItemGenerationJPA;
 import org.epos.api.core.organizations.OrganisationsGeneration;
 import org.epos.api.facets.Facets;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 public class Tests {
 
 	public static void main(String[] args) {
 		
 		Gson gson = new Gson();
-		
-		Facets.getInstance();
-		if(EnvironmentVariables.MONITORING.equals("true")) {
-			ZabbixExecutor.getInstance();
-		}
-		
-		Map<String, Object> headers = new HashMap<String, Object>();
-		headers.put("type", "dataproviders,serviceproviders");
-		headers.put("country", "IT");
-		headers.put("q", "Istituto");
-		//headers.put("format", "application/epos.geo+json");
-		
+		JsonObject facetsFromDatabase;
 		try {
-			System.out.println(Facets.getInstance().generateFacetsFromDatabase());
+			facetsFromDatabase = Facets.getInstance().generateFacetsFromDatabase();
+			Facets.getInstance().setFacetsFromDatabase(facetsFromDatabase);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		OrganisationsGeneration.generate(headers);
-		//System.out.println(gson.toJsonTree(OrganisationsGeneration.generate(headers)));
+		
+		Map<String, Object> headers = new HashMap<String, Object>();
+		headers.put("id", "ac205459-f386-442a-9bff-6c81b92ad2e9");
+		//headers.put("format", "application/epos.geo+json");
+		
+		//FacilityDetailsItemGenerationJPA.generate(headers);
+		System.out.println(gson.toJsonTree(FacilityDetailsItemGenerationJPA.generate(headers)));
 
 		//EntityManager em = new DBService().getEntityManager();
 		//List<EDMFacility> facilities  = getFromDB(em, EDMFacility.class, "facility.findAllByState", "STATE", "PUBLISHED");

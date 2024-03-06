@@ -90,48 +90,40 @@ public class FacilityDetailsItemGenerationJPA {
 			keywords.removeAll(Collections.singleton(null));
 			keywords.removeAll(Collections.singleton(""));
 			facility.setKeywords(new ArrayList<>(keywords));
-			
+
 
 			// Facility Types
 			List<EDMCategory> type = categoriesFromDB
 					.stream()
 					.filter(cat -> cat.getUid().equals(facilitySelected.getType())).collect(Collectors.toList());
 
-			
+
 			facility.setType(type.get(0).getName());
-			
-			
+
+
 			if (facilitySelected.getFacilitySpatialsByInstanceId() != null) {
 				for (EDMFacilitySpatial s : facilitySelected.getFacilitySpatialsByInstanceId())
 					facility.getSpatial().addPaths(SpatialInformation.doSpatial(s.getLocation()), SpatialInformation.checkPoint(s.getLocation()));
 			}
 
 			Set<EDMEdmEntityId> organizationsEntityIds = new HashSet<>();
-			
-			if(facilitySelected.getEquipmentFacilitiesByInstanceId()!=null) {
-				for(EDMEquipmentFacility item : facilitySelected.getEquipmentFacilitiesByInstanceId()) {
-					EDMEquipment own = item.getEquipmentByInstanceEquipmentId();
-					
-					organizationForOwners.stream()
-					.map(EDMOrganization::getOwnsByInstanceId)
-					.filter(Objects::nonNull)
-					.forEach(organizationowner->{
-						
-						organizationowner.stream()
-						.filter(edmEntity -> edmEntity.getEntityMetaId().equals(own.getMetaId()))
-						.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
-						.map(EDMOrganization::getEdmEntityIdByMetaId)
-						.filter(Objects::nonNull)
-						.collect(Collectors.toList())
-						.forEach(organizationsEntityIds::add);
-						
-					});
-				}
-			}
-			
+
+			organizationForOwners.stream()
+			.map(EDMOrganization::getOwnsByInstanceId)
+			.filter(Objects::nonNull)
+			.forEach(organizationowner->{organizationowner.stream()
+				.filter(edmEntity -> edmEntity.getEntityMetaId().equals(facilitySelected.getMetaId()))
+				.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
+				.map(EDMOrganization::getEdmEntityIdByMetaId)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList())
+				.forEach(organizationsEntityIds::add);
+
+			});
+
+
 			facility.setDataProvider(DataServiceProviderGeneration.getProviders(new ArrayList<EDMEdmEntityId>(organizationsEntityIds)));
-			
-			
+
 			facility.setAvailableFormats(List.of(new AvailableFormat.AvailableFormatBuilder()
 					.originalFormat("application/epos.geo+json")
 					.format("application/epos.geo+json")
@@ -155,6 +147,7 @@ public class FacilityDetailsItemGenerationJPA {
 				}
 
 			}
+
 
 			List<String> categoryList = facilitySelected.getFacilityCategoriesByInstanceId().stream()
 					.map(EDMFacilityCategory::getCategoryByCategoryId)
@@ -193,10 +186,10 @@ public class FacilityDetailsItemGenerationJPA {
 	public static FeaturesCollection generateAsGeoJson(EDMFacility facilitySelected, String equipmenttypes) {
 
 		EntityManager em = new DBService().getEntityManager();
-		
+
 		List<EDMCategory> categoriesFromDB = getFromDB(em, EDMCategory.class, "EDMCategory.findAll");
 		em.close();
-		
+
 		FeaturesCollection geojson = new FeaturesCollection();
 
 		Feature feature = new Feature();
@@ -242,14 +235,14 @@ public class FacilityDetailsItemGenerationJPA {
 			}
 			feature.setGeometry(geometry);
 		}
-		
+
 		LinkObject link = new LinkObject();
-		
+
 		link.setAuthenticatedDownload(false);
 		link.setLabel("Equipments");
 		link.setType("application/epos.table.geo+json");
 		link.setHref(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getMetaId() + (equipmenttypes!=null? "&equipmenttypes="+equipmenttypes : ""));
-		
+
 		feature.addSimpleProperty("@epos_links",List.of(link));
 
 

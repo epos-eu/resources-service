@@ -75,33 +75,29 @@ public class FacilitySearchGenerationJPA {
 
 
 			if(facility.getEquipmentFacilitiesByInstanceId()!=null) {
-				for(EDMEquipmentFacility item : facility.getEquipmentFacilitiesByInstanceId()) {
-					EDMEquipment own = item.getEquipmentByInstanceEquipmentId();
-					
-					
-					organizationForOwners.stream()
-					.map(EDMOrganization::getOwnsByInstanceId)
+				organizationForOwners.stream()
+				.map(EDMOrganization::getOwnsByInstanceId)
+				.filter(Objects::nonNull)
+				.forEach(organizationowner->{
+					organizationowner.stream()
+					.filter(edmEntity -> edmEntity.getEntityMetaId().equals(facility.getMetaId()))
+					.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
+					.map(EDMOrganization::getOrganizationLegalnameByInstanceId)
+					.flatMap(Collection::stream)
+					.filter(legalname -> Objects.nonNull(legalname))
+					.map(EDMOrganizationLegalname::getLegalname)
+					.forEach(facetsFacilityProviders::add);
+
+					organizationowner.stream()
+					.filter(edmEntity -> edmEntity.getEntityMetaId().equals(facility.getMetaId()))
+					.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
+					.map(EDMOrganization::getEdmEntityIdByMetaId)
 					.filter(Objects::nonNull)
-					.forEach(organizationowner->{
-						organizationowner.stream()
-						.filter(edmEntity -> edmEntity.getEntityMetaId().equals(own.getMetaId()))
-						.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
-						.map(EDMOrganization::getOrganizationLegalnameByInstanceId)
-						.flatMap(Collection::stream)
-						.filter(legalname -> Objects.nonNull(legalname))
-						.map(EDMOrganizationLegalname::getLegalname)
-						.forEach(facetsFacilityProviders::add);
-						
-						organizationowner.stream()
-						.filter(edmEntity -> edmEntity.getEntityMetaId().equals(own.getMetaId()))
-						.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
-						.map(EDMOrganization::getEdmEntityIdByMetaId)
-						.filter(Objects::nonNull)
-						.collect(Collectors.toList())
-						.forEach(organizationsEntityIds::add);
-						
-					});
-				}
+					.collect(Collectors.toList())
+					.forEach(organizationsEntityIds::add);
+
+				});
+
 			}
 
 			DiscoveryItem discoveryItem = new DiscoveryItemBuilder(facility.getMetaId(),
@@ -131,10 +127,10 @@ public class FacilitySearchGenerationJPA {
 
 			// Facility Types
 			categoriesFromDB
-					.stream()
-					.filter(cat -> cat.getUid().equals(facility.getType()))
-					.forEach(facilityTypes::add);
-			
+			.stream()
+			.filter(cat -> cat.getUid().equals(facility.getType()))
+			.forEach(facilityTypes::add);
+
 
 			//Equipment types
 			if(facility.getEquipmentFacilitiesByInstanceId()!=null) {
@@ -184,7 +180,7 @@ public class FacilitySearchGenerationJPA {
 			node.setId(Base64.getEncoder().encodeToString(r.getBytes()));
 			keywordsNodes.addChild(node);
 		});
-		
+
 		List<DataServiceProvider> collection = DataServiceProviderGeneration.getProviders(new ArrayList<EDMEdmEntityId>(organizationsEntityIds));
 
 		NodeFilters organisationsNodes = new NodeFilters("organisations");
