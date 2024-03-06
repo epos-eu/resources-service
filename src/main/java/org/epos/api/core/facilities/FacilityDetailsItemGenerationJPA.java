@@ -129,7 +129,7 @@ public class FacilityDetailsItemGenerationJPA {
 				}
 			}
 			
-			facility.setFacilityProvider(DataServiceProviderGeneration.getProviders(new ArrayList<EDMEdmEntityId>(organizationsEntityIds)));
+			facility.setDataProvider(DataServiceProviderGeneration.getProviders(new ArrayList<EDMEdmEntityId>(organizationsEntityIds)));
 			
 			
 			facility.setAvailableFormats(List.of(new AvailableFormat.AvailableFormatBuilder()

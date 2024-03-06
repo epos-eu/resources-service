@@ -30,7 +30,7 @@ public class Facility implements Serializable {
 	//private String license;
 	//private String downloadURL;
 	private List<String> keywords;
-	private List<DataServiceProvider> facilityProvider;
+	private List<DataServiceProvider> dataProvider;
 	//private String frequencyUpdate;
 	private List<String> internalID;
 	//private List<String> DOI;
@@ -125,12 +125,12 @@ public class Facility implements Serializable {
 	public void setKeywords(List<String> keywords) {
 		this.keywords = keywords;
 	}
-	public List<DataServiceProvider> getFacilityProvider() {
-		if(facilityProvider==null) facilityProvider = new ArrayList<DataServiceProvider>();
-		return facilityProvider;
+	public List<DataServiceProvider> getDataProvider() {
+		if(dataProvider==null) dataProvider = new ArrayList<DataServiceProvider>();
+		return dataProvider;
 	}
-	public void setFacilityProvider(List<DataServiceProvider> facilityProvider) {
-		this.facilityProvider = facilityProvider;
+	public void setDataProvider(List<DataServiceProvider> dataProvider) {
+		this.dataProvider = dataProvider;
 	}
 	public List<String> getInternalID() {
 		if(internalID==null) internalID = new ArrayList<String>();
@@ -173,7 +173,7 @@ public class Facility implements Serializable {
 	@Override
 	public int hashCode() {
 		return Objects.hash(availableContactPoints, availableFormats, categories, description, errorMessage,
-				facilityProvider, href, id, internalID, keywords, operationid, serviceType, spatial, title, type, uid);
+				dataProvider, href, id, internalID, keywords, operationid, serviceType, spatial, title, type, uid);
 	}
 	@Override
 	public boolean equals(Object obj) {
@@ -188,7 +188,7 @@ public class Facility implements Serializable {
 				&& Objects.equals(availableFormats, other.availableFormats)
 				&& Objects.equals(categories, other.categories) && Objects.equals(description, other.description)
 				&& Objects.equals(errorMessage, other.errorMessage)
-				&& Objects.equals(facilityProvider, other.facilityProvider) && Objects.equals(href, other.href)
+				&& Objects.equals(dataProvider, other.dataProvider) && Objects.equals(href, other.href)
 				&& Objects.equals(id, other.id) && Objects.equals(internalID, other.internalID)
 				&& Objects.equals(keywords, other.keywords) && Objects.equals(operationid, other.operationid)
 				&& Objects.equals(serviceType, other.serviceType) && Objects.equals(spatial, other.spatial)
@@ -199,7 +199,7 @@ public class Facility implements Serializable {
 	public String toString() {
 		return "Facility [errorMessage=" + errorMessage + ", operationid=" + operationid + ", href=" + href
 				+ ", categories=" + categories + ", id=" + id + ", uid=" + uid + ", type=" + type + ", title=" + title
-				+ ", description=" + description + ", keywords=" + keywords + ", facilityProvider=" + facilityProvider
+				+ ", description=" + description + ", keywords=" + keywords + ", dataProvider=" + dataProvider
 				+ ", internalID=" + internalID + ", spatial=" + spatial + ", availableContactPoints="
 				+ availableContactPoints + ", availableFormats=" + availableFormats + ", serviceType=" + serviceType
 				+ "]";
