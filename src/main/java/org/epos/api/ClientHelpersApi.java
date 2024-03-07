@@ -166,8 +166,8 @@ public interface ClientHelpersApi {
         method = RequestMethod.GET)
     ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The equipment ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id, 
     		@Parameter(in = ParameterIn.QUERY, description = "The facility ID" ,schema=@Schema()) @Valid @RequestParam(value = "facilityid", required = false) String facilityid,
-			@Parameter(in = ParameterIn.QUERY, description = "equipmenttypes" ,schema=@Schema()) @Valid @RequestParam(value = "equipmenttypes", required = false) String equipmenttypes,
-    		@Parameter(in = ParameterIn.QUERY, description = "format {json/plain, application/epos.geo+json}" ,schema=@Schema()) @Valid @RequestParam(value = "format", required = false) String format);
+    		@Parameter(in = ParameterIn.QUERY, description = "format {json/plain, application/epos.geo+json}" ,schema=@Schema()) @Valid @RequestParam(value = "format", required = false) String format,
+    		@Parameter(in = ParameterIn.QUERY, description = "params" ,schema=@Schema()) @Valid @RequestParam(value = "params", required = false) String params);
 
 
 }

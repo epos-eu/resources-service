@@ -405,7 +405,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 	 */
 
 	@Override
-	public ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(String id, String facilityid, String equipmenttypes, String format) {
+	public ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(String id, String facilityid, String format, String params) {
 		if(id==null) id="all";
 		if(format==null) format="json/plain";
 		
@@ -431,15 +431,15 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			requestParameters.put("facilityid", facilityid);
 		}
 		
-		if(equipmenttypes!=null) {
+		if(params!=null) {
 			try {
-				equipmenttypes=java.net.URLDecoder.decode(equipmenttypes, StandardCharsets.UTF_8.name());
+				params=java.net.URLDecoder.decode(params, StandardCharsets.UTF_8.name());
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "equipmenttypes: "+ equipmenttypes, e); 
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "params: "+ params, e); 
 				Distribution errorResponse = new Distribution(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
-			requestParameters.put("equipmenttypes", equipmenttypes);
+			requestParameters.put("params", params);
 		}
 
 		try {

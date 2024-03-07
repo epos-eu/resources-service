@@ -1,5 +1,6 @@
 package org.epos.api.core.facilities;
 
+import org.epos.api.utility.Utils;
 import org.epos.eposdatamodel.Equipment;
 import org.epos.eposdatamodel.Facility;
 import org.epos.eposdatamodel.LinkedEntity;
@@ -19,6 +20,8 @@ import org.epos.library.propertiestypes.PropertyMapKeys;
 import org.epos.library.style.EposStyleItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.JsonObject;
 
 import javax.persistence.EntityManager;
 
@@ -52,30 +55,37 @@ public class EquipmentsDetailsItemGenerationJPA {
 			return null;
 
 		List<Equipment> equipmentList = null;
-		
+
 		if(parameters.containsKey("id") && !parameters.get("id").equals("all")) {
 			equipmentList = List.of(new EquipmentDBAPI().getByInstanceId(parameters.get("id").toString()));
 		}else {
 			equipmentList = new EquipmentDBAPI().getAllByState(State.PUBLISHED);
 		}
 
-		if(parameters.containsKey("equipmenttypes")) {
-			List<String> scienceDomainsParameters = List.of(parameters.get("equipmenttypes").toString().split(","));
-			List<Equipment> tempEquipmentList = new ArrayList<Equipment>();
-			for(Equipment item : equipmentList) {
-				List<String> facilityTypes = new ArrayList<String>();
-				categoriesFromDB
-				.stream()
-				.filter(cat -> cat.getUid().equals(item.getType()))
-				.map(EDMCategory::getId)
-				.forEach(facilityTypes::add);
-				if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){
-					tempEquipmentList.add(item);
+		if(parameters.containsKey("params")) {
+			JsonObject params = Utils.gson.fromJson(parameters.get("params").toString(), JsonObject.class);
+			if(params.has("equipmenttypes")) {
+				String equipmenttypes = params.get("equipmenttypes").getAsString();
+				List<String> scienceDomainsParameters = List.of(equipmenttypes.split(","));
+				List<Equipment> tempEquipmentList = new ArrayList<Equipment>();
+				for(Equipment item : equipmentList) {
+					List<String> facilityTypes = new ArrayList<String>();
+					categoriesFromDB
+					.stream()
+					.filter(cat -> cat.getUid().equals(item.getType()))
+					.map(EDMCategory::getId)
+					.forEach(facilityTypes::add);
+					if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){
+						tempEquipmentList.add(item);
+					}
 				}
+				equipmentList = tempEquipmentList;
+
 			}
-			equipmentList = tempEquipmentList;
 		}
-		
+
+
+
 		List<Equipment> returnList = new ArrayList<Equipment>();
 
 		for(Equipment equipment : equipmentList) {
@@ -117,7 +127,7 @@ public class EquipmentsDetailsItemGenerationJPA {
 			feature.addSimpleProperty("Resolution", Optional.ofNullable(equipment.getResolution()).orElse(null));
 			feature.addSimpleProperty("Sample period", Optional.ofNullable(equipment.getSamplePeriod()).orElse(null));
 			feature.addSimpleProperty("Serial number", Optional.ofNullable(equipment.getSerialNumber()).orElse(null));
-			
+
 			for(Location loc : equipment.getSpatialExtent()) {
 				String location = loc.getLocation();
 				boolean isPoint = location.contains("POINT");

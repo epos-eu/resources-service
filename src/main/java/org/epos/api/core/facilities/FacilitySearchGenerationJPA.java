@@ -109,7 +109,7 @@ public class FacilitySearchGenerationJPA {
 					.availableFormats(List.of(new AvailableFormat.AvailableFormatBuilder()
 							.originalFormat("application/epos.geo+json")
 							.format("application/epos.geo+json")
-							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facility.getMetaId() + (parameters.containsKey("equipmenttypes")? "&equipmenttypes="+parameters.get("equipmenttypes") : ""))
+							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facility.getMetaId())
 							.label("GEOJSON")
 							.description(AvailableFormatType.CONVERTED)
 							.build()))

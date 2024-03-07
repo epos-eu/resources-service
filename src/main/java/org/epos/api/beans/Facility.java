@@ -27,6 +27,7 @@ public class Facility implements Serializable {
 	private String type;
 	private String title;
 	private String description;
+	private List<String> page;
 	//private String license;
 	//private String downloadURL;
 	private List<String> keywords;
@@ -51,6 +52,10 @@ public class Facility implements Serializable {
 	//private String serviceEndpoint;
 	//private String serviceDocumentation;
 	private List<String> serviceType;
+
+	private List<ServiceParameter> serviceParameters;
+	
+	
 	//private String endpoint;
 	public String getErrorMessage() {
 		return errorMessage;
@@ -118,6 +123,13 @@ public class Facility implements Serializable {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	public List<String> getPage() {
+		if(page==null) page = new ArrayList<String>();
+		return page;
+	}
+	public void setPage(List<String> page) {
+		this.page = page;
+	}
 	public List<String> getKeywords() {
 		if(keywords==null) keywords = new ArrayList<String>();
 		return keywords;
@@ -169,6 +181,12 @@ public class Facility implements Serializable {
 	}
 	public static long getSerialversionuid() {
 		return serialVersionUID;
+	}
+	public List<ServiceParameter> getServiceParameters() {
+		return serviceParameters;
+	}
+	public void setServiceParameters(List<ServiceParameter> serviceParameters) {
+		this.serviceParameters = serviceParameters;
 	}
 	@Override
 	public int hashCode() {

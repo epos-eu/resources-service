@@ -7,6 +7,7 @@ import org.epos.api.beans.AvailableFormat;
 import org.epos.api.beans.DataServiceProvider;
 import org.epos.api.beans.DiscoveryItem;
 import org.epos.api.beans.Facility;
+import org.epos.api.beans.ServiceParameter;
 import org.epos.api.beans.SpatialInformation;
 import org.epos.api.enums.AvailableFormatType;
 import org.epos.api.facets.FacetsGeneration;
@@ -123,11 +124,23 @@ public class FacilityDetailsItemGenerationJPA {
 
 
 			facility.setDataProvider(DataServiceProviderGeneration.getProviders(new ArrayList<EDMEdmEntityId>(organizationsEntityIds)));
+			facilitySelected.getFacilityPageurlsByInstanceId().forEach(page->{
+				facility.getPage().add(page.getPageurl());
+			});
+
+			facility.setServiceParameters(new ArrayList<>());
+			ServiceParameter sp = new ServiceParameter();
+			sp.setName("equipmenttypes");
+			sp.setLabel("Equipment types");
+			sp.setRequired(false);
+			sp.setType("string");
+			sp.setMultipleValue("true");
+			facility.getServiceParameters().add(sp);
 
 			facility.setAvailableFormats(List.of(new AvailableFormat.AvailableFormatBuilder()
 					.originalFormat("application/epos.geo+json")
 					.format("application/epos.geo+json")
-					.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getMetaId() + (parameters.containsKey("equipmenttypes")? "&equipmenttypes="+parameters.get("equipmenttypes") : ""))
+					.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getMetaId())
 					.label("GEOJSON")
 					.description(AvailableFormatType.CONVERTED)
 					.build()));
@@ -165,7 +178,7 @@ public class FacilityDetailsItemGenerationJPA {
 					.availableFormats(List.of(new AvailableFormat.AvailableFormatBuilder()
 							.originalFormat("application/epos.geo+json")
 							.format("application/epos.geo+json")
-							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getMetaId() + (parameters.containsKey("equipmenttypes")? "&equipmenttypes="+parameters.get("equipmenttypes") : ""))
+							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getMetaId())
 							.label("GEOJSON")
 							.description(AvailableFormatType.CONVERTED)
 							.build()))
@@ -241,7 +254,7 @@ public class FacilityDetailsItemGenerationJPA {
 		link.setAuthenticatedDownload(false);
 		link.setLabel("Equipments");
 		link.setType("application/epos.table.geo+json");
-		link.setHref(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getMetaId() + (equipmenttypes!=null? "&equipmenttypes="+equipmenttypes : ""));
+		link.setHref(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getMetaId());
 
 		feature.addSimpleProperty("@epos_links",List.of(link));
 

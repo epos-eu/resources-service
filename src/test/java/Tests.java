@@ -27,11 +27,14 @@ public class Tests {
 		}
 		
 		Map<String, Object> headers = new HashMap<String, Object>();
-		headers.put("organisations", "897f2233-709e-4b47-8dda-9ac4e294979f");
+		headers.put("id", "all");
+		headers.put("facilityid", "a3da9c4a-f73f-41d2-b414-9a15d3078076");
+		headers.put("format", "application/epos.geo+json");
+		headers.put("params", "{\"equipmenttypes\":\"02a5bffb-9a4d-4a69-b0fb-9b15e831deb3\"}");
 		//headers.put("format", "application/epos.geo+json");
 		
 		//FacilityDetailsItemGenerationJPA.generate(headers);
-		System.out.println(gson.toJsonTree(FacilitySearchGenerationJPA.generate(headers)));
+		System.out.println(gson.toJsonTree(EquipmentsDetailsItemGenerationJPA.generate(headers)));
 
 		//EntityManager em = new DBService().getEntityManager();
 		//List<EDMFacility> facilities  = getFromDB(em, EDMFacility.class, "facility.findAllByState", "STATE", "PUBLISHED");
