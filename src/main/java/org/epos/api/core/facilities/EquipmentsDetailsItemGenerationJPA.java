@@ -73,7 +73,7 @@ public class EquipmentsDetailsItemGenerationJPA {
 					categoriesFromDB
 					.stream()
 					.filter(cat -> cat.getUid().equals(item.getType()))
-					.map(EDMCategory::getId)
+					.map(EDMCategory::getName)
 					.forEach(facilityTypes::add);
 					if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){
 						tempEquipmentList.add(item);
@@ -117,8 +117,8 @@ public class EquipmentsDetailsItemGenerationJPA {
 			feature.addSimpleProperty("Description", Optional.ofNullable(equipment.getDescription()).orElse(null));
 			feature.addSimpleProperty("Type", Optional.ofNullable(Optional.ofNullable(categoriesFromDB
 					.stream()
-					.filter(cat -> cat.getUid().equals(equipment.getType())).map(EDMCategory::getName).collect(Collectors.toList())).get().toString()).orElse(null));
-			feature.addSimpleProperty("Category", Optional.ofNullable(equipment.getCategory().toString()).orElse(null));
+					.filter(cat -> cat.getUid().equals(equipment.getType())).map(EDMCategory::getName).collect(Collectors.toList())).get()).orElse(null));
+			feature.addSimpleProperty("Category", Optional.ofNullable(equipment.getCategory()).orElse(null));
 			feature.addSimpleProperty("Dynamic range", Optional.ofNullable(equipment.getDynamicRange()).orElse(null));
 			feature.addSimpleProperty("Filter", Optional.ofNullable(equipment.getFilter()).orElse(null));
 			feature.addSimpleProperty("Manufacturer", Optional.ofNullable(equipment.getManufacturer() != null ? equipment.getManufacturer().getUid() : null).orElse(null));

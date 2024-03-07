@@ -128,10 +128,27 @@ public class FacilityDetailsItemGenerationJPA {
 				facility.getPage().add(page.getPageurl());
 			});
 
+			Set<EDMCategory> equipmentTypes = new HashSet<>();
+
+			//Equipment types
+			if(facilitySelected.getEquipmentFacilitiesByInstanceId()!=null) {
+				for(EDMEquipmentFacility item : facilitySelected.getEquipmentFacilitiesByInstanceId()) {
+					categoriesFromDB
+					.stream()
+					.filter(cat -> cat.getUid().equals(item.getEquipmentByInstanceEquipmentId().getType()))
+					.forEach(equipmentTypes::add);
+				}
+			}
+
 			facility.setServiceParameters(new ArrayList<>());
 			ServiceParameter sp = new ServiceParameter();
 			sp.setName("equipmenttypes");
 			sp.setLabel("Equipment types");
+			sp.setEnumValue(
+					equipmentTypes.size()>0 ?
+							equipmentTypes.stream().map(EDMCategory::getName).collect(Collectors.toList())
+							: new ArrayList<>()
+					);
 			sp.setRequired(false);
 			sp.setType("string");
 			sp.setMultipleValue("true");
