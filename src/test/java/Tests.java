@@ -28,9 +28,9 @@ public class Tests {
 		
 		Map<String, Object> headers = new HashMap<String, Object>();
 		headers.put("id", "all");
-		headers.put("facilityid", "a3da9c4a-f73f-41d2-b414-9a15d3078076");
+		headers.put("facilityid", "e181b188-e4d6-4c85-a4d1-f212fb253661");
 		headers.put("format", "application/epos.geo+json");
-		headers.put("params", "{\"equipmenttypes\":\"02a5bffb-9a4d-4a69-b0fb-9b15e831deb3\"}");
+		headers.put("params", "{\"equipmenttypes\":}");
 		//headers.put("format", "application/epos.geo+json");
 		
 		//FacilityDetailsItemGenerationJPA.generate(headers);

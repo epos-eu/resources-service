@@ -63,24 +63,30 @@ public class EquipmentsDetailsItemGenerationJPA {
 		}
 
 		if(parameters.containsKey("params")) {
+			try {
 			JsonObject params = Utils.gson.fromJson(parameters.get("params").toString(), JsonObject.class);
 			if(params.has("equipmenttypes")) {
 				String equipmenttypes = params.get("equipmenttypes").getAsString();
-				List<String> scienceDomainsParameters = List.of(equipmenttypes.split(","));
-				List<Equipment> tempEquipmentList = new ArrayList<Equipment>();
-				for(Equipment item : equipmentList) {
-					List<String> facilityTypes = new ArrayList<String>();
-					categoriesFromDB
-					.stream()
-					.filter(cat -> cat.getUid().equals(item.getType()))
-					.map(EDMCategory::getName)
-					.forEach(facilityTypes::add);
-					if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){
-						tempEquipmentList.add(item);
+				if(!(equipmenttypes.isBlank() || equipmenttypes.isEmpty())){
+					System.out.println("Stil there");
+					List<String> scienceDomainsParameters = List.of(equipmenttypes.split(","));
+					List<Equipment> tempEquipmentList = new ArrayList<Equipment>();
+					for(Equipment item : equipmentList) {
+						List<String> facilityTypes = new ArrayList<String>();
+						categoriesFromDB
+						.stream()
+						.filter(cat -> cat.getUid().equals(item.getType()))
+						.map(EDMCategory::getName)
+						.forEach(facilityTypes::add);
+						if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){
+							tempEquipmentList.add(item);
+						}
 					}
+					equipmentList = tempEquipmentList;
 				}
-				equipmentList = tempEquipmentList;
-
+			}
+			}catch(Exception e) {
+				System.err.println("Not valid json, skip filter");
 			}
 		}
 
