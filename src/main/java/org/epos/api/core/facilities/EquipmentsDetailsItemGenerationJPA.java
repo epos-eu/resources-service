@@ -117,16 +117,6 @@ public class EquipmentsDetailsItemGenerationJPA {
 	public static FeaturesCollection generateAsGeoJson(EDMFacility facilitySelected, List<EDMCategory> categoriesFromDB, List<Equipment> equipmentList) {
 
 		FeaturesCollection geojson = new FeaturesCollection();
-		
-		EposStyleItem esi = new EposStyleItem("event");
-		EposStyleObject eso = new EposStyleObject();
-		Marker m = new FontAwesomeMarker("far fa-circle", false, false, Anchor.C);
-		eso.setMarker(m);
-		eso.setLabel("equipment");
-		esi.setStyleName(eso);
-		esi.setName("equipment");
-		geojson.addStyleItem(esi);
-		
 
 		for(Equipment equipment : equipmentList) {
 
@@ -147,8 +137,6 @@ public class EquipmentsDetailsItemGenerationJPA {
 			feature.addSimpleProperty("Sample period", Optional.ofNullable(equipment.getSamplePeriod()).orElse(null));
 			feature.addSimpleProperty("Serial number", Optional.ofNullable(equipment.getSerialNumber()).orElse(null));
 			
-			feature.addSimpleProperty("@epos_type","equipment");
-
 			for(Location loc : equipment.getSpatialExtent()) {
 				String location = loc.getLocation();
 				boolean isPoint = location.contains("POINT");
