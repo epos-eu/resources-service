@@ -128,7 +128,6 @@ public class EquipmentsDetailsItemGenerationJPA {
 		geojson.addStyleItem(esi);
 		
 
-
 		for(Equipment equipment : equipmentList) {
 
 			Feature feature = new Feature();
