@@ -27,12 +27,24 @@ public class AvailableFormatsGeneration {
 					for (EDMMapping map : op.getMappingsByInstanceId() != null ? op.getMappingsByInstanceId() : new ArrayList<EDMMapping>()) {
 						if (map.getProperty() != null && map.getProperty().contains("encodingFormat")) {
 							for (String pv : map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList())) {
-								if (pv.startsWith("image/")) {
+								if (pv.startsWith("image/") && (op.getTemplate().contains("service=WMS") || 
+										op.getMappingsByInstanceId().stream()
+										.anyMatch(e -> e.getVariable().equals("service") && (map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList()).contains("WMS") || e.getDefaultvalue().contains("WMS"))))) {
 									formats.add(new AvailableFormat.AvailableFormatBuilder()
 											.originalFormat(pv)
 											.format("application/vnd.ogc.wms_xml")
 											.href(EnvironmentVariables.API_HOST+ API_PATH_EXECUTE_OGC + distribution.getMetaId())
 											.label("WMS".toUpperCase())
+											.description(AvailableFormatType.ORIGINAL)
+											.build());
+								} else if (pv.startsWith("image/") && (op.getTemplate().contains("service=WMTS") || 
+										op.getMappingsByInstanceId().stream()
+										.anyMatch(e -> e.getVariable().equals("service") && (map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList()).contains("WMTS") || e.getDefaultvalue().contains("WMTS"))))) {
+									formats.add(new AvailableFormat.AvailableFormatBuilder()
+											.originalFormat(pv)
+											.format("application/vnd.ogc.wmts_xml")
+											.href(EnvironmentVariables.API_HOST+ API_PATH_EXECUTE_OGC + distribution.getMetaId())
+											.label("WMTS".toUpperCase())
 											.description(AvailableFormatType.ORIGINAL)
 											.build());
 								} else if (pv.equals("json") &&
