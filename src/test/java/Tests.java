@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.core.ZabbixExecutor;
+import org.epos.api.core.distributions.DistributionSearchGenerationJPA;
 import org.epos.api.core.facilities.EquipmentsDetailsItemGenerationJPA;
 import org.epos.api.core.facilities.FacilityDetailsItemGenerationJPA;
 import org.epos.api.core.facilities.FacilitySearchGenerationJPA;
@@ -27,14 +28,14 @@ public class Tests {
 		}
 		
 		Map<String, Object> headers = new HashMap<String, Object>();
-		headers.put("id", "all");
-		headers.put("facilityid", "e181b188-e4d6-4c85-a4d1-f212fb253661");
-		headers.put("format", "application/epos.geo+json");
-		headers.put("params", "{\"equipmenttypes\":}");
+		//headers.put("id", "all");
+		//headers.put("facilityid", "e181b188-e4d6-4c85-a4d1-f212fb253661");
+		//headers.put("format", "application/epos.geo+json");
+		//headers.put("params", "{\"equipmenttypes\":}");
 		//headers.put("format", "application/epos.geo+json");
 		
 		//FacilityDetailsItemGenerationJPA.generate(headers);
-		System.out.println(gson.toJsonTree(EquipmentsDetailsItemGenerationJPA.generate(headers)));
+		System.out.println(gson.toJsonTree(DistributionSearchGenerationJPA.generate(headers)));
 
 		//EntityManager em = new DBService().getEntityManager();
 		//List<EDMFacility> facilities  = getFromDB(em, EDMFacility.class, "facility.findAllByState", "STATE", "PUBLISHED");

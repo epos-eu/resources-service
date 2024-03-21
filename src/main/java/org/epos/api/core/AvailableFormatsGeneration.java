@@ -27,9 +27,9 @@ public class AvailableFormatsGeneration {
 					for (EDMMapping map : op.getMappingsByInstanceId() != null ? op.getMappingsByInstanceId() : new ArrayList<EDMMapping>()) {
 						if (map.getProperty() != null && map.getProperty().contains("encodingFormat")) {
 							for (String pv : map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList())) {
-								if (pv.startsWith("image/") && (op.getTemplate().contains("service=WMS") || 
+								if (pv.startsWith("image/") && (op.getTemplate().toLowerCase().contains("service=wms") || 
 										op.getMappingsByInstanceId().stream()
-										.anyMatch(e -> e.getVariable().equals("service") && (map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList()).contains("WMS") || e.getDefaultvalue().contains("WMS"))))) {
+										.anyMatch(e -> e.getVariable().toLowerCase().equals("service") && (map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList()).contains("WMS") || e.getDefaultvalue().toLowerCase().contains("wms"))))) {
 									formats.add(new AvailableFormat.AvailableFormatBuilder()
 											.originalFormat(pv)
 											.format("application/vnd.ogc.wms_xml")
@@ -37,9 +37,10 @@ public class AvailableFormatsGeneration {
 											.label("WMS".toUpperCase())
 											.description(AvailableFormatType.ORIGINAL)
 											.build());
-								} else if (pv.startsWith("image/") && (op.getTemplate().contains("service=WMTS") || 
+								} else if (pv.startsWith("image/") && (op.getTemplate().toLowerCase().contains("service=wmts") || 
 										op.getMappingsByInstanceId().stream()
-										.anyMatch(e -> e.getVariable().equals("service") && (map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList()).contains("WMTS") || e.getDefaultvalue().contains("WMTS"))))) {
+										.anyMatch(e -> e.getVariable().toLowerCase().equals("service") && (map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList()).contains("WMTS") || e.getDefaultvalue().toLowerCase().contains("wmts"))))) {
+									System.out.println("HELLO" + distribution.getUid());
 									formats.add(new AvailableFormat.AvailableFormatBuilder()
 											.originalFormat(pv)
 											.format("application/vnd.ogc.wmts_xml")
@@ -48,9 +49,9 @@ public class AvailableFormatsGeneration {
 											.description(AvailableFormatType.ORIGINAL)
 											.build());
 								} else if (pv.equals("json") &&
-										(op.getTemplate().contains("service=WFS") ||
+										(op.getTemplate().toLowerCase().contains("service=wfs") ||
 												op.getMappingsByInstanceId().stream()
-												.anyMatch(e -> e.getVariable().equals("service") && (map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList()).contains("WFS") || e.getDefaultvalue().contains("WFS"))))) {
+												.anyMatch(e -> e.getVariable().toLowerCase().equals("service") && (map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList()).contains("WFS") || e.getDefaultvalue().toLowerCase().contains("wfs"))))) {
 									formats.add(new AvailableFormat.AvailableFormatBuilder()
 											.originalFormat(pv)
 											.format("application/epos.geo+json")
