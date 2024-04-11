@@ -2,7 +2,7 @@ name: "mirror v2"
 on:
   push:
     branches:
-      - v2
+      - isogc
 
 jobs:
     mirror:
@@ -12,5 +12,5 @@ jobs:
             - run: |
                   git remote add remote-repo https://github:${{secrets.GITLAB}}@epos-ci.brgm.fr/epos/resources-service.git
                   git fetch --unshallow
-                  git push remote-repo v2
+                  git push remote-repo isogc
                   
