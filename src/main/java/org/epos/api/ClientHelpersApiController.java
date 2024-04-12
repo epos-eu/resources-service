@@ -70,7 +70,8 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
 		
-		Map<String,Object> requestParams = Map.of("id", id);
+		Map<String,Object> requestParams = new HashMap<>();
+		requestParams.put("id", id);
 		requestParams.put("extended", extended);
 
 		return standardRequest("DETAILS", requestParams);
