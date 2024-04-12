@@ -19,6 +19,7 @@ public class Distribution implements Serializable {
 	private String operationid;
 	
 	private String href;
+	private String hrefExtended;
 
 	private Node categories;
 	
@@ -360,6 +361,14 @@ public class Distribution implements Serializable {
 		this.href = href;
 	}
 	
+	public String getHrefExtended() {
+		return hrefExtended;
+	}
+
+	public void setHrefExtended(String hrefExtended) {
+		this.hrefExtended = hrefExtended;
+	}
+
 	public List<String> getScienceDomain() {
 		if(scienceDomain==null) scienceDomain = new ArrayList<String>();
 		return scienceDomain;

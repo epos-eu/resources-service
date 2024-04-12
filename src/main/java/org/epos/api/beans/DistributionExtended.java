@@ -5,8 +5,6 @@ import java.util.*;
 
 import org.epos.api.facets.Node;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
 public class DistributionExtended implements Serializable {
 
 	/**
@@ -17,6 +15,7 @@ public class DistributionExtended implements Serializable {
 	private String errorMessage;
 	
 	private String href;
+	private String hrefExtended;
 
 	private Node categories;
 	
@@ -160,6 +159,14 @@ public class DistributionExtended implements Serializable {
 		this.href = href;
 	}
 	
+	public String getHrefExtended() {
+		return hrefExtended;
+	}
+
+	public void setHrefExtended(String hrefExtended) {
+		this.hrefExtended = hrefExtended;
+	}
+
 	public List<String> getScienceDomain() {
 		if(scienceDomain==null) scienceDomain = new ArrayList<String>();
 		return scienceDomain;
