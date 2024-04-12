@@ -55,7 +55,8 @@ public interface ClientHelpersApi {
     @RequestMapping(value = "/resources/details/{instance_id}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The distribution ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id);
+    ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The distribution ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id,
+    		@Parameter(in = ParameterIn.QUERY, description = "extended payload" ,schema=@Schema()) @Valid @RequestParam(value = "extended", required = false) Boolean extended);
 
 
 	@Operation(summary = "search operation", description = "Search endpoint", tags={ "Resources Service" })

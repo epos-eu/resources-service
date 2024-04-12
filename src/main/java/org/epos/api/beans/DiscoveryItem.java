@@ -13,6 +13,7 @@ public class DiscoveryItem implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private String href;
+	private String hrefExtended;
 	private String id;
 	private String uid;
 	private transient String sha256id;
@@ -30,6 +31,7 @@ public class DiscoveryItem implements Serializable {
 
 	public DiscoveryItem(DiscoveryItemBuilder builder) {
 		this.href = builder.href;
+		this.hrefExtended = builder.hrefExtended;
 		this.id = builder.id;
 		this.uid = builder.uid;
 		this.sha256id = builder.sha256id;
@@ -50,6 +52,14 @@ public class DiscoveryItem implements Serializable {
 
 	public void setHref(String href) {
 		this.href = href;
+	}
+
+	public String getHrefExtended() {
+		return hrefExtended;
+	}
+
+	public void setHrefExtended(String hrefExtended) {
+		this.hrefExtended = hrefExtended;
 	}
 
 	public String getId() {
@@ -151,6 +161,7 @@ public class DiscoveryItem implements Serializable {
 	public static class DiscoveryItemBuilder{
 		
 		private String href;
+		private String hrefExtended;
 		private String id;
 		private String uid;
 		private transient String sha256id;
@@ -164,9 +175,10 @@ public class DiscoveryItem implements Serializable {
 		private String statusTimestamp;
 		private List<AvailableFormat> availableFormats;
 		
-		public DiscoveryItemBuilder(String id, String href) {
+		public DiscoveryItemBuilder(String id, String href, String hrefExtended) {
 			this.id = id;
 			this.href = href;
+			this.hrefExtended = hrefExtended;
 		}
 
 		public DiscoveryItemBuilder uid(String uid) {
@@ -231,7 +243,7 @@ public class DiscoveryItem implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(availableFormats, description, href, id, status, statusTimestamp, title, uid);
+		return Objects.hash(availableFormats, description, href, hrefExtended, id, status, statusTimestamp, title, uid);
 	}
 
 	@Override
@@ -245,22 +257,17 @@ public class DiscoveryItem implements Serializable {
 		DiscoveryItem other = (DiscoveryItem) obj;
 		return Objects.equals(availableFormats, other.availableFormats)
 				&& Objects.equals(description, other.description) && Objects.equals(href, other.href)
-				&& Objects.equals(id, other.id) && status == other.status
-				&& Objects.equals(statusTimestamp, other.statusTimestamp) && Objects.equals(title, other.title)
-				&& Objects.equals(uid, other.uid);
+				&& Objects.equals(hrefExtended, other.hrefExtended) && Objects.equals(id, other.id)
+				&& status == other.status && Objects.equals(statusTimestamp, other.statusTimestamp)
+				&& Objects.equals(title, other.title) && Objects.equals(uid, other.uid);
 	}
 
 	@Override
 	public String toString() {
-		return "DiscoveryItem [href=" + href + ", id=" + id + ", uid=" + uid + ", sha256id=" + sha256id
-				+ ", dataprovider=" + dataprovider + ", facilityprovider=" + facilityprovider + ", serviceprovider="
-				+ serviceprovider + ", categories=" + categories + ", title=" + title + ", description=" + description
-				+ ", status=" + status + ", statusTimestamp=" + statusTimestamp + ", availableFormats="
-				+ availableFormats + "]";
+		return "DiscoveryItem [href=" + href + ", hrefExtended=" + hrefExtended + ", id=" + id + ", uid=" + uid
+				+ ", title=" + title + ", description=" + description + ", status=" + status + ", statusTimestamp="
+				+ statusTimestamp + ", availableFormats=" + availableFormats + "]";
 	}
-	
-	
-	
-	
+
 	
 }
