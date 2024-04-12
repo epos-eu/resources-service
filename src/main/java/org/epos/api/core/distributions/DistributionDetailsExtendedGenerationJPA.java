@@ -127,6 +127,7 @@ public class DistributionDetailsExtendedGenerationJPA {
 
 		distribution.setFrequencyUpdate(Optional.ofNullable(dp.getAccrualperiodicity()).orElse(null));
 		distribution.setHref(EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getMetaId());
+		distribution.setHrefExtended(EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getMetaId()+"?extended=true");
 
 		Set<String> keywords = new HashSet<>(Arrays.stream(Optional.ofNullable(dp.getKeywords()).orElse("").split(",\t")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()));
 		if (ws != null)
