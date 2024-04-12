@@ -151,7 +151,8 @@ public class DistributionSearchGenerationJPA {
 						}
 
 						DiscoveryItem discoveryItem = new DiscoveryItemBuilder(distribution.getMetaId(),
-								EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.getMetaId())
+								EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.getMetaId(),
+								EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.getMetaId()+"?extended=true")
 								.uid(distribution.getUid())
 								.title(distribution.getDistributionTitlesByInstanceId()
 										.stream()

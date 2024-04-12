@@ -19,6 +19,8 @@ public class AvailableFormatsGeneration {
 	public static List<AvailableFormat> generate(EDMDistribution distribution) {
 
 		List<AvailableFormat> formats = new ArrayList<>();
+		
+		boolean isogcformat = false;
 		//available formats
 		EDMWebservice webserviceByAccessService = distribution.getWebserviceByAccessService();
 		if(webserviceByAccessService !=null && webserviceByAccessService.getSupportedOperationByInstanceId() != null) {
@@ -37,6 +39,7 @@ public class AvailableFormatsGeneration {
 											.label("WMS".toUpperCase())
 											.description(AvailableFormatType.ORIGINAL)
 											.build());
+									isogcformat = true;
 								} else if (pv.startsWith("image/") && (op.getTemplate().toLowerCase().contains("service=wmts") || 
 										op.getMappingsByInstanceId().stream()
 										.anyMatch(e -> e.getVariable().toLowerCase().equals("service") && (map.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList()).contains("WMTS") || e.getDefaultvalue().toLowerCase().contains("wmts"))))) {
@@ -48,6 +51,7 @@ public class AvailableFormatsGeneration {
 											.label("WMTS".toUpperCase())
 											.description(AvailableFormatType.ORIGINAL)
 											.build());
+									isogcformat = true;
 								} else if (pv.equals("json") &&
 										(op.getTemplate().toLowerCase().contains("service=wfs") ||
 												op.getMappingsByInstanceId().stream()
@@ -112,7 +116,7 @@ public class AvailableFormatsGeneration {
 							}
 						}
 					}
-					if (op.getSoftwareapplicationOperationsByInstanceId() != null) {
+					if (op.getSoftwareapplicationOperationsByInstanceId() != null && !isogcformat) {
 						for (EDMSoftwareapplication s : op.getSoftwareapplicationOperationsByInstanceId().stream().map(EDMSoftwareapplicationOperation::getSoftwareapplicationByInstanceSoftwareapplicationId).collect(Collectors.toList())) {
 							if (s.getSoftwareapplicationParametersByInstanceId() != null) {
 								ArrayList<Parameter> parameterList = new ArrayList<>();

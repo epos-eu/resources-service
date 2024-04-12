@@ -51,10 +51,15 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 	 * 
 	 */
 
-	public ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The distribution ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id){
+	public ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The distribution ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id,
+    		@Parameter(in = ParameterIn.QUERY, description = "extended payload" ,schema=@Schema()) @Valid @RequestParam(value = "extended", required = false) Boolean extended){
 
 		if(id==null) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		
+		if(extended==null) {
+			extended = false;
 		}
 
 		try {
@@ -64,7 +69,9 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			Distribution errorResponse = new Distribution(e.getLocalizedMessage());
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
+		
 		Map<String,Object> requestParams = Map.of("id", id);
+		requestParams.put("extended", extended);
 
 		return standardRequest("DETAILS", requestParams);
 	}

@@ -101,7 +101,8 @@ public class FacilitySearchGenerationJPA {
 			}
 
 			DiscoveryItem discoveryItem = new DiscoveryItemBuilder(facility.getMetaId(),
-					EnvironmentVariables.API_HOST + API_PATH_DETAILS + facility.getMetaId())
+					EnvironmentVariables.API_HOST + API_PATH_DETAILS + facility.getMetaId(),
+					null)
 					.uid(facility.getUid())
 					.title(facility.getTitle())
 					.description(facility.getDescription())
