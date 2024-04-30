@@ -248,6 +248,13 @@ public class FacilityFilterSearch {
 								if (dataproductKeywords.contains(q)) qSMap.put(q, Boolean.TRUE);
 							}
 						}
+						
+						if(Objects.nonNull(instanceWS.getServiceByInstanceServiceId().getUid())){
+							for (String q : qSMap.keySet()) {
+								if (instanceWS.getServiceByInstanceServiceId().getUid().contains(q)) qSMap.put(q, Boolean.TRUE);
+							}
+						}
+						
 					});
 				}
 
@@ -265,6 +272,12 @@ public class FacilityFilterSearch {
 						if (edmFacility.getDescription().toLowerCase().contains(q)) {
 							qSMap.put(q, Boolean.TRUE);
 						}
+					}
+				}
+				
+				if(Objects.nonNull(edmFacility.getUid())){
+					for (String q : qSMap.keySet()) {
+						if (edmFacility.getUid().contains(q)) qSMap.put(q, Boolean.TRUE);
 					}
 				}
 

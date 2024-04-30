@@ -50,6 +50,12 @@ public class OrganizationFilterSearch {
 						}
 					}
 				}
+				
+				if(Objects.nonNull(edmOrganisation.getUid())){
+					for (String q : qSMap.keySet()) {
+						if (edmOrganisation.getUid().contains(q)) qSMap.put(q, Boolean.TRUE);
+					}
+				}
 
 				//take a dataproduct onlly if every element of the freetext search is satisfied
 				if (qSMap.values().stream().allMatch(b -> b)) tempDatasetList.add(edmOrganisation);

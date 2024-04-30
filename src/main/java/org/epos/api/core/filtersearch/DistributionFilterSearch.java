@@ -302,6 +302,11 @@ public class DistributionFilterSearch {
 						if (dataproductKeywords.contains(q)) qSMap.put(q, Boolean.TRUE);
 					}
 				}
+				if(Objects.nonNull(edmDataproduct.getUid())){
+					for (String q : qSMap.keySet()) {
+						if (edmDataproduct.getUid().contains(q)) qSMap.put(q, Boolean.TRUE);
+					}
+				}
 
 
 				if (edmDataproduct.getIsDistributionsByInstanceId() != null && !edmDataproduct.getIsDistributionsByInstanceId().isEmpty()) {
@@ -320,6 +325,12 @@ public class DistributionFilterSearch {
 								}
 							}
 									);
+						}
+						
+						if(Objects.nonNull(edmDistribution.getUid())){
+							for (String q : qSMap.keySet()) {
+								if (edmDistribution.getUid().contains(q)) qSMap.put(q, Boolean.TRUE);
+							}
 						}
 
 						//distribution description
@@ -341,6 +352,12 @@ public class DistributionFilterSearch {
 						if (edmDistribution.getWebserviceByAccessService() != null) {
 							EDMWebservice edmWebservice = edmDistribution.getWebserviceByAccessService();
 
+							if(Objects.nonNull(edmWebservice.getUid())){
+								for (String q : qSMap.keySet()) {
+									if (edmWebservice.getUid().contains(q)) qSMap.put(q, Boolean.TRUE);
+								}
+							}
+							
 							//webservice title
 							if (edmWebservice.getName() != null) {
 								for (String q : qSMap.keySet()) {
