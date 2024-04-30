@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.epos.handler.dbapi.model.EDMOrganization;
+import org.epos.handler.dbapi.model.EDMOrganizationIdentifier;
 import org.epos.handler.dbapi.model.EDMOrganizationLegalname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,17 @@ public class OrganizationFilterSearch {
 						}
 					}
 				}
+				
+				if(Objects.nonNull(edmOrganisation.getOrganizationIdentifiersByInstanceId())){
+					for(EDMOrganizationIdentifier identifier : edmOrganisation.getOrganizationIdentifiersByInstanceId()) {
+						for (String q : qSMap.keySet()) {
+							if (identifier.getIdentifier().contains(q)) qSMap.put(q, Boolean.TRUE);
+							if (identifier.getType().contains(q)) qSMap.put(q, Boolean.TRUE);
+						}
+					}
+					
+				}
+
 				
 				if(Objects.nonNull(edmOrganisation.getUid())){
 					for (String q : qSMap.keySet()) {
