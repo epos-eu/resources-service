@@ -71,13 +71,14 @@ public class DistributionDetailsGenerationJPA {
 
 		EDMOperation op = null;
 		if (distributionSelected.getAccessURLByInstanceId() != null) {
-			op = distributionSelected.getAccessURLByInstanceId().stream()
-			.map(EDMDistributionAccessURL::getOperationByInstanceOperationId).filter(item -> item!=null).collect(Collectors.toList()).get(0);
+			List<EDMOperation> opList = distributionSelected.getAccessURLByInstanceId().stream()
+			.map(EDMDistributionAccessURL::getOperationByInstanceOperationId).filter(item -> item!=null).collect(Collectors.toList());
+			op = opList!=null && opList.size()>0? opList.get(0) : null;
 		} else {
 			return null;
 		}
 		
-		if (op == null && distributionSelected.getAccessService() != null) return null;
+		//if (op == null && distributionSelected.getAccessService() != null) return null;
 
 
 		Distribution distribution = new Distribution();
