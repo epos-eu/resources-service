@@ -72,7 +72,7 @@ public class DistributionDetailsGenerationJPA {
 		EDMOperation op = null;
 		if (distributionSelected.getAccessURLByInstanceId() != null) {
 			op = distributionSelected.getAccessURLByInstanceId().stream()
-			.map(EDMDistributionAccessURL::getOperationByInstanceOperationId).collect(Collectors.toList()).get(0);
+			.map(EDMDistributionAccessURL::getOperationByInstanceOperationId).filter(item -> item!=null).collect(Collectors.toList()).get(0);
 		} else {
 			return null;
 		}
