@@ -306,7 +306,7 @@ public class DistributionFilterSearch {
 				}
 				if(Objects.nonNull(edmDataproduct.getUid())){
 					for (String q : qSMap.keySet()) {
-						if (edmDataproduct.getUid().contains(q)) qSMap.put(q, Boolean.TRUE);
+						if (edmDataproduct.getUid().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
 					}
 				}
 
@@ -331,7 +331,7 @@ public class DistributionFilterSearch {
 						
 						if(Objects.nonNull(edmDistribution.getUid())){
 							for (String q : qSMap.keySet()) {
-								if (edmDistribution.getUid().contains(q)) qSMap.put(q, Boolean.TRUE);
+								if (edmDistribution.getUid().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
 							}
 						}
 
@@ -356,7 +356,7 @@ public class DistributionFilterSearch {
 
 							if(Objects.nonNull(edmWebservice.getUid())){
 								for (String q : qSMap.keySet()) {
-									if (edmWebservice.getUid().contains(q)) qSMap.put(q, Boolean.TRUE);
+									if (edmWebservice.getUid().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
 								}
 							}
 							
