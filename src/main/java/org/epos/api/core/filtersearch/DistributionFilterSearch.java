@@ -285,6 +285,8 @@ public class DistributionFilterSearch {
 		if(parameters.containsKey("q")) {
 			HashSet<EDMDataproduct> tempDatasetList = new HashSet<>();
 			String[] qs = parameters.get("q").toString().toLowerCase().split(",");
+			
+			System.out.println(Arrays.toString(qs));
 
 			for (EDMDataproduct edmDataproduct : datasetList) {
 				Map<String, Boolean> qSMap = Arrays.stream(qs)
