@@ -125,6 +125,7 @@ public class FacilitySearchGenerationJPA {
 					keywords.addAll(Arrays.stream(Optional.ofNullable(instanceWS.getServiceByInstanceServiceId().getKeywords()).orElse("").split(",\t")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()));
 				});
 			}
+			
 
 			// Facility Types
 			categoriesFromDB

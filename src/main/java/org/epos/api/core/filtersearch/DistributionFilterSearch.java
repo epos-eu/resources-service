@@ -12,6 +12,7 @@ import org.epos.eposdatamodel.*;
 import org.epos.handler.dbapi.model.EDMCategory;
 import org.epos.handler.dbapi.model.EDMDataproduct;
 import org.epos.handler.dbapi.model.EDMDataproductCategory;
+import org.epos.handler.dbapi.model.EDMDataproductIdentifier;
 import org.epos.handler.dbapi.model.EDMDataproductSpatial;
 import org.epos.handler.dbapi.model.EDMDistribution;
 import org.epos.handler.dbapi.model.EDMDistributionDescription;
@@ -309,11 +310,23 @@ public class DistributionFilterSearch {
 						if (edmDataproduct.getUid().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
 					}
 				}
+				
+				//identifier
+				if (edmDataproduct.getDataproductIdentifiersByInstanceId()!=null && !edmDataproduct.getDataproductIdentifiersByInstanceId().isEmpty()) {
+					for (EDMDataproductIdentifier edmIdentifier : edmDataproduct.getDataproductIdentifiersByInstanceId().stream().collect(Collectors.toList())) {
+						for (String q : qSMap.keySet()) {
+							if (edmIdentifier.getIdentifier().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
+							if (edmIdentifier.getType().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
+							if ((edmIdentifier.getType().toLowerCase()+edmIdentifier.getIdentifier().toLowerCase()).contains(q)) qSMap.put(q, Boolean.TRUE);
+						}
+					}
+				}
 
 
 				if (edmDataproduct.getIsDistributionsByInstanceId() != null && !edmDataproduct.getIsDistributionsByInstanceId().isEmpty()) {
 					for (EDMDistribution edmDistribution : edmDataproduct.getIsDistributionsByInstanceId().stream().map(EDMIsDistribution::getDistributionByInstanceDistributionId).collect(Collectors.toList())) {
 
+						
 						//distribution title
 						if (edmDistribution.getDistributionTitlesByInstanceId() != null) {
 							edmDistribution.getDistributionTitlesByInstanceId()

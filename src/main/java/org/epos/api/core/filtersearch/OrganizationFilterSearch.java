@@ -3,6 +3,7 @@ package org.epos.api.core.filtersearch;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.epos.handler.dbapi.model.EDMDataproductIdentifier;
 import org.epos.handler.dbapi.model.EDMOrganization;
 import org.epos.handler.dbapi.model.EDMOrganizationIdentifier;
 import org.epos.handler.dbapi.model.EDMOrganizationLegalname;
@@ -57,6 +58,7 @@ public class OrganizationFilterSearch {
 						for (String q : qSMap.keySet()) {
 							if (identifier.getIdentifier().contains(q)) qSMap.put(q, Boolean.TRUE);
 							if (identifier.getType().contains(q)) qSMap.put(q, Boolean.TRUE);
+							if ((identifier.getType().toLowerCase()+identifier.getIdentifier().toLowerCase()).contains(q)) qSMap.put(q, Boolean.TRUE);
 						}
 					}
 					
