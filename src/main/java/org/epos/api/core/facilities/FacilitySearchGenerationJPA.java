@@ -118,13 +118,7 @@ public class FacilitySearchGenerationJPA {
 					.setCategories(categoryList.isEmpty() ? null : categoryList)
 					.build();
 
-			// Keywords
-			Collection<EDMFacilityService> ws = facility.getFacilityServicesByInstanceId() != null ? facility.getFacilityServicesByInstanceId() : null;
-			if (ws != null) {
-				ws.forEach(instanceWS ->{
-					keywords.addAll(Arrays.stream(Optional.ofNullable(instanceWS.getServiceByInstanceServiceId().getKeywords()).orElse("").split(",\t")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()));
-				});
-			}
+			keywords.addAll(Arrays.stream(Optional.ofNullable(facility.getKeywords()).orElse("").split(",\t")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()));
 			
 
 			// Facility Types

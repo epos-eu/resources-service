@@ -200,24 +200,17 @@ public class FacilityFilterSearch {
 		if(parameters.containsKey("keywords")) {
 			ArrayList<EDMFacility> tempFacilityList = new ArrayList<>();
 			String[] keywords = parameters.get("keywords").toString().split(",");
-
 			facilityList.forEach(fac -> {
-				Collection<EDMFacilityService> edmFacilityService = fac.getFacilityServicesByInstanceId() != null ? fac.getFacilityServicesByInstanceId() : null;
-				if (edmFacilityService!=null) {
-					edmFacilityService.forEach(instanceWS ->{
-						if(Objects.nonNull(instanceWS.getServiceByInstanceServiceId().getKeywords())){
-							List<String> dataproductKeywords = Arrays.stream(instanceWS.getServiceByInstanceServiceId().getKeywords().split(","))
-									.map(String::toLowerCase)
-									.map(String::trim)
-									.collect(Collectors.toList());
+				if(Objects.nonNull(fac.getKeywords())){
+					List<String> dataproductKeywords = Arrays.stream(fac.getKeywords().split(","))
+							.map(String::toLowerCase)
+							.map(String::trim)
+							.collect(Collectors.toList());
 
-							if(!Collections.disjoint(dataproductKeywords.stream().map(String::toLowerCase).map(String::trim).collect(Collectors.toList()), Arrays.asList(keywords))){
-								tempFacilityList.add(fac);
-							}
-						}
-					});
+					if(!Collections.disjoint(dataproductKeywords.stream().map(String::toLowerCase).map(String::trim).collect(Collectors.toList()), Arrays.asList(keywords))){
+						tempFacilityList.add(fac);
+					}
 				}
-
 			});
 			facilityList = tempFacilityList;
 		}
@@ -235,29 +228,18 @@ public class FacilityFilterSearch {
 								key -> key, value -> Boolean.FALSE
 								));
 
-				Collection<EDMFacilityService> edmFacilityService = edmFacility.getFacilityServicesByInstanceId() != null ? edmFacility.getFacilityServicesByInstanceId() : null;
-				if (edmFacilityService!=null) {
-					edmFacilityService.forEach(instanceWS ->{
-						if(Objects.nonNull(instanceWS.getServiceByInstanceServiceId().getKeywords())){
-							List<String> dataproductKeywords = Arrays.stream(instanceWS.getServiceByInstanceServiceId().getKeywords().split(","))
-									.map(String::toLowerCase)
-									.map(String::trim)
-									.collect(Collectors.toList());
+				if(Objects.nonNull(edmFacility.getKeywords())){
+					List<String> dataproductKeywords = Arrays.stream(edmFacility.getKeywords().split(","))
+							.map(String::toLowerCase)
+							.map(String::trim)
+							.collect(Collectors.toList());
 
-							for (String q : qSMap.keySet()) {
-								if (dataproductKeywords.contains(q)) qSMap.put(q, Boolean.TRUE);
-							}
-						}
-						
-						if(Objects.nonNull(instanceWS.getServiceByInstanceServiceId().getUid())){
-							for (String q : qSMap.keySet()) {
-								if (instanceWS.getServiceByInstanceServiceId().getUid().contains(q)) qSMap.put(q, Boolean.TRUE);
-							}
-						}
-						
-					});
+					for (String q : qSMap.keySet()) {
+						if (dataproductKeywords.contains(q)) qSMap.put(q, Boolean.TRUE);
+					}
 				}
 
+				
 				if (edmFacility.getTitle() != null) {
 					for (String q : qSMap.keySet()) {
 						if (edmFacility.getTitle().toLowerCase().contains(q)) {
@@ -274,7 +256,7 @@ public class FacilityFilterSearch {
 						}
 					}
 				}
-				
+
 				if(Objects.nonNull(edmFacility.getUid())){
 					for (String q : qSMap.keySet()) {
 						if (edmFacility.getUid().contains(q)) qSMap.put(q, Boolean.TRUE);

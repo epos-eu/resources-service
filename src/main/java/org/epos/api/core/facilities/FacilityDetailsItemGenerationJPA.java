@@ -80,14 +80,11 @@ public class FacilityDetailsItemGenerationJPA {
 			facility.setUid(Optional.ofNullable(facilitySelected.getUid()).orElse(null));
 
 			facility.setHref(EnvironmentVariables.API_HOST + API_PATH_DETAILS + facilitySelected.getMetaId());
-
+			
+	
 			List<String> keywords = new ArrayList<String>();
-			if(ws!=null)
-				ws.forEach(instanceWS ->{
-					instanceWS.getServiceByInstanceServiceId().getKeywords();
-					keywords.addAll(Arrays.stream(Optional.ofNullable(instanceWS.getServiceByInstanceServiceId().getKeywords()).orElse("").split(",\t")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()));
-				});
-
+			keywords.addAll(Arrays.stream(Optional.ofNullable(facilitySelected.getKeywords()).orElse("").split(",\t")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()));
+			
 			keywords.removeAll(Collections.singleton(null));
 			keywords.removeAll(Collections.singleton(""));
 			facility.setKeywords(new ArrayList<>(keywords));
