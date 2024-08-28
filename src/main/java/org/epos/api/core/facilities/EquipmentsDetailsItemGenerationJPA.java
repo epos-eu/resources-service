@@ -122,7 +122,7 @@ public class EquipmentsDetailsItemGenerationJPA {
 
 			Feature feature = new Feature();
 
-			feature.addSimpleProperty("Name", Optional.ofNullable(equipment.getName()).orElse(null));
+			feature.addSimpleProperty("Equipment name", Optional.ofNullable(equipment.getName()).orElse(null));
 			feature.addSimpleProperty("Description", Optional.ofNullable(equipment.getDescription()).orElse(null));
 			feature.addSimpleProperty("Type", Optional.ofNullable(Optional.ofNullable(categoriesFromDB
 					.stream()
@@ -172,7 +172,7 @@ public class EquipmentsDetailsItemGenerationJPA {
 				feature.setGeometry(geometry);
 			}
 			List<Object> values = new ArrayList<Object>();
-			values.add("Name");
+			values.add("Equipment name");
 			values.add("Description");
 			values.add("Type");
 			values.add("Category");
