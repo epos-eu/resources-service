@@ -272,8 +272,9 @@ public class DistributionFilterSearch {
 		if(parameters.containsKey("keywords")) {
 			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
 			String[] keywords = parameters.get("keywords").toString().split(",");
+			Set<String> keywordsSet = new HashSet<String>(Arrays.asList(keywords));
 			datasetList.forEach(ds -> {
-				if(!Collections.disjoint(Arrays.stream(ds.getKeywords().split(",")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()), Arrays.asList(keywords))){
+				if(!Collections.disjoint(Arrays.stream(ds.getKeywords().split(",")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()), keywordsSet)){
 					tempDatasetList.add(ds);
 				}
 			});
@@ -286,11 +287,13 @@ public class DistributionFilterSearch {
 		if(parameters.containsKey("q")) {
 			HashSet<EDMDataproduct> tempDatasetList = new HashSet<>();
 			String[] qs = parameters.get("q").toString().toLowerCase().split(",");
+
+			Set<String> qsSet = new HashSet<String>(Arrays.asList(qs));
 			
 			System.out.println(Arrays.toString(qs));
 
 			for (EDMDataproduct edmDataproduct : datasetList) {
-				Map<String, Boolean> qSMap = Arrays.stream(qs)
+				Map<String, Boolean> qSMap = qsSet.stream()
 						.collect(Collectors.toMap(
 								key -> key, value -> Boolean.FALSE
 								));
