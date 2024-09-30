@@ -159,13 +159,14 @@ public class AvailableFormatsGeneration {
 				}
 			}
 		}
-		if(distribution.getAccessURLByInstanceId()!=null && webserviceByAccessService ==null && distribution.getAccessURLByInstanceId().size() > 0 && distribution.getFormat()!=null) {
+		if(distribution.getDistributionDownloadurlsByInstanceId()!=null && webserviceByAccessService ==null && distribution.getDistributionDownloadurlsByInstanceId().size() > 0 && distribution.getFormat()!=null) {
 			String[] uri = distribution.getFormat().split("\\/");
 			String format = uri[uri.length-1];
 			formats.add(new AvailableFormat.AvailableFormatBuilder()
 					.originalFormat(format)
 					.format(format)
-					.href(new ArrayList<>(distribution.getAccessURLByInstanceId()).get(0).getInstanceOperationId())
+					.href(distribution.getDistributionDownloadurlsByInstanceId().stream()
+							.map(EDMDistributionDownloadurl::getDownloadurl).findFirst().get())
 					.label(format.toUpperCase())
 					.description(AvailableFormatType.ORIGINAL)
 					.build());
