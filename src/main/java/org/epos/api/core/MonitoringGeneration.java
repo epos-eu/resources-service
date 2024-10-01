@@ -103,7 +103,7 @@ public class MonitoringGeneration {
 						LOGGER.error("Found the following issue whilst executing the WFS Checker, issue raised "+ e.getMessage() + " - Continuing execution");
 					}
 					
-					compiledUrl = java.net.URLDecoder.decode(compiledUrl, StandardCharsets.UTF_8);
+					//compiledUrl = java.net.URLDecoder.decode(compiledUrl, StandardCharsets.UTF_8);
 					mb.setOriginalURL(compiledUrl);
 				}
 
