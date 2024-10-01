@@ -17,6 +17,7 @@
 package org.epos.api.core;
 
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -64,12 +65,12 @@ public class URLGeneration {
 				sb.append('}'); 
 				isSegment = false;
 				String calcTemplate = calculateTemplate(sb.toString(), map);
-				LOGGER.debug("infos: "+sb.toString()+" "+map.toString());
-				LOGGER.debug("calcTemplate: "+calcTemplate);
+				LOGGER.info("infos: "+sb.toString()+" "+map.toString());
+				LOGGER.info("calcTemplate: "+calcTemplate);
 				if(calcTemplate.isEmpty() && isThereQuestionMark) template = template.replace(sb.toString(), "?");
 				if(calcTemplate!=null) {
 					template = template.replace(sb.toString(), calcTemplate);
-					LOGGER.debug("template updated: "+template);
+					LOGGER.info("template updated: "+template);
 					if(template.contains("{")) {
 						template = generateURLFromTemplateAndMap(template, map);
 					}

@@ -1,5 +1,9 @@
 package org.epos.api.core;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,6 +88,15 @@ public class MonitoringGeneration {
 				if(distribution.getEndpoint()!=null) {
 					String compiledUrl = null;
 					compiledUrl = URLGeneration.generateURLFromTemplateAndMap(distribution.getEndpoint(), parametersMap);
+					try {
+						URL url = new URL(compiledUrl);
+						URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+						compiledUrl = uri.toASCIIString();
+					} catch (URISyntaxException | MalformedURLException e) {
+						// TODO Auto-generated catch block
+						LOGGER.error("Found the following issue whilst executing the URL Encoding, issue raised "+ e.getMessage() + " - Continuing execution");
+					}
+
 					try {
 						compiledUrl = URLGeneration.ogcWFSChecker(compiledUrl);
 					}catch(Exception e) {
