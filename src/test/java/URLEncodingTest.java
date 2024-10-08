@@ -13,14 +13,14 @@ public class URLEncodingTest {
 		
 		
 		HashMap<String,Object> parameters = new HashMap<>();
-		parameters.put("episode", "ASPO");
-		parameters.put("element", "separated value");
-		
-		String urlStr = URLGeneration.generateURLFromTemplateAndMap(template, parameters);
-		URL url = new URL(urlStr);
-		URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+		parameters.put("episode", URLGeneration.encodeValue("ASPO"));
+		parameters.put("element", URLGeneration.encodeValue("separated value"));
 
-		urlStr = uri.toASCIIString();
+		String urlStr = URLGeneration.generateURLFromTemplateAndMap(template, parameters);
+		//URL url = new URL(urlStr);
+		//URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+
+		//urlStr = uri.toASCIIString();
 
 		System.out.println("OUTPUT: "+urlStr);
 		

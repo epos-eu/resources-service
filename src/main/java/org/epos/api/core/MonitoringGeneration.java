@@ -80,22 +80,14 @@ public class MonitoringGeneration {
 				if(distribution.getParameters()!=null) {
 					distribution.getParameters().forEach(p -> {
 						if (p.getValue() != null && !p.getValue().equals(""))
-							parametersMap.put(p.getName(), p.getValue());
+							parametersMap.put(p.getName(),URLGeneration.encodeValue(p.getValue()));
 						if (p.getDefaultValue() != null && p.getValue() == null && p.isRequired())
-							parametersMap.put(p.getName(), p.getDefaultValue());
+							parametersMap.put(p.getName(), URLGeneration.encodeValue(p.getDefaultValue()));
 					});
 				}
 				if(distribution.getEndpoint()!=null) {
 					String compiledUrl = null;
 					compiledUrl = URLGeneration.generateURLFromTemplateAndMap(distribution.getEndpoint(), parametersMap);
-					try {
-						URL url = new URL(compiledUrl);
-						URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
-						compiledUrl = uri.toASCIIString();
-					} catch (URISyntaxException | MalformedURLException e) {
-						// TODO Auto-generated catch block
-						LOGGER.error("Found the following issue whilst executing the URL Encoding, issue raised "+ e.getMessage() + " - Continuing execution");
-					}
 
 					try {
 						compiledUrl = URLGeneration.ogcWFSChecker(compiledUrl);
