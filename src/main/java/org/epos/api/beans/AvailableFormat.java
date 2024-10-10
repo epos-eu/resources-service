@@ -11,6 +11,7 @@ public class AvailableFormat implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 
+	private String method;
 	private String label;
 	private String format;
 
@@ -19,11 +20,20 @@ public class AvailableFormat implements Serializable{
 	private AvailableFormatType type;
 	
 	public AvailableFormat(AvailableFormatBuilder builder) {
+		this.method = builder.method;
 		this.label = builder.label;
 		this.originalFormat = builder.originalFormat;
 		this.format = builder.format;
 		this.href = builder.href;
 		this.type = builder.type;
+	}
+
+	public String getMethod() {
+		return method;
+	}
+
+	public void setMethod(String method) {
+		this.method = method;
 	}
 
 	public String getLabel() {
@@ -68,6 +78,7 @@ public class AvailableFormat implements Serializable{
 
 	public static class AvailableFormatBuilder{
 
+		private String method;
 		private String label;
 		private String originalFormat;
 		private String format;
@@ -75,7 +86,13 @@ public class AvailableFormat implements Serializable{
 		private AvailableFormatType type = AvailableFormatType.ORIGINAL;
 		
 		public AvailableFormatBuilder() {}
-		
+
+		public AvailableFormatBuilder method(String method) {
+			this.method = method;
+			return this;
+		}
+
+
 		public AvailableFormatBuilder label(String label) {
 			this.label = label;
 			return this;
