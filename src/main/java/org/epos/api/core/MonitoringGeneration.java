@@ -79,9 +79,7 @@ public class MonitoringGeneration {
 				
 				if(distribution.getParameters()!=null) {
 					distribution.getParameters().forEach(p -> {
-						if (p.getValue() != null && !p.getValue().equals(""))
-							parametersMap.put(p.getName(),URLGeneration.encodeValue(p.getValue()));
-						if (p.getDefaultValue() != null && p.getValue() == null && p.isRequired())
+						if (p.getDefaultValue() != null && !p.getDefaultValue().isEmpty())
 							parametersMap.put(p.getName(), URLGeneration.encodeValue(p.getDefaultValue()));
 					});
 				}
