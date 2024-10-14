@@ -357,9 +357,13 @@ public class DistributionDetailsGenerationJPA {
 				.setCategories(categoryList.isEmpty()? null : categoryList)
 				.build());
 		
-		FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList);
-		categories.getNodes().forEach(node -> node.setDistributions(null));
-		distribution.setCategories(categories.getFacets());
+		try{
+			FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList);
+			categories.getNodes().forEach(node -> node.setDistributions(null));
+			distribution.setCategories(categories.getFacets());
+		}catch(NullPointerException npe) {
+			LOGGER.warn("Error on generating facets information");
+		}
 
 		em.close();
 		

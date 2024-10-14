@@ -35,6 +35,8 @@ public class MonitoringApiController extends ApiController implements Monitoring
 	
 	@Override
 	public ResponseEntity<List<MonitoringBean>> monitoringUsingGet() {
+		
+		System.out.println("Start request --> MONITORING");
 	        
 		return standardRequest("MONITORING", null);
 	}

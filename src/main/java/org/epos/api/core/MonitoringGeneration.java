@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import org.epos.handler.dbapi.service.DBService;
 import org.epos.api.beans.Distribution;
 import org.epos.api.beans.MonitoringBean;
 import org.epos.api.core.distributions.DistributionDetailsGenerationJPA;
+import org.epos.api.utility.Utils;
 import org.epos.eposdatamodel.ContactPoint;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Identifier;
@@ -52,6 +54,8 @@ public class MonitoringGeneration {
 		List<MonitoringBean> monitoringList = new ArrayList<>();
 		List<DataProduct> datasetList = new DataProductDBAPI().getAllByState(State.PUBLISHED);
 		List<EDMDistribution> distributionList = getFromDB(em, EDMDistribution.class, "distribution.findAllByState", "STATE", "PUBLISHED");
+		
+		System.out.println("Start loop");
 
 		for(EDMDistribution dx : distributionList) {
 
@@ -79,8 +83,15 @@ public class MonitoringGeneration {
 				
 				if(distribution.getParameters()!=null) {
 					distribution.getParameters().forEach(p -> {
-						if (p.getDefaultValue() != null && !p.getDefaultValue().isEmpty())
-							parametersMap.put(p.getName(), URLGeneration.encodeValue(p.getDefaultValue()));
+						if (p.getDefaultValue() != null && !p.getDefaultValue().isEmpty()) {
+							if(p.getValuePattern()!=null && p.getProperty()!=null && (p.getProperty().equals("schema:startDate") || p.getProperty().equals("schema:endDate"))) {
+								p.setDefaultValue(Utils.convertDateUsingPattern(p.getDefaultValue(), Utils.EPOSINTERNALFORMAT, p.getValuePattern()));
+							}
+							if(p.getDefaultValue().contains("%20")) {
+								parametersMap.put(p.getName(), p.getDefaultValue());
+							}
+							else parametersMap.put(p.getName(), URLGeneration.encodeValue(p.getDefaultValue()));
+						}
 					});
 				}
 				if(distribution.getEndpoint()!=null) {
