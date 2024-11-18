@@ -65,7 +65,6 @@ public class Facets {
 		if(father==null) {
 			// Loop over the categories in the domain (inScheme) and take the categories with empty broaders
 			for(Category cat : tempCategoryList.stream().filter(category -> category.getBroader().isEmpty()).collect(Collectors.toList())) {
-				System.out.println(domain+" "+father+" "+cat);
 				JsonObject facetsObject = new JsonObject();
 				facetsObject.addProperty("name", cat.getName());
 				facetsObject.addProperty("ddss", cat.getUid());
@@ -80,7 +79,6 @@ public class Facets {
 		} else {
 			// Loop over the categories in the domain (inScheme) and take the categories with a populated broaders
 			for(Category cat : tempCategoryList.stream().filter(category -> !category.getBroader().isEmpty()).collect(Collectors.toList())) {
-				System.out.println(domain+" "+father+" "+cat);
 				//check if the broader is equal to the father
 				for(LinkedEntity linkedEntity : cat.getBroader()){
 					if(linkedEntity.getInstanceId().equals(father)) {
@@ -100,45 +98,6 @@ public class Facets {
 		}
 		return children;
 	}
-
-
-//	private JsonArray recursiveChildren(List<Category> categoriesList, String domain, String father) {
-//		JsonArray children = new JsonArray();
-//		if(father==null) {
-//			for(Category cat : categoriesList) {
-//				if(cat.getInScheme()!=null && cat.getInScheme().getInstanceId().equals(domain)) {
-//					if(cat.getBroader().isEmpty()) {
-//						JsonObject facetsObject = new JsonObject();
-//						facetsObject.addProperty("name", cat.getName());
-//						facetsObject.addProperty("ddss", cat.getUid());
-//						if(!cat.getNarrower().isEmpty()){
-//							JsonArray childrenList = recursiveChildren(categoriesList, domain, cat.getInstanceId());
-//							if(!(childrenList.isEmpty()))
-//								facetsObject.add("children", childrenList);
-//						}
-//						children.add(facetsObject);
-//					}
-//				}
-//			}
-//		} else {
-//			for(Category cat : categoriesList) {
-//				if(cat.getInScheme()!=null && cat.getInScheme().getInstanceId().equals(domain)) {
-//					if(!cat.getBroader().isEmpty() && cat.getBroader().stream().map(LinkedEntity::getInstanceId).anyMatch(Predicate.isEqual(father))) {
-//						JsonObject facetsObject = new JsonObject();
-//						facetsObject.addProperty("name", cat.getName());
-//						facetsObject.addProperty("ddss", cat.getUid());
-//						if(!cat.getNarrower() .isEmpty()) {
-//							JsonArray childrenList = recursiveChildren(categoriesList, domain, cat.getInstanceId());
-//							if(!(childrenList.isEmpty()))
-//								facetsObject.add("children", childrenList);
-//						}
-//						children.add(facetsObject);
-//					}
-//				}
-//			}
-//		}
-//		return children;
-//	}
 
 	public JsonObject getFacetsStatic() {
 		return facetsStatic;

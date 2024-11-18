@@ -37,11 +37,11 @@ public class DistributionSearchGenerationJPA {
 
 		long startTime = System.currentTimeMillis();
 
-		// Retrieve all Dataproducts available
+		// Retrieve all needed information available
 		List<DataProduct> dataproducts  = (List<DataProduct>) AbstractAPI.retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll().parallelStream().filter(item -> ((org.epos.eposdatamodel.DataProduct) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List<SoftwareApplication> softwareApplications = AbstractAPI.retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll();
+		List<SoftwareApplication> softwareApplications = (List<SoftwareApplication>) AbstractAPI.retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll().parallelStream().filter(item -> ((SoftwareApplication) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 
-		LOGGER.info("Apply filter using input parameters: "+parameters.toString());
+        LOGGER.info("Apply filter using input parameters: {}", parameters.toString());
 		// Apply filtering
 		dataproducts = DistributionFilterSearch.doFilters(dataproducts, parameters);
 
@@ -54,49 +54,46 @@ public class DistributionSearchGenerationJPA {
 		Set<Category> serviceTypes = new HashSet<>();
 		Set<Organization> organizationsEntityIds = new HashSet<>();
 
-		dataproducts.parallelStream().forEach(dataproduct -> {
+		dataproducts.forEach(dataproduct -> {
 
 			Set<String> facetsDataProviders = new HashSet<>();
 			List<String> categoryList = new ArrayList<>();
 
 			// DATA PRODUCT
-			if(dataproduct.getCategory()!=null)
-				categoryList = dataproduct.getCategory().parallelStream()
-						.map(LinkedEntity::getUid)
-						.filter(uid -> uid.contains("category:"))
-						.collect(Collectors.toList());
+			if(dataproduct.getCategory()!=null) {
+				dataproduct.getCategory().forEach(category ->{
+					if(category.getUid().contains("category:")) categoryList.add(category.getUid());
+					else {
+						scienceDomains.add((Category) LinkedEntityAPI.retrieveFromLinkedEntity(category));
+					}
+				});
+			}
 
-			if(dataproduct.getPublisher()!=null)
-				dataproduct.getPublisher().parallelStream()
-						.map(linkedEntity -> (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
-						.filter(Objects::nonNull)
-						.map(Organization::getLegalName)
-						.collect(Collectors.toList())
-						.parallelStream()
-						.forEach(facetsDataProviders::addAll);
+			if(dataproduct.getPublisher()!=null){
+				for(Organization organization : dataproduct.getPublisher().parallelStream()
+						.map(linkedEntity -> (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity)).collect(Collectors.toList())){
+					facetsDataProviders.add(String.join(",",organization.getLegalName()));
+					organizationsEntityIds.add(organization);
+				}
+			}
 
-			List<String> finalCategoryList = categoryList;
+			// Keywords
+			keywords.addAll(Arrays.stream(Optional.ofNullable(dataproduct.getKeywords())
+							.orElse("").split(",\t"))
+					.map(String::toLowerCase)
+					.map(String::trim)
+					.collect(Collectors.toSet()));
 
-			Optional.ofNullable(dataproduct.getDistribution())
-			.ifPresent(isDistribution -> isDistribution.parallelStream()
+			if(dataproduct.getDistribution()!=null)
+				dataproduct.getDistribution()
 					.forEach(distributionLe -> {
-
 						Distribution distribution = (Distribution) LinkedEntityAPI.retrieveFromLinkedEntity(distributionLe);
-
 						Set<String> facetsServiceProviders = new HashSet<>();
-
 						List<AvailableFormat> availableFormats = new ArrayList<>();
 
-						System.out.println(dataproduct.getPublisher());
-						if(dataproduct.getPublisher()!=null){
-							for(Organization organization : dataproduct.getPublisher().parallelStream()
-									.map(linkedEntity -> (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity)).collect(Collectors.toList())){
-								facetsDataProviders.add(String.join(",",organization.getLegalName()));
-								organizationsEntityIds.add(organization);
-							}
-						}
 						if(distribution.getAccessService()!=null){
-							for(WebService webService : distribution.getAccessService().parallelStream().map(linkedEntity -> (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity)).collect(Collectors.toList())){
+							distribution.getAccessService().forEach(linkedEntity -> {
+								WebService webService = (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity);
 								availableFormats.addAll(AvailableFormatsGeneration.generate(distribution, webService, softwareApplications));
 
 								if(webService.getProvider()!=null){
@@ -104,15 +101,16 @@ public class DistributionSearchGenerationJPA {
 									facetsServiceProviders.add(String.join(",",organization.getLegalName()));
 									organizationsEntityIds.add(organization);
 								}
+
 								// Service Types
 								if(webService.getCategory()!=null){
 									webService.getCategory()
 											.parallelStream()
-											.map(linkedEntity -> (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
+											.map(linkedEntity1 -> (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity1))
 											.filter(Objects::nonNull)
 											.forEach(serviceTypes::add);
 								}
-							}
+							});
 						}
 
 						DiscoveryItem discoveryItem = new DiscoveryItemBuilder(distribution.getInstanceId(),
@@ -125,10 +123,8 @@ public class DistributionSearchGenerationJPA {
 								.setSha256id(DigestUtils.sha256Hex(distribution.getUid()))
 								.setDataprovider(facetsDataProviders)
 								.setServiceProvider(facetsServiceProviders)
-								.setCategories(finalCategoryList.isEmpty() ? null : finalCategoryList)
+								.setCategories(categoryList.isEmpty() ? null : categoryList)
 								.build();
-
-						System.out.println(discoveryItem);
 
 						if (EnvironmentVariables.MONITORING != null && EnvironmentVariables.MONITORING.equals("true")) {
 							discoveryItem.setStatus(ZabbixExecutor.getInstance().getStatusInfoFromSha(discoveryItem.getSha256id()));
@@ -136,26 +132,10 @@ public class DistributionSearchGenerationJPA {
 						}
 
 						discoveryMap.put(discoveryItem.getSha256id(), discoveryItem);
-					})
-					);
-
-			// Keywords
-			keywords.addAll(Arrays.stream(Optional.ofNullable(dataproduct.getKeywords())
-					.orElse("").split(",\t"))
-					.map(String::toLowerCase)
-					.map(String::trim)
-					.collect(Collectors.toSet()));
-
-			// Science Domains
-			scienceDomains.addAll(Optional.ofNullable(dataproduct.getCategory())
-					.orElse(Collections.emptyList())
-					.parallelStream()
-					.map(linkedEntity -> (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
-					.filter(Objects::nonNull)
-					.collect(Collectors.toSet()));
+					});
 		});
 
-		LOGGER.info("Final number of results: "+discoveryMap.values().size());
+        LOGGER.info("Final number of results: {}", discoveryMap.size());
 
 		Node results = new Node("results");
 		if(parameters.containsKey("facets") && parameters.get("facets").toString().equals("true")) {
@@ -179,7 +159,7 @@ public class DistributionSearchGenerationJPA {
 			results.addChild(child);
 		}
 
-		LOGGER.info("Number of organizations retrieved "+organizationsEntityIds.size());
+        LOGGER.info("Number of organizations retrieved {}", organizationsEntityIds.size());
 
 		List<String> keywordsCollection = keywords.parallelStream()
 				.filter(Objects::nonNull)
@@ -193,13 +173,6 @@ public class DistributionSearchGenerationJPA {
 			node.setId(Base64.getEncoder().encodeToString(r.getBytes()));
 			keywordsNodes.addChild(node);
 		});
-
-		/*List<EDMOrganization> organizationsCollection = organizations.parallelStream()
-				.sorted(Comparator.comparing(o -> o.getOrganizationLegalnameByInstanceId().parallelStream()
-						.map(EDMOrganizationLegalname::getLegalname)
-						.findFirst()
-						.orElse("")))
-				.collect(Collectors.toList());*/
 
 		List<DataServiceProvider> collection = DataServiceProviderGeneration.getProviders(new ArrayList<Organization>(organizationsEntityIds));
 
@@ -243,7 +216,7 @@ public class DistributionSearchGenerationJPA {
 		long endTime = System.currentTimeMillis();
 		long duration = (endTime - startTime);
 
-		LOGGER.info("Result done in ms: "+duration);
+        LOGGER.info("Result done in ms: {}", duration);
 
 		return response;
 

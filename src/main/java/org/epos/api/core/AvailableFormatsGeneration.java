@@ -2,6 +2,7 @@ package org.epos.api.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import commonapis.LinkedEntityAPI;
@@ -113,79 +114,14 @@ public class AvailableFormatsGeneration {
 										}
 									}
 								}
-								if (operation.getReturns() != null && formats.isEmpty()) {
-									for (String returns : operation.getReturns()) {
-										if (returns.contains("geojson") || returns.contains("geo+json")) {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(returns)
-													.method(operation.getMethod())
-													.format("application/epos.geo+json")
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + returns)
-													.label("GEOJSON")
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										} else {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(returns)
-													.method(operation.getMethod())
-													.format(returns)
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + returns)
-													.label(returns.toUpperCase())
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										}
-									}
-								}
-								for (SoftwareApplication softwareApplication : softwareApplications) {
-									if (softwareApplication.getRelation()!=null && softwareApplication.getRelation().parallelStream().map(LinkedEntity::getInstanceId).collect(Collectors.toList()).contains(operation.getInstanceId())) {
-										if (softwareApplication.getParameter() != null) {
-											for (LinkedEntity parameterLinkedEntity : softwareApplication.getParameter()) {
-												Parameter parameter = (Parameter) LinkedEntityAPI.retrieveFromLinkedEntity(parameterLinkedEntity);
-												if (parameter.getEncodingFormat().equals("application/epos.geo+json")
-														|| parameter.getEncodingFormat().equals("application/epos.table.geo+json")
-														|| parameter.getEncodingFormat().equals("application/epos.map.geo+json")) {
-
-													formats.add(new AvailableFormat.AvailableFormatBuilder()
-															.originalFormat(parameter.getEncodingFormat())
-															.method(operation.getMethod())
-															.format(parameter.getEncodingFormat())
-															.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + parameter.getEncodingFormat())
-															.label("GEOJSON")
-															.description(AvailableFormatType.CONVERTED)
-															.build());
-												}
-												if (parameter.getEncodingFormat().equals("covjson")) {
-													formats.add(new AvailableFormat.AvailableFormatBuilder()
-															.originalFormat(parameter.getEncodingFormat())
-															.method(operation.getMethod())
-															.format(parameter.getEncodingFormat())
-															.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + parameter.getEncodingFormat())
-															.label("COVJSON")
-															.description(AvailableFormatType.CONVERTED)
-															.build());
-												}
-											}
-										}
-									}
-								}
+								getReturnFormats(distribution, softwareApplications, formats, operation);
 							}
 						}
 					}
 				}
 			}
 		}
-		if(distribution.getDownloadURL()!=null && distribution.getAccessService() ==null && !distribution.getDownloadURL().isEmpty() && distribution.getFormat()!=null) {
-			String[] uri = distribution.getFormat().split("/");
-			String format = uri[uri.length-1];
-			formats.add(new AvailableFormat.AvailableFormatBuilder()
-					.originalFormat(format)
-					.format(format)
-					.href(String.join(",", distribution.getDownloadURL()))
-					.label(format.toUpperCase())
-					.description(AvailableFormatType.ORIGINAL)
-					.build());
-		}
-		return formats;
+		return getAvailableFormats(distribution, formats);
 	}
 
 	public static List<AvailableFormat> generate(Distribution distribution, WebService webService, List<SoftwareApplication> softwareApplications ) {
@@ -198,8 +134,8 @@ public class AvailableFormatsGeneration {
 				boolean isWFS = false;
 
 				if (webService != null && webService.getSupportedOperation() != null) {
-					for (LinkedEntity supportedOperationLinkedEntity : webService.getSupportedOperation()) {
-						Operation operation = (Operation) LinkedEntityAPI.retrieveFromLinkedEntity(supportedOperationLinkedEntity);
+					List<Operation> operationList = webService.getSupportedOperation().parallelStream().map(linkedEntity -> (Operation) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity)).collect(Collectors.toList());
+					for(Operation operation : operationList) {
 						/** Check if is an OGC service, the check at this level si based only on the template **/
 						if(operation.getTemplate()!=null) {
 							if (operation.getTemplate().toLowerCase().contains("service=wms")) isWMS = true;
@@ -208,7 +144,9 @@ public class AvailableFormatsGeneration {
 						}
 
 						if(operation.getMapping()!=null){
-							for (Mapping map : operation.getMapping().parallelStream().map(linkedEntity -> (Mapping) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity)).collect(Collectors.toList())) {
+							List<Mapping> mappingList = operation.getMapping().parallelStream().map(linkedEntity -> (Mapping) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity)).collect(Collectors.toList());
+
+							for (Mapping map : mappingList) {
 								/** Check if is an OGC service, the check on this level is based on a value of a variable **/
 								if (map.getVariable().equalsIgnoreCase("service")
 										&& map.getParamValue()!=null && (map.getParamValue().contains("WMS") || map.getParamValue().contains("wms") || map.getDefaultValue().equalsIgnoreCase("wms")))
@@ -233,7 +171,6 @@ public class AvailableFormatsGeneration {
 													.description(AvailableFormatType.ORIGINAL)
 													.build());
 										} else if (pv.startsWith("image/") && isWMTS) {
-											System.out.println("HELLO" + distribution.getUid());
 											formats.add(new AvailableFormat.AvailableFormatBuilder()
 													.originalFormat(pv)
 													.method(operation.getMethod())
@@ -284,66 +221,74 @@ public class AvailableFormatsGeneration {
 										}
 									}
 								}
-								if (operation.getReturns() != null && formats.isEmpty()) {
-									for (String returns : operation.getReturns()) {
-										if (returns.contains("geojson") || returns.contains("geo+json")) {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(returns)
-													.method(operation.getMethod())
-													.format("application/epos.geo+json")
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + returns)
-													.label("GEOJSON")
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										} else {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(returns)
-													.method(operation.getMethod())
-													.format(returns)
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + returns)
-													.label(returns.toUpperCase())
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										}
-									}
-								}
-								for (SoftwareApplication softwareApplication : softwareApplications) {
-									if (softwareApplication.getRelation()!=null && softwareApplication.getRelation().parallelStream().map(LinkedEntity::getInstanceId).collect(Collectors.toList()).contains(operation.getInstanceId())) {
-										if (softwareApplication.getParameter() != null) {
-											for (LinkedEntity parameterLinkedEntity : softwareApplication.getParameter()) {
-												Parameter parameter = (Parameter) LinkedEntityAPI.retrieveFromLinkedEntity(parameterLinkedEntity);
-												if (parameter.getEncodingFormat().equals("application/epos.geo+json")
-														|| parameter.getEncodingFormat().equals("application/epos.table.geo+json")
-														|| parameter.getEncodingFormat().equals("application/epos.map.geo+json")) {
-
-													formats.add(new AvailableFormat.AvailableFormatBuilder()
-															.originalFormat(parameter.getEncodingFormat())
-															.method(operation.getMethod())
-															.format(parameter.getEncodingFormat())
-															.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + parameter.getEncodingFormat())
-															.label("GEOJSON")
-															.description(AvailableFormatType.CONVERTED)
-															.build());
-												}
-												if (parameter.getEncodingFormat().equals("covjson")) {
-													formats.add(new AvailableFormat.AvailableFormatBuilder()
-															.originalFormat(parameter.getEncodingFormat())
-															.method(operation.getMethod())
-															.format(parameter.getEncodingFormat())
-															.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + parameter.getEncodingFormat())
-															.label("COVJSON")
-															.description(AvailableFormatType.CONVERTED)
-															.build());
-												}
-											}
-										}
-									}
-								}
+								getReturnFormats(distribution, softwareApplications, formats, operation);
 							}
 						}
 					}
 				}
 
+		return getAvailableFormats(distribution, formats);
+	}
+
+	private static void getReturnFormats(Distribution distribution, List<SoftwareApplication> softwareApplications, List<AvailableFormat> formats, Operation operation) {
+		if (operation.getReturns() != null && formats.isEmpty()) {
+			for (String returns : operation.getReturns()) {
+				if (returns.contains("geojson") || returns.contains("geo+json")) {
+					formats.add(new AvailableFormat.AvailableFormatBuilder()
+							.originalFormat(returns)
+							.method(operation.getMethod())
+							.format("application/epos.geo+json")
+							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + returns)
+							.label("GEOJSON")
+							.description(AvailableFormatType.ORIGINAL)
+							.build());
+				} else {
+					formats.add(new AvailableFormat.AvailableFormatBuilder()
+							.originalFormat(returns)
+							.method(operation.getMethod())
+							.format(returns)
+							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + returns)
+							.label(returns.toUpperCase())
+							.description(AvailableFormatType.ORIGINAL)
+							.build());
+				}
+			}
+		}
+		for (SoftwareApplication softwareApplication : softwareApplications) {
+			if (softwareApplication.getRelation()!=null && softwareApplication.getRelation().parallelStream().map(LinkedEntity::getInstanceId).collect(Collectors.toList()).contains(operation.getInstanceId())) {
+				if (softwareApplication.getParameter() != null) {
+					for (LinkedEntity parameterLinkedEntity : softwareApplication.getParameter()) {
+						Parameter parameter = (Parameter) LinkedEntityAPI.retrieveFromLinkedEntity(parameterLinkedEntity);
+						if (parameter.getEncodingFormat().equals("application/epos.geo+json")
+								|| parameter.getEncodingFormat().equals("application/epos.table.geo+json")
+								|| parameter.getEncodingFormat().equals("application/epos.map.geo+json")) {
+
+							formats.add(new AvailableFormat.AvailableFormatBuilder()
+									.originalFormat(parameter.getEncodingFormat())
+									.method(operation.getMethod())
+									.format(parameter.getEncodingFormat())
+									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + parameter.getEncodingFormat())
+									.label("GEOJSON")
+									.description(AvailableFormatType.CONVERTED)
+									.build());
+						}
+						if (parameter.getEncodingFormat().equals("covjson")) {
+							formats.add(new AvailableFormat.AvailableFormatBuilder()
+									.originalFormat(parameter.getEncodingFormat())
+									.method(operation.getMethod())
+									.format(parameter.getEncodingFormat())
+									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + parameter.getEncodingFormat())
+									.label("COVJSON")
+									.description(AvailableFormatType.CONVERTED)
+									.build());
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private static List<AvailableFormat> getAvailableFormats(Distribution distribution, List<AvailableFormat> formats) {
 		if(distribution.getDownloadURL()!=null && distribution.getAccessService() ==null && !distribution.getDownloadURL().isEmpty() && distribution.getFormat()!=null) {
 			String[] uri = distribution.getFormat().split("/");
 			String format = uri[uri.length-1];
