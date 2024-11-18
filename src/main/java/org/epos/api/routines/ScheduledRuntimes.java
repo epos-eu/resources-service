@@ -93,6 +93,7 @@ public class ScheduledRuntimes {
 			// TODO Auto-generated catch block
 			LOGGER.error(e.getLocalizedMessage());
 		}
+		System.out.println(Facets.getInstance().getFacetsFromDatabase());
 		LOGGER.info("[Scheduled Task - Facets] Facets successfully updated");
 	}
 

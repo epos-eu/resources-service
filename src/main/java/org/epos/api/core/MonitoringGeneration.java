@@ -11,16 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-
-import org.epos.handler.dbapi.DBAPIClient;
-import org.epos.handler.dbapi.dbapiimplementation.DataProductDBAPI;
-import org.epos.handler.dbapi.dbapiimplementation.SoftwareApplicationDBAPI;
-import org.epos.handler.dbapi.model.EDMDistribution;
-import org.epos.handler.dbapi.model.EDMDistributionAccessURL;
-import org.epos.handler.dbapi.model.EDMDistributionTitle;
-import org.epos.handler.dbapi.model.EDMOperation;
-import org.epos.handler.dbapi.service.DBService;
+import abstractapis.AbstractAPI;
+import commonapis.LinkedEntityAPI;
+import metadataapis.EntityNames;
+import model.StatusType;
 import org.epos.api.beans.Distribution;
 import org.epos.api.beans.MonitoringBean;
 import org.epos.api.core.distributions.DistributionDetailsGenerationJPA;
@@ -31,38 +25,32 @@ import org.epos.eposdatamodel.LinkedEntity;
 import org.epos.eposdatamodel.Parameter;
 import org.epos.eposdatamodel.Parameter.ActionEnum;
 import org.epos.eposdatamodel.SoftwareApplication;
-import org.epos.eposdatamodel.State;
 import org.epos.eposdatamodel.WebService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.epos.handler.dbapi.util.DBUtil.getFromDB;
 
 public class MonitoringGeneration {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MonitoringGeneration.class); 
 
-	private static final DBAPIClient dbapi = new DBAPIClient();
 
 	public static List<MonitoringBean> generate() {
-		
-		EntityManager em = new DBService().getEntityManager();
 
-		List<SoftwareApplication> softwareApplicationList = new SoftwareApplicationDBAPI().getAllByState(State.PUBLISHED);
+		List<SoftwareApplication> softwareApplicationList = (List<SoftwareApplication>) AbstractAPI.retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll().stream().filter(item -> ((SoftwareApplication) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 		List<MonitoringBean> monitoringList = new ArrayList<>();
-		List<DataProduct> datasetList = new DataProductDBAPI().getAllByState(State.PUBLISHED);
-		List<EDMDistribution> distributionList = getFromDB(em, EDMDistribution.class, "distribution.findAllByState", "STATE", "PUBLISHED");
+		List<DataProduct> datasetList = (List<DataProduct>) AbstractAPI.retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll().stream().filter(item -> ((DataProduct) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+		List<org.epos.eposdatamodel.Distribution> distributionList = (List<org.epos.eposdatamodel.Distribution>) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Distribution) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 
-		for(EDMDistribution dx : distributionList) {
+		for(org.epos.eposdatamodel.Distribution dx : distributionList) {
 
 			MonitoringBean mb = new MonitoringBean();
 			//IDENTIFIER
 			mb.setIdentifier(dx.getMetaId());
 			
 			String title = null;
-			if (dx.getDistributionTitlesByInstanceId() != null && !dx.getDistributionTitlesByInstanceId().isEmpty()) {
-				EDMDistributionTitle edmDistributionTitles = new ArrayList<>(dx.getDistributionTitlesByInstanceId()).get(0);
-				title = edmDistributionTitles.getTitle();
+			if (dx.getTitle() != null && !dx.getTitle().isEmpty()) {
+				title = new ArrayList<>(dx.getTitle()).get(0);
 			}
 			
 			mb.setName(title);
@@ -108,7 +96,8 @@ public class MonitoringGeneration {
 					if(distrs.contains(dx.getMetaId())) {
 						String ddss = null;
 
-						for (Identifier i : d.getIdentifier()) {
+						for (LinkedEntity item : d.getIdentifier()) {
+							Identifier i = (Identifier) LinkedEntityAPI.retrieveFromLinkedEntity(item);
 							if(i.getType().equals("DDSS-ID")){
 								ddss = i.getIdentifier();
 							}
@@ -129,36 +118,39 @@ public class MonitoringGeneration {
 
 
 						if(dx.getAccessService()!=null) {
-							for(WebService ws : dbapi.retrieve(WebService.class, new DBAPIClient.GetQuery().instanceId(dx.getAccessService()))) {
+							for(LinkedEntity item : dx.getAccessService()) {
+								WebService ws = (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(item);
 								for(LinkedEntity le : ws.getContactPoint()) {
-									dbapi.retrieve(ContactPoint.class, new DBAPIClient.GetQuery().instanceId(le.getInstanceId()))
-									.forEach(contact->  mb.createContacts(contact.getUid(),contact.getRole(), contact.getEmail()));
+									ContactPoint contact = (ContactPoint) LinkedEntityAPI.retrieveFromLinkedEntity(le);
+									mb.createContacts(contact.getUid(),contact.getRole(), contact.getEmail());
 								}	
 							}
 						}
 					}
 				}
-				//VALIDATION RULES
-				for(SoftwareApplication sw : softwareApplicationList) {
-					for(String value : sw.getIdentifier().stream().map(Identifier::getIdentifier).collect(Collectors.toList())) {
-						if(value.toLowerCase().contains("monitoring/zabbix")) {
-							if(dx.getAccessURLByInstanceId()!=null && sw.getRelation().stream().map(LinkedEntity::getUid).collect(Collectors.toList()).containsAll(dx.getAccessURLByInstanceId().stream()
-									.map(EDMDistributionAccessURL::getOperationByInstanceOperationId).map(EDMOperation::getUid).collect(Collectors.toList()))){
-								String validationtype = sw.getRequirements().replace("validation-type=", "");
-								if(validationtype.equals("")) validationtype="none";
-								String encodingFormatObject = null;
-								String schemaversionObject = null;
-								for (Parameter parameter : sw.getParameter()) {
-									if (parameter.getAction().equals(ActionEnum.OBJECT)){
-										encodingFormatObject = parameter.getEncodingFormat();
-										schemaversionObject = parameter.getConformsTo();
-									}
-								}
-								mb.createValidationRule(validationtype, encodingFormatObject, schemaversionObject);
-							}
-						}
-					}
-				}
+//				//VALIDATION RULES
+//				for(SoftwareApplication sw : softwareApplicationList) {
+//					for(LinkedEntity item : sw.getIdentifier()) {
+//						Identifier identifier = (Identifier) LinkedEntityAPI.retrieveFromLinkedEntity(item);
+//						if(identifier.getIdentifier().toLowerCase().contains("monitoring/zabbix")) {
+//
+//							if(dx.getAccessURLByInstanceId()!=null && sw.getRelation().stream().map(LinkedEntity::getUid).collect(Collectors.toList()).containsAll(dx.getAccessURLByInstanceId().stream()
+//									.map(EDMDistributionAccessURL::getOperationByInstanceOperationId).map(EDMOperation::getUid).collect(Collectors.toList()))){
+//								String validationtype = sw.getRequirements().replace("validation-type=", "");
+//								if(validationtype.equals("")) validationtype="none";
+//								String encodingFormatObject = null;
+//								String schemaversionObject = null;
+//								for (Parameter parameter : sw.getParameter()) {
+//									if (parameter.getAction().equals(ActionEnum.OBJECT)){
+//										encodingFormatObject = parameter.getEncodingFormat();
+//										schemaversionObject = parameter.getConformsTo();
+//									}
+//								}
+//								mb.createValidationRule(validationtype, encodingFormatObject, schemaversionObject);
+//							}
+//						}
+//					}
+//				}
 				if(mb.getValidationRules()==null || mb.getValidationRules().isEmpty()) {
 					mb.createValidationRule("none", null, null);
 				}

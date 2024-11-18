@@ -3,14 +3,18 @@ package org.epos.api.facets;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import abstractapis.AbstractAPI;
+import metadataapis.EntityNames;
 import org.epos.eposdatamodel.Category;
 import org.epos.eposdatamodel.CategoryScheme;
-import org.epos.handler.dbapi.dbapiimplementation.CategoryDBAPI;
-import org.epos.handler.dbapi.dbapiimplementation.CategorySchemeDBAPI;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.epos.eposdatamodel.DataProduct;
+import org.epos.eposdatamodel.LinkedEntity;
 
 public class Facets {
 	private JsonObject facetsStatic;
@@ -29,11 +33,11 @@ public class Facets {
 		JsonArray domainsFacets = new JsonArray();
 		JsonObject facetsObject = new JsonObject();
 
-		CategorySchemeDBAPI schemes = new CategorySchemeDBAPI();
-		CategoryDBAPI categories = new CategoryDBAPI();
+		List<CategoryScheme> schemes = (List<CategoryScheme>) AbstractAPI.retrieveAPI(EntityNames.CATEGORYSCHEME.name()).retrieveAll();
+		List<Category> categories = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll();
 
-		List<CategoryScheme> categorySchemesList = schemes.getAll().stream().filter(e->e.getUid().contains("category:")).collect(Collectors.toList());
-		List<Category> categoriesList = categories.getAll().stream().filter(e->e.getUid().contains("category:")).collect(Collectors.toList());
+		List<CategoryScheme> categorySchemesList = schemes.stream().filter(e->e.getUid().contains("category:")).collect(Collectors.toList());
+		List<Category> categoriesList = categories.stream().filter(e->e.getUid().contains("category:")).collect(Collectors.toList());
 
 		for(CategoryScheme scheme : categorySchemesList) {
 			JsonObject facetDomain = new JsonObject();
@@ -53,35 +57,40 @@ public class Facets {
 		return facetsObject;
 
 	}
-
 	private JsonArray recursiveChildren(List<Category> categoriesList, String domain, String father) {
+		List<Category> tempCategoryList = categoriesList.stream().filter(category -> category.getInScheme()!=null).filter(category -> category.getInScheme().getInstanceId().equals(domain)).collect(Collectors.toList());
 		JsonArray children = new JsonArray();
+
+		//If father is null, then is a top-level category
 		if(father==null) {
-			for(Category cat : categoriesList) {
-				if(cat.getInScheme()!=null && cat.getInScheme().equals(domain)) {
-					if(cat.getBroader()==null) {
-						JsonObject facetsObject = new JsonObject();
-						facetsObject.addProperty("name", cat.getName());
-						facetsObject.addProperty("ddss", cat.getUid());
-						if(cat.getNarrower()!=null){
-							JsonArray childrenList = recursiveChildren(categoriesList, domain, cat.getInstanceId());
-							if(!(childrenList.size()==0))
-								facetsObject.add("children", childrenList);
-						}
-						children.add(facetsObject);
-					}
+			// Loop over the categories in the domain (inScheme) and take the categories with empty broaders
+			for(Category cat : tempCategoryList.stream().filter(category -> category.getBroader().isEmpty()).collect(Collectors.toList())) {
+				System.out.println(domain+" "+father+" "+cat);
+				JsonObject facetsObject = new JsonObject();
+				facetsObject.addProperty("name", cat.getName());
+				facetsObject.addProperty("ddss", cat.getUid());
+				// check if there are sons, in that case go ahead
+				if(!cat.getNarrower().isEmpty()){
+					JsonArray childrenList = recursiveChildren(tempCategoryList, domain, cat.getInstanceId());
+					if(!(childrenList.isEmpty()))
+						facetsObject.add("children", childrenList);
 				}
+				children.add(facetsObject);
 			}
 		} else {
-			for(Category cat : categoriesList) {
-				if(cat.getInScheme()!=null && cat.getInScheme().equals(domain)) {
-					if(cat.getBroader()!=null && cat.getBroader().contains(father)) {
+			// Loop over the categories in the domain (inScheme) and take the categories with a populated broaders
+			for(Category cat : tempCategoryList.stream().filter(category -> !category.getBroader().isEmpty()).collect(Collectors.toList())) {
+				System.out.println(domain+" "+father+" "+cat);
+				//check if the broader is equal to the father
+				for(LinkedEntity linkedEntity : cat.getBroader()){
+					if(linkedEntity.getInstanceId().equals(father)) {
 						JsonObject facetsObject = new JsonObject();
 						facetsObject.addProperty("name", cat.getName());
 						facetsObject.addProperty("ddss", cat.getUid());
-						if(cat.getNarrower() != null) {
-							JsonArray childrenList = recursiveChildren(categoriesList, domain, cat.getInstanceId());
-							if(!(childrenList.size()==0))
+						// check if there are sons, in that case go ahead
+						if(!cat.getNarrower().isEmpty()) {
+							JsonArray childrenList = recursiveChildren(tempCategoryList, domain, cat.getInstanceId());
+							if(!(childrenList.isEmpty()))
 								facetsObject.add("children", childrenList);
 						}
 						children.add(facetsObject);
@@ -91,6 +100,45 @@ public class Facets {
 		}
 		return children;
 	}
+
+
+//	private JsonArray recursiveChildren(List<Category> categoriesList, String domain, String father) {
+//		JsonArray children = new JsonArray();
+//		if(father==null) {
+//			for(Category cat : categoriesList) {
+//				if(cat.getInScheme()!=null && cat.getInScheme().getInstanceId().equals(domain)) {
+//					if(cat.getBroader().isEmpty()) {
+//						JsonObject facetsObject = new JsonObject();
+//						facetsObject.addProperty("name", cat.getName());
+//						facetsObject.addProperty("ddss", cat.getUid());
+//						if(!cat.getNarrower().isEmpty()){
+//							JsonArray childrenList = recursiveChildren(categoriesList, domain, cat.getInstanceId());
+//							if(!(childrenList.isEmpty()))
+//								facetsObject.add("children", childrenList);
+//						}
+//						children.add(facetsObject);
+//					}
+//				}
+//			}
+//		} else {
+//			for(Category cat : categoriesList) {
+//				if(cat.getInScheme()!=null && cat.getInScheme().getInstanceId().equals(domain)) {
+//					if(!cat.getBroader().isEmpty() && cat.getBroader().stream().map(LinkedEntity::getInstanceId).anyMatch(Predicate.isEqual(father))) {
+//						JsonObject facetsObject = new JsonObject();
+//						facetsObject.addProperty("name", cat.getName());
+//						facetsObject.addProperty("ddss", cat.getUid());
+//						if(!cat.getNarrower() .isEmpty()) {
+//							JsonArray childrenList = recursiveChildren(categoriesList, domain, cat.getInstanceId());
+//							if(!(childrenList.isEmpty()))
+//								facetsObject.add("children", childrenList);
+//						}
+//						children.add(facetsObject);
+//					}
+//				}
+//			}
+//		}
+//		return children;
+//	}
 
 	public JsonObject getFacetsStatic() {
 		return facetsStatic;

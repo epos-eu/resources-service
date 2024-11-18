@@ -9,11 +9,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import org.epos.api.beans.OrganizationBean;
-import org.epos.eposdatamodel.DataProduct;
-import org.epos.eposdatamodel.Organization;
-import org.epos.eposdatamodel.Person;
-import org.epos.eposdatamodel.Software;
-import org.epos.eposdatamodel.WebService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;

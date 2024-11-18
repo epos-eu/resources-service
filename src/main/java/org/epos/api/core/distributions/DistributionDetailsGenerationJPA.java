@@ -1,5 +1,8 @@
 package org.epos.api.core.distributions;
 
+import abstractapis.AbstractAPI;
+import commonapis.LinkedEntityAPI;
+import metadataapis.EntityNames;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.epos.api.beans.AvailableContactPoints.AvailableContactPointsBuilder;
 import org.epos.api.core.AvailableFormatsGeneration;
@@ -14,20 +17,13 @@ import org.epos.api.beans.TemporalCoverage;
 import org.epos.api.enums.ProviderType;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.FacetsNodeTree;
-import org.epos.eposdatamodel.State;
-import org.epos.handler.dbapi.model.*;
-import org.epos.handler.dbapi.service.DBService;
-import org.epos.handler.dbapi.util.EDMUtil;
+import org.epos.eposdatamodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.persistence.EntityManager;
 
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.epos.handler.dbapi.util.DBUtil.getFromDB;
 
 public class DistributionDetailsGenerationJPA {
 
@@ -40,99 +36,83 @@ public class DistributionDetailsGenerationJPA {
 
 		LOGGER.info("Parameters {}", parameters);
 
-		EntityManager em = new DBService().getEntityManager();
-
-		List<EDMDistribution> distributionSelectedList = getFromDB(em, EDMDistribution.class,
-				"distribution.findAllByMetaId",
-				"METAID", parameters.get("id"));
-
-		if (distributionSelectedList.stream().noneMatch(distrSelected -> distrSelected.getState().equals("PUBLISHED")))
-			return null;
-
-		EDMDistribution distributionSelected = distributionSelectedList.stream().filter(distrSelected -> distrSelected.getState().equals("PUBLISHED")).collect(Collectors.toList()).get(0);
+		org.epos.eposdatamodel.Distribution distributionSelected = (org.epos.eposdatamodel.Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(parameters.get("id").toString());
+		List<SoftwareApplication> softwareApplications = AbstractAPI.retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll();
 
 		if (distributionSelected == null) return null;
 
-		EDMDataproduct dp;
-		if (distributionSelected.getIsDistributionsByInstanceId() != null &&
-				!distributionSelected.getIsDistributionsByInstanceId().isEmpty()) {
-			dp = distributionSelected.getIsDistributionsByInstanceId().stream()
-					.map(EDMIsDistribution::getDataproductByInstanceDataproductId)
-					.filter(edmDataproduct -> edmDataproduct.getState().equals(State.PUBLISHED.toString()))
-					.findFirst().orElse(null);
+		DataProduct dp;
+		if (distributionSelected.getDataProduct() != null &&
+				!distributionSelected.getDataProduct().isEmpty()) {
+			dp = (DataProduct) LinkedEntityAPI.retrieveFromLinkedEntity(distributionSelected.getDataProduct().get(0));
 			if (dp == null) return null;
 		} else {
 			return null;
 		}
 
-		EDMWebservice ws = distributionSelected.getWebserviceByAccessService() != null && distributionSelected.getWebserviceByAccessService().getState().equals(State.PUBLISHED.toString()) ?
-				distributionSelected.getWebserviceByAccessService() : null;
+		WebService ws = distributionSelected.getAccessService() != null && !distributionSelected.getAccessService().isEmpty() ?
+				(WebService) LinkedEntityAPI.retrieveFromLinkedEntity(distributionSelected.getAccessService().get(0)) : null;
 		if (ws == null && distributionSelected.getAccessService() != null) return null;
 
-		EDMOperation op = null;
-		if (distributionSelected.getAccessURLByInstanceId() != null) {
-			List<EDMOperation> opList = distributionSelected.getAccessURLByInstanceId().stream()
-			.map(EDMDistributionAccessURL::getOperationByInstanceOperationId).filter(item -> item!=null).collect(Collectors.toList());
-			op = opList!=null && opList.size()>0? opList.get(0) : null;
+		Operation op = null;
+		if (distributionSelected.getSupportedOperation() != null) {
+			List<Operation> opList = distributionSelected.getSupportedOperation().parallelStream()
+			.map(linkedEntity -> (Operation) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
+					.filter(Objects::nonNull).collect(Collectors.toList());
+			op = !opList.isEmpty() ? opList.get(0) : null;
 		} else {
 			return null;
 		}
-		
-		//if (op == null && distributionSelected.getAccessService() != null) return null;
-
 
 		Distribution distribution = new Distribution();
 
-		if (distributionSelected.getDistributionTitlesByInstanceId() != null) {
+		if (distributionSelected.getTitle() != null) {
 			distribution.setTitle(
 					Optional.of(
-							distributionSelected.getDistributionTitlesByInstanceId().stream()
-							.map(EDMDistributionTitle::getTitle).collect(Collectors.joining("."))
-							).orElse(null)
-					);
+							String.join(".", distributionSelected.getTitle())
+					).orElse(null)
+			);
 		}
 
 		if (distributionSelected.getType() != null) {
-			String[] type = distributionSelected.getType().split("\\/");
+			String[] type = distributionSelected.getType().split("/");
 			distribution.setType(type[type.length - 1]);
 		}
 
-		if (distributionSelected.getDistributionDescriptionsByInstanceId() != null) {
+		if (distributionSelected.getDescription() != null) {
 			distribution.setDescription(
 					Optional.of(
-							distributionSelected.getDistributionDescriptionsByInstanceId().stream()
-							.map(EDMDistributionDescription::getDescription).collect(Collectors.joining("."))
-							).orElse(null)
-					);
+							String.join(".", distributionSelected.getDescription())
+					).orElse(null)
+			);
 		}
 
-		distribution.setId(Optional.ofNullable(distributionSelected.getMetaId()).orElse(null));
-		distribution.setUid(Optional.ofNullable(distributionSelected.getUid()).orElse(null));
+		distribution.setId(distributionSelected.getMetaId());
+		distribution.setUid(distributionSelected.getUid());
 
-		if (distributionSelected.getDistributionDownloadurlsByInstanceId() != null) {
+		if (distributionSelected.getDownloadURL() != null) {
 			distribution.setDownloadURL(
 					Optional.of(
-							distributionSelected.getDistributionDownloadurlsByInstanceId().stream()
-							.map(EDMDistributionDownloadurl::getDownloadurl).collect(Collectors.joining("."))
-							).orElse(null)
-					);
+							String.join(".", distributionSelected.getDownloadURL())
+					).orElse(null)
+			);
 		}
 
-		if (distributionSelected.getAccessURLByInstanceId() != null) {
+		if (distributionSelected.getAccessURL() != null) {
 			distribution.setEndpoint(
 					Optional.of(
-							distributionSelected.getAccessURLByInstanceId().stream()
-							.map(EDMDistributionAccessURL::getOperationByInstanceOperationId).map(EDMOperation::getTemplate).collect(Collectors.joining("."))
+                            String.join(".", distributionSelected.getAccessURL())
 							).orElse(null)
 					);
 		}
 
-		distribution.setLicense(Optional.ofNullable(distributionSelected.getLicense()).orElse(null));
+		distribution.setLicense(distributionSelected.getLicence());
 
 		// DATASET INFO
 		ArrayList<String> internalIDs = new ArrayList<>();
 		List<String> doi = new ArrayList<>();
-		dp.getDataproductIdentifiersByInstanceId().forEach(identifier -> {
+		dp.getIdentifier().forEach(identifierLe -> {
+			Identifier identifier = (Identifier) LinkedEntityAPI.retrieveFromLinkedEntity(identifierLe);
 			if (identifier.getType().equals("DOI")) {
 				doi.add(identifier.getIdentifier());
 				distribution.setDOI(doi);
@@ -144,7 +124,7 @@ public class DistributionDetailsGenerationJPA {
 		});
 
 
-		distribution.setFrequencyUpdate(Optional.ofNullable(dp.getAccrualperiodicity()).orElse(null));
+		distribution.setFrequencyUpdate(dp.getAccrualPeriodicity());
 		distribution.setHref(EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getMetaId());
 		distribution.setHrefExtended(EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getMetaId()+"?extended=true");
 		distribution.setInternalID(internalIDs);
@@ -156,103 +136,111 @@ public class DistributionDetailsGenerationJPA {
 		keywords.removeAll(Collections.singleton(""));
 		distribution.setKeywords(new ArrayList<>(keywords));
 
-		if (dp.getDataproductSpatialsByInstanceId() != null) {
-			for (EDMDataproductSpatial s : dp.getDataproductSpatialsByInstanceId())
+		if (dp.getSpatialExtent() != null) {
+			for (LinkedEntity sLe : dp.getSpatialExtent()) {
+				Location s = (Location) LinkedEntityAPI.retrieveFromLinkedEntity(sLe);
 				distribution.getSpatial().addPaths(SpatialInformation.doSpatial(s.getLocation()), SpatialInformation.checkPoint(s.getLocation()));
+			}
 		}
 
 		// how to handle multiple temporal? at the moment use only the first one
 		TemporalCoverage tc = new TemporalCoverage();
-		if (dp.getDataproductTemporalsByInstanceId() != null && dp.getDataproductTemporalsByInstanceId().size() > 0) {
-			Timestamp startdate = new ArrayList<>(dp.getDataproductTemporalsByInstanceId()).get(0).getStartdate();
-			Timestamp enddate = new ArrayList<>(dp.getDataproductTemporalsByInstanceId()).get(0).getEnddate();
-			String startDate;
-			String endDate;
-
-			if (startdate != null) {
-				startDate = startdate.toString().replace(".0", "Z").replace(" ", "T");
+		if (dp.getTemporalExtent() != null && !dp.getTemporalExtent().isEmpty()) {
+			PeriodOfTime periodOfTime = (PeriodOfTime) LinkedEntityAPI.retrieveFromLinkedEntity(dp.getTemporalExtent().get(0));
+			String startDate = null;
+			String endDate = null;
+			if(periodOfTime.getStartDate()!=null){
+				startDate = Timestamp.valueOf(periodOfTime.getStartDate()).toString().replace(".0", "Z").replace(" ", "T");
 				if (!startDate.contains("Z")) startDate = startDate + "Z";
-			} else startDate = null;
-			if (enddate != null) {
-				endDate = enddate.toString().replace(".0", "Z").replace(" ", "T");
-				if (!endDate.contains("Z")) endDate = endDate + "Z";
-			} else endDate = null;
-
-			tc.setStartDate(startDate);
+			}
+			if(periodOfTime.getEndDate()!=null){
+            	endDate = Timestamp.valueOf(periodOfTime.getEndDate()).toString().replace(".0", "Z").replace(" ", "T");
+           	 	if (!endDate.contains("Z")) endDate = endDate + "Z";
+			}
+            tc.setStartDate(startDate);
 			tc.setEndDate(endDate);
 		}
 		distribution.setTemporalCoverage(tc);
 
-		if (dp.getPublishersByInstanceId() != null) {
-			List<DataServiceProvider> dataProviders = DataServiceProviderGeneration.getProviders(dp.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList()));
+		if (dp.getPublisher() != null) {
+			List<DataServiceProvider> dataProviders = DataServiceProviderGeneration.getProviders(
+					dp.getPublisher().parallelStream()
+							.map(linkedEntity -> (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
+							.filter(Objects::nonNull).collect(Collectors.toList())
+			);
 			distribution.setDataProvider(dataProviders);
 		}
 
-		if (dp.getDataproductCategoriesByInstanceId() != null) {
-			distribution.setScienceDomain(Optional.of(dp.getDataproductCategoriesByInstanceId().stream()
-					.map(EDMDataproductCategory::getCategoryByCategoryId)
-					.map(EDMCategory::getName).collect(Collectors.toList())).orElse(null));
+		if (dp.getCategory() != null) {
+			distribution.setScienceDomain(
+					dp.getCategory().parallelStream()
+							.map(linkedEntity -> (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
+							.filter(Objects::nonNull)
+							.map(Category::getName)
+							.collect(Collectors.toList()));
 		}
 
-		distribution.setHasQualityAnnotation(Optional.ofNullable(dp.getHasQualityAnnotation()).orElse(null));
+		distribution.setHasQualityAnnotation(dp.getHasQualityAnnotation());
 
 		// WEBSERVICE INFO
 		if (ws != null) {
-			distribution.setServiceDescription(Optional.ofNullable(ws.getDescription()).orElse(null));
+			distribution.setServiceDescription(ws.getDescription());
 
-			if (ws.getWebserviceDocumentationsByInstanceId() != null) {
-				distribution.setServiceDocumentation(Optional.of(ws.getWebserviceDocumentationsByInstanceId().stream()
-						.map(EDMWebserviceDocumentation::getDocumentation)
-						.collect(Collectors.joining("."))).orElse(null));
+			if (ws.getDocumentation() != null) {
+				distribution.setServiceDocumentation(ws.getDocumentation().parallelStream()
+						.map(linkedEntity -> (Documentation) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
+						.map(Documentation::getUri)
+						.collect(Collectors.joining(".")));
 			}
 
 			distribution.setServiceName(Optional.ofNullable(ws.getName()).orElse(null));
 
-			if (ws.getEdmEntityIdByProvider() != null) {
-				List<DataServiceProvider> serviceProviders = DataServiceProviderGeneration.getProviders(List.of(ws.getEdmEntityIdByProvider()));
+			if (ws.getProvider() != null) {
+				List<DataServiceProvider> serviceProviders = DataServiceProviderGeneration.getProviders(List.of((Organization) LinkedEntityAPI.retrieveFromLinkedEntity(ws.getProvider())));
 				if (!serviceProviders.isEmpty()){
 					distribution.setServiceProvider(serviceProviders.get(0));
 				}
 			}
 
-			if (ws.getWebserviceSpatialsByInstanceId() != null) {
-				for (EDMWebserviceSpatial s : ws.getWebserviceSpatialsByInstanceId())
+			if (ws.getSpatialExtent() != null&& !ws.getSpatialExtent().isEmpty()) {
+				for (LinkedEntity sLe : ws.getSpatialExtent()) {
+					Location s = (Location) LinkedEntityAPI.retrieveFromLinkedEntity(sLe);
 					distribution.getServiceSpatial().addPaths(SpatialInformation.doSpatial(s.getLocation()), SpatialInformation.checkPoint(s.getLocation()));
+				}
 			}
 
 			TemporalCoverage tcws = new TemporalCoverage();
-			if (ws.getWebserviceTemporalsByInstanceId() != null && ws.getWebserviceTemporalsByInstanceId().size() > 0) {
-				Timestamp startdate = new ArrayList<>(ws.getWebserviceTemporalsByInstanceId()).get(0).getStartdate();
-				Timestamp enddate = new ArrayList<>(ws.getWebserviceTemporalsByInstanceId()).get(0).getEnddate();
-
-				String startDate;
-				String endDate;
-
-				if (startdate != null) {
-					startDate = startdate.toString().replace(".0", "Z").replace(" ", "T");
+			if (ws.getTemporalExtent() != null && !ws.getTemporalExtent().isEmpty()) {
+				PeriodOfTime periodOfTime = (PeriodOfTime) LinkedEntityAPI.retrieveFromLinkedEntity(ws.getTemporalExtent().get(0));
+				String startDate = null;
+				String endDate = null;
+				if(periodOfTime.getStartDate()!=null){
+					startDate = Timestamp.valueOf(periodOfTime.getStartDate()).toString().replace(".0", "Z").replace(" ", "T");
 					if (!startDate.contains("Z")) startDate = startDate + "Z";
-				} else startDate = null;
-				if (enddate != null) {
-					endDate = enddate.toString().replace(".0", "Z").replace(" ", "T");
+				}
+				if(periodOfTime.getEndDate()!=null){
+					endDate = Timestamp.valueOf(periodOfTime.getEndDate()).toString().replace(".0", "Z").replace(" ", "T");
 					if (!endDate.contains("Z")) endDate = endDate + "Z";
-				} else endDate = null;
-
+				}
 				tcws.setStartDate(startDate);
 				tcws.setEndDate(endDate);
 			}
 			distribution.setServiceTemporalCoverage(tcws);
 
-			if (ws.getWebserviceCategoriesByInstanceId() != null) {
-				distribution.setServiceType(Optional.of(ws.getWebserviceCategoriesByInstanceId().stream()
-						.map(EDMWebserviceCategory::getCategoryByCategoryId)
-						.map(EDMCategory::getName).collect(Collectors.toList())).orElse(null));
+			if (ws.getCategory() != null) {
+				distribution.setServiceType(
+						ws.getCategory().parallelStream()
+								.map(linkedEntity -> (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
+								.filter(Objects::nonNull)
+								.map(Category::getName)
+								.collect(Collectors.toList()));
 			}
 
 		}
 
 		// CONTACT POINTS
 
-		if(ws!=null && !ws.getContactpointWebservicesByInstanceId().isEmpty()) {
+		if(ws!=null && !ws.getContactPoint().isEmpty()) {
 			distribution.getAvailableContactPoints()
 			.add(new AvailableContactPointsBuilder()
 					.href(EnvironmentVariables.API_HOST + EMAIL_SENDER + ws.getInstanceId()+"&contactType="+ProviderType.SERVICEPROVIDERS)
@@ -260,14 +248,14 @@ public class DistributionDetailsGenerationJPA {
 		}
 
 
-		if(!dp.getContactpointDataproductsByInstanceId().isEmpty()) {
+		if(!dp.getContactPoint().isEmpty()) {
 			distribution.getAvailableContactPoints()
 			.add(new AvailableContactPointsBuilder()
 					.href(EnvironmentVariables.API_HOST + EMAIL_SENDER + dp.getInstanceId()+"&contactType="+ProviderType.DATAPROVIDERS)
 					.type(ProviderType.DATAPROVIDERS).build());
 		}
 
-		if((ws!=null && !ws.getContactpointWebservicesByInstanceId().isEmpty() && !dp.getContactpointDataproductsByInstanceId().isEmpty())){
+		if((ws!=null && !ws.getContactPoint().isEmpty() && !dp.getContactPoint().isEmpty())){
 			distribution.getAvailableContactPoints()
 			.add(new AvailableContactPointsBuilder()
 					.href(EnvironmentVariables.API_HOST + EMAIL_SENDER + distribution.getId()+"&contactType="+ProviderType.ALL)
@@ -280,24 +268,25 @@ public class DistributionDetailsGenerationJPA {
 			distribution.setEndpoint(op.getTemplate());
 			if(op.getTemplate()!=null) distribution.setServiceEndpoint(op.getTemplate().split("\\{")[0]);
 			distribution.setOperationid(op.getUid());
-			if (op.getMappingsByInstanceId() != null) {
-				for (EDMMapping mp : op.getMappingsByInstanceId()) {
+			if (op.getMapping() != null && !op.getMapping().isEmpty()) {
+				for (LinkedEntity mpLe : op.getMapping()) {
+					Mapping mp = (Mapping) LinkedEntityAPI.retrieveFromLinkedEntity(mpLe);
 					ServiceParameter sp = new ServiceParameter();
-					sp.setDefaultValue(mp.getDefaultvalue());
+					sp.setDefaultValue(mp.getDefaultValue());
 					sp.setEnumValue(
-							mp.getMappingParamvaluesById() != null ?
-									mp.getMappingParamvaluesById().stream().map(EDMMappingParamvalue::getParamvalue).collect(Collectors.toList())
+							mp.getParamValue() != null ?
+									mp.getParamValue()
 									: new ArrayList<>()
 							);
 					sp.setName(mp.getVariable());
-					sp.setMaxValue(mp.getMaxvalue());
-					sp.setMinValue(mp.getMinvalue());
+					sp.setMaxValue(mp.getMaxValue());
+					sp.setMinValue(mp.getMinValue());
 					sp.setLabel(mp.getLabel() != null ? mp.getLabel().replaceAll("@en", "") : null);
 					sp.setProperty(mp.getProperty());
-					sp.setRequired(mp.getRequired());
+					sp.setRequired(Boolean.parseBoolean(mp.getRequired()));
 					sp.setType(mp.getRange() != null ? mp.getRange().replace("xsd:", "") : null);
 					sp.setValue(null);
-					sp.setValuePattern(mp.getValuepattern());
+					sp.setValuePattern(mp.getValuePattern());
 					sp.setVersion(null);
 					sp.setReadOnlyValue(mp.getReadOnlyValue());
 					sp.setMultipleValue(mp.getMultipleValues());
@@ -306,42 +295,33 @@ public class DistributionDetailsGenerationJPA {
 			}
 		}
 
-		distribution.setAvailableFormats(AvailableFormatsGeneration.generate(distributionSelected));
+		distribution.setAvailableFormats(AvailableFormatsGeneration.generate(distributionSelected, softwareApplications));
 
 		// TEMP SECTION
 		ArrayList<DiscoveryItem> discoveryList = new ArrayList<>();
 
 		Set<String> facetsDataProviders = new HashSet<String>();
-		if(dp.getPublishersByInstanceId() != null ) {
-			for (EDMEdmEntityId edmMetaId : dp.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList())) {
-				if (edmMetaId.getOrganizationsByMetaId() != null && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
-					ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
-					list.sort(EDMUtil::compareEntityVersion);
-					EDMOrganization edmDataproductRelatedOrganization = list.get(0);
-					if(edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId() != null && !edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId().isEmpty()) {
-						facetsDataProviders.add(edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId().stream().findFirst().get().getLegalname());
-					}
+		if(dp.getPublisher() != null ) {
+			for (LinkedEntity edmMetaIdLe : dp.getPublisher()) {
+				Organization edmMetaId = (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(edmMetaIdLe);
+				if(edmMetaId.getLegalName() != null && !edmMetaId.getLegalName().isEmpty()) {
+					facetsDataProviders.add(String.join(",",edmMetaId.getLegalName()));
 				}
 			}
 		}
 
 		Set<String> facetsServiceProviders = new HashSet<String>();
-		if(distributionSelected.getWebserviceByAccessService() != null && distributionSelected.getWebserviceByAccessService().getEdmEntityIdByProvider() != null) {
-			EDMEdmEntityId edmMetaId = distributionSelected.getWebserviceByAccessService().getEdmEntityIdByProvider();
-			if (edmMetaId.getOrganizationsByMetaId() != null && !edmMetaId.getOrganizationsByMetaId().isEmpty()) {
-				ArrayList<EDMOrganization> list = new ArrayList<>(edmMetaId.getOrganizationsByMetaId());
-				list.sort(EDMUtil::compareEntityVersion);
-				EDMOrganization edmWebserviceRelatedOrganization = list.get(0);
-				if(edmWebserviceRelatedOrganization.getOrganizationLegalnameByInstanceId() != null && !edmWebserviceRelatedOrganization.getOrganizationLegalnameByInstanceId().isEmpty()) {
-					facetsServiceProviders.add(edmWebserviceRelatedOrganization.getOrganizationLegalnameByInstanceId().stream().findFirst().get().getLegalname());
-				}
+		if(ws!=null && ws.getProvider()!=null) {
+			Organization edmMetaId = (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(ws.getProvider());
+			if(edmMetaId.getLegalName() != null && !edmMetaId.getLegalName().isEmpty()) {
+				facetsServiceProviders.add(String.join(",",edmMetaId.getLegalName()));
 			}
 		}
-		List<String> categoryList = dp.getDataproductCategoriesByInstanceId().stream()
-				.map(EDMDataproductCategory::getCategoryByCategoryId)
-				.filter(Objects::nonNull)
-				.filter(e->e.getUid().contains("category:"))
-				.map(EDMCategory::getUid)
+
+		List<String> categoryList = dp.getCategory().parallelStream()
+				.map(linkedEntity -> (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
+				.map(Category::getUid)
+				.filter(uid -> uid.contains("category:"))
 				.collect(Collectors.toList());
 
 		discoveryList.add(new DiscoveryItem.DiscoveryItemBuilder(distributionSelected.getMetaId(),
@@ -350,7 +330,7 @@ public class DistributionDetailsGenerationJPA {
 				.uid(distribution.getUid())
 				.title(distribution.getTitle())
 				.description(distribution.getDescription())
-				.availableFormats(AvailableFormatsGeneration.generate(distributionSelected))
+				.availableFormats(AvailableFormatsGeneration.generate(distributionSelected, softwareApplications))
 				.setSha256id(DigestUtils.sha256Hex(distribution.getUid()))
 				.setDataprovider(facetsDataProviders)
 				.setServiceProvider(facetsServiceProviders)
@@ -360,8 +340,6 @@ public class DistributionDetailsGenerationJPA {
 		FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList);
 		categories.getNodes().forEach(node -> node.setDistributions(null));
 		distribution.setCategories(categories.getFacets());
-
-		em.close();
 		
 		return distribution;
 	}

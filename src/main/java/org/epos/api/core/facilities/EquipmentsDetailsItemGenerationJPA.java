@@ -1,15 +1,11 @@
 package org.epos.api.core.facilities;
 
+import abstractapis.AbstractAPI;
+import commonapis.LinkedEntityAPI;
+import metadataapis.EntityNames;
+import model.StatusType;
 import org.epos.api.utility.Utils;
-import org.epos.eposdatamodel.Equipment;
-import org.epos.eposdatamodel.Facility;
-import org.epos.eposdatamodel.LinkedEntity;
-import org.epos.eposdatamodel.Location;
-import org.epos.eposdatamodel.State;
-import org.epos.handler.dbapi.dbapiimplementation.EquipmentDBAPI;
-import org.epos.handler.dbapi.model.*;
-import org.epos.handler.dbapi.service.DBService;
-import org.epos.library.enums.Anchor;
+import org.epos.eposdatamodel.*;
 import org.epos.library.feature.Feature;
 import org.epos.library.feature.FeaturesCollection;
 import org.epos.library.geometries.Geometry;
@@ -18,21 +14,13 @@ import org.epos.library.geometries.PointCoordinates;
 import org.epos.library.geometries.Polygon;
 import org.epos.library.propertiestypes.PropertyDataKeys;
 import org.epos.library.propertiestypes.PropertyMapKeys;
-import org.epos.library.style.EposStyleItem;
-import org.epos.library.style.EposStyleObject;
-import org.epos.library.style.FontAwesomeMarker;
-import org.epos.library.style.Marker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonObject;
 
-import javax.persistence.EntityManager;
-
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.epos.handler.dbapi.util.DBUtil.getFromDB;
 
 public class EquipmentsDetailsItemGenerationJPA {
 
@@ -42,28 +30,21 @@ public class EquipmentsDetailsItemGenerationJPA {
 
 		LOGGER.info("Parameters {}", parameters);
 
-		EntityManager em = new DBService().getEntityManager();
-		List<EDMFacility> facilitySelectedList = null;
+		List<Facility> facilitySelectedList = null;
 		if(parameters.containsKey("facilityid")) {
-			facilitySelectedList = getFromDB(em, EDMFacility.class,
-					"facility.findAllByMetaId",
-					"METAID", parameters.get("facilityid").toString());
+			facilitySelectedList = List.of((Facility)AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieve(parameters.get("id").toString()));
 		}else {
-			facilitySelectedList = getFromDB(em, EDMFacility.class,
-					"facility.findAll");
+			facilitySelectedList = (List<Facility>) AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Facility) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 		}
 
-		List<EDMCategory> categoriesFromDB = getFromDB(em, EDMCategory.class, "EDMCategory.findAll");
-
-		if (facilitySelectedList.stream().noneMatch(facSelected -> facSelected.getState().equals("PUBLISHED")))
-			return null;
+		List<Category> categoriesFromDB = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Category) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 
 		List<Equipment> equipmentList = null;
 
 		if(parameters.containsKey("id") && !parameters.get("id").equals("all")) {
-			equipmentList = List.of(new EquipmentDBAPI().getByInstanceId(parameters.get("id").toString()));
+			equipmentList = List.of( (org.epos.eposdatamodel.Equipment) AbstractAPI.retrieveAPI(EntityNames.EQUIPMENT.name()).retrieve(parameters.get("id").toString()));
 		}else {
-			equipmentList = new EquipmentDBAPI().getAllByState(State.PUBLISHED);
+			equipmentList = (List<Equipment>) AbstractAPI.retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Equipment) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 		}
 
 		if(parameters.containsKey("params")) {
@@ -72,7 +53,6 @@ public class EquipmentsDetailsItemGenerationJPA {
 			if(params.has("equipmenttypes")) {
 				String equipmenttypes = params.get("equipmenttypes").getAsString();
 				if(!(equipmenttypes.isBlank() || equipmenttypes.isEmpty())){
-					System.out.println("Stil there");
 					List<String> scienceDomainsParameters = List.of(equipmenttypes.split(","));
 					List<Equipment> tempEquipmentList = new ArrayList<Equipment>();
 					for(Equipment item : equipmentList) {
@@ -80,7 +60,7 @@ public class EquipmentsDetailsItemGenerationJPA {
 						categoriesFromDB
 						.stream()
 						.filter(cat -> cat.getUid().equals(item.getType()))
-						.map(EDMCategory::getName)
+						.map(Category::getName)
 						.forEach(facilityTypes::add);
 						if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){
 							tempEquipmentList.add(item);
@@ -93,8 +73,6 @@ public class EquipmentsDetailsItemGenerationJPA {
 				System.err.println("Not valid json, skip filter");
 			}
 		}
-
-
 
 		List<Equipment> returnList = new ArrayList<Equipment>();
 
@@ -109,12 +87,10 @@ public class EquipmentsDetailsItemGenerationJPA {
 		if(parameters.containsKey("format") && parameters.get("format").toString().equals("application/epos.geo+json"))
 			return generateAsGeoJson(facilitySelectedList.get(0),categoriesFromDB, returnList);
 
-		em.close();
-
 		return returnList;
 	}
 
-	public static FeaturesCollection generateAsGeoJson(EDMFacility facilitySelected, List<EDMCategory> categoriesFromDB, List<Equipment> equipmentList) {
+	public static FeaturesCollection generateAsGeoJson(Facility facilitySelected, List<Category> categoriesFromDB, List<Equipment> equipmentList) {
 
 		FeaturesCollection geojson = new FeaturesCollection();
 
@@ -122,22 +98,23 @@ public class EquipmentsDetailsItemGenerationJPA {
 
 			Feature feature = new Feature();
 
-			feature.addSimpleProperty("Equipment name", Optional.ofNullable(equipment.getName()).orElse(null));
-			feature.addSimpleProperty("Description", Optional.ofNullable(equipment.getDescription()).orElse(null));
-			feature.addSimpleProperty("Type", Optional.ofNullable(Optional.ofNullable(categoriesFromDB
+			feature.addSimpleProperty("Equipment name", equipment.getName());
+			feature.addSimpleProperty("Description", equipment.getDescription());
+			feature.addSimpleProperty("Type", Optional.of(Optional.of(categoriesFromDB
 					.stream()
-					.filter(cat -> cat.getUid().equals(equipment.getType())).map(EDMCategory::getName).collect(Collectors.toList())).get()).orElse(null));
-			feature.addSimpleProperty("Category", Optional.ofNullable(equipment.getCategory()).orElse(null));
-			feature.addSimpleProperty("Dynamic range", Optional.ofNullable(equipment.getDynamicRange()).orElse(null));
-			feature.addSimpleProperty("Filter", Optional.ofNullable(equipment.getFilter()).orElse(null));
-			feature.addSimpleProperty("Manufacturer", Optional.ofNullable(equipment.getManufacturer() != null ? equipment.getManufacturer().getUid() : null).orElse(null));
-			feature.addSimpleProperty("Orientation", Optional.ofNullable(equipment.getOrientation()).orElse(null));
-			feature.addSimpleProperty("Page url", Optional.ofNullable(equipment.getPageURL()).orElse(null));
-			feature.addSimpleProperty("Resolution", Optional.ofNullable(equipment.getResolution()).orElse(null));
-			feature.addSimpleProperty("Sample period", Optional.ofNullable(equipment.getSamplePeriod()).orElse(null));
-			feature.addSimpleProperty("Serial number", Optional.ofNullable(equipment.getSerialNumber()).orElse(null));
+					.filter(cat -> cat.getUid().equals(equipment.getType())).map(Category::getName).collect(Collectors.toList())).get()).orElse(null));
+			feature.addSimpleProperty("Category", equipment.getCategory());
+			feature.addSimpleProperty("Dynamic range", equipment.getDynamicRange());
+			feature.addSimpleProperty("Filter", equipment.getFilter());
+			feature.addSimpleProperty("Manufacturer", equipment.getManufacturer() != null ? equipment.getManufacturer().getUid() : null);
+			feature.addSimpleProperty("Orientation", equipment.getOrientation());
+			feature.addSimpleProperty("Page url", equipment.getPageURL());
+			feature.addSimpleProperty("Resolution", equipment.getResolution());
+			feature.addSimpleProperty("Sample period", equipment.getSamplePeriod());
+			feature.addSimpleProperty("Serial number", equipment.getSerialNumber());
 			
-			for(Location loc : equipment.getSpatialExtent()) {
+			for(LinkedEntity locLe : equipment.getSpatialExtent()) {
+				Location loc = (Location) LinkedEntityAPI.retrieveFromLinkedEntity(locLe);
 				String location = loc.getLocation();
 				boolean isPoint = location.contains("POINT");
 				location = location.replaceAll("POLYGON", "").replaceAll("POINT", "").replaceAll("\\(", "").replaceAll("\\)", "");
@@ -190,7 +167,6 @@ public class EquipmentsDetailsItemGenerationJPA {
 			feature.addPropertyFromPropertyObject(pmk);
 			geojson.addFeature(feature);
 		}
-
 		return geojson;
 	}
 

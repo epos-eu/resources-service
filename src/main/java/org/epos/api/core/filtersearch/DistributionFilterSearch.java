@@ -5,23 +5,13 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import abstractapis.AbstractAPI;
+import commonapis.LinkedEntityAPI;
 import org.epos.api.beans.DataServiceProvider;
 import org.epos.api.core.DataServiceProviderGeneration;
 import org.epos.api.utility.BBoxToPolygon;
 import org.epos.eposdatamodel.*;
-import org.epos.handler.dbapi.model.EDMCategory;
-import org.epos.handler.dbapi.model.EDMDataproduct;
-import org.epos.handler.dbapi.model.EDMDataproductCategory;
-import org.epos.handler.dbapi.model.EDMDataproductIdentifier;
-import org.epos.handler.dbapi.model.EDMDataproductSpatial;
-import org.epos.handler.dbapi.model.EDMDistribution;
-import org.epos.handler.dbapi.model.EDMDistributionDescription;
-import org.epos.handler.dbapi.model.EDMDistributionTitle;
-import org.epos.handler.dbapi.model.EDMIsDistribution;
-import org.epos.handler.dbapi.model.EDMPublisher;
-import org.epos.handler.dbapi.model.EDMWebservice;
-import org.epos.handler.dbapi.model.EDMWebserviceCategory;
-import org.epos.handler.dbapi.model.EDMWebserviceSpatial;
+import org.epos.eposdatamodel.DataProduct;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.io.ParseException;
@@ -44,7 +34,7 @@ public class DistributionFilterSearch {
 	private static final String PARAMETER__SERVICE_TYPE = "servicetypes";
 
 
-	public static List<EDMDataproduct> doFilters(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	public static List<DataProduct> doFilters(List<DataProduct> datasetList, Map<String,Object> parameters) {
 
 		datasetList = filterByFullText(datasetList, parameters);
 		datasetList = filterByKeywords(datasetList, parameters);
@@ -57,17 +47,17 @@ public class DistributionFilterSearch {
 		return datasetList;
 	}
 
-	private static List<EDMDataproduct> filterByScienceDomain(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	private static List<DataProduct> filterByScienceDomain(List<DataProduct> datasetList, Map<String,Object> parameters) {
 		if(parameters.containsKey(PARAMETER__SCIENCE_DOMAIN)) {
-			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
+			ArrayList<DataProduct> tempDatasetList = new ArrayList<>();
 			List<String> scienceDomainsParameters = List.of(parameters.get(PARAMETER__SCIENCE_DOMAIN).toString().split(","));
 			datasetList.forEach(dataproduct -> {
-				if (Objects.nonNull(dataproduct.getDataproductCategoriesByInstanceId()) && !dataproduct.getDataproductCategoriesByInstanceId().isEmpty()){
-					List<String> scienceDomainOfDataproduct = dataproduct.getDataproductCategoriesByInstanceId().stream()
-							.map(EDMDataproductCategory::getCategoryByCategoryId)
-							.filter(Objects::nonNull)
-							.map(EDMCategory::getId)
-							.collect(Collectors.toList());
+				if (Objects.nonNull(dataproduct.getCategory()) && !dataproduct.getCategory().isEmpty()){
+					List<String> scienceDomainOfDataproduct = new ArrayList<>();
+					for(LinkedEntity item : dataproduct.getCategory()){
+						Category category = (Category) LinkedEntityAPI.retrieveFromLinkedEntity(item);
+						if(category!=null) scienceDomainOfDataproduct.add(category.getName());
+					}
 
 					if(!Collections.disjoint(scienceDomainOfDataproduct, scienceDomainsParameters)){
 						tempDatasetList.add(dataproduct);
@@ -80,35 +70,30 @@ public class DistributionFilterSearch {
 	}
 
 
-	private static List<EDMDataproduct> filterByServiceType(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	private static List<DataProduct> filterByServiceType(List<DataProduct> datasetList, Map<String,Object> parameters) {
 		if (parameters.containsKey(PARAMETER__SERVICE_TYPE)) {
-			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
+			ArrayList<DataProduct> tempDatasetList = new ArrayList<>();
 			List<String> serviceTypesParameters = List.of(parameters.get(PARAMETER__SERVICE_TYPE).toString().split(","));
 
 			datasetList.forEach(dataproduct -> {
+				for (LinkedEntity distribution : dataproduct.getDistribution()) {
+					Distribution distribution1 = (Distribution) LinkedEntityAPI.retrieveFromLinkedEntity(distribution);
+					for (LinkedEntity accessService : distribution1.getAccessService()) {
+						WebService webservice = (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(accessService);
 
-				List<EDMWebservice> webservices = dataproduct.getIsDistributionsByInstanceId().stream()
-						.map(EDMIsDistribution::getDistributionByInstanceDistributionId)
-						.filter(Objects::nonNull)
-						.map(EDMDistribution::getWebserviceByAccessService)
-						.filter(Objects::nonNull)
-						.collect(Collectors.toList());
+						if (Objects.nonNull(webservice.getCategory()) && !webservice.getCategory().isEmpty()){
+							List<String> serviceTypesOfWebservice = new ArrayList<>();
+							for(LinkedEntity item : webservice.getCategory()){
+								Category category = (Category) LinkedEntityAPI.retrieveFromLinkedEntity(item);
+								if(category!=null) serviceTypesOfWebservice.add(category.getName());
+							}
 
-				for (EDMWebservice webservice : webservices) {
-					if (Objects.nonNull(webservice.getWebserviceCategoriesByInstanceId()) && !webservice.getWebserviceCategoriesByInstanceId().isEmpty()) {
-						List<String> serviceTypesOfWebservice = webservice.getWebserviceCategoriesByInstanceId().stream()
-								.map(EDMWebserviceCategory::getCategoryByCategoryId)
-								.filter(Objects::nonNull)
-								.map(EDMCategory::getId)
-								.collect(Collectors.toList());
-
-						if (!Collections.disjoint(serviceTypesOfWebservice, serviceTypesParameters)) {
-							tempDatasetList.add(dataproduct);
-							break;
+							if(!Collections.disjoint(serviceTypesOfWebservice, serviceTypesParameters)){
+								tempDatasetList.add(dataproduct);
+							}
 						}
 					}
 				}
-
 			});
 			datasetList = tempDatasetList;
 		}
@@ -116,7 +101,7 @@ public class DistributionFilterSearch {
 	}
 
 
-	private static List<EDMDataproduct> filterByBoundingBox(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	private static List<DataProduct> filterByBoundingBox(List<DataProduct> datasetList, Map<String,Object> parameters) {
 		//check if the bbox passed inside the parameters is complete, if not exit and return the whole list of dataproduct
 		if (!parameters.containsKey(NORTHEN_LAT)
 				|| !parameters.containsKey(SOUTHERN_LAT)
@@ -131,23 +116,21 @@ public class DistributionFilterSearch {
 			//check if the bbox is parsed
 			if(inputGeometry!=null) {
 				//temporary dataproduct list, it will collect the dataproduct which are, even in part, contained inside the bbox
-				ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
+				ArrayList<DataProduct> tempDatasetList = new ArrayList<>();
 				//utility set to contain the all the uid of the selected dataproduct to avoid duplicates
 				Set<String> uidSet = new HashSet<>();
 				//iterate over every dataproduct
-				for (EDMDataproduct ds : datasetList) {
+				for (DataProduct ds : datasetList) {
 					//if the uid belong to an already selected dataproduct just skip the iteration
 					if(uidSet.contains(ds.getMetaId())) continue;
 					//iterate over every distribution related to the dataproduct taken into account
-					ds.getIsDistributionsByInstanceId().stream()
-					.map(EDMIsDistribution::getDistributionByInstanceDistributionId)
-					.map(EDMDistribution::getWebserviceByAccessService)
-					.filter(Objects::nonNull)
-					//iterate over the webservice related to the distribution
-					.forEach(ws -> {
-						if(Objects.nonNull(ws.getWebserviceSpatialsByInstanceId())){
-							//loop on every spatial of the webservice
-							for (EDMWebserviceSpatial wsSpatial : ws.getWebserviceSpatialsByInstanceId()) {
+					for (LinkedEntity distribution : ds.getDistribution()) {
+						Distribution distribution1 = (Distribution) LinkedEntityAPI.retrieveFromLinkedEntity(distribution);
+						for (LinkedEntity accessService : distribution1.getAccessService()) {
+							WebService ws = (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(accessService);
+
+							for (LinkedEntity wsSpatialLe : ws.getSpatialExtent()) {
+								Location wsSpatial = (Location) LinkedEntityAPI.retrieveFromLinkedEntity(wsSpatialLe);
 								try {
 									//parse the spatial of the webservice
 									Geometry dsGeometry = reader.read(wsSpatial.getLocation());
@@ -162,23 +145,31 @@ public class DistributionFilterSearch {
 								}
 							}
 						}
-					});
+					}
 					//if the uid belong to an already selected dataproduct just skip the iteration
 					if(uidSet.contains(ds.getMetaId())) continue;
 					//same operation done before for the webservice's spatial but now for the dataprodut spatial
-					if(ds.getDataproductSpatialsByInstanceId() != null){
-						for(EDMDataproductSpatial dsSpatial : ds.getDataproductSpatialsByInstanceId()){
-							Geometry dsGeometry = reader.read(dsSpatial.getLocation());
-							if (!uidSet.contains(ds.getMetaId()) && inputGeometry.intersects(dsGeometry)) {
-								tempDatasetList.add(ds);
-								uidSet.add(ds.getMetaId());
+					if(ds.getSpatialExtent() != null){
+						for (LinkedEntity wsSpatialLe : ds.getSpatialExtent()) {
+							Location wsSpatial = (Location) LinkedEntityAPI.retrieveFromLinkedEntity(wsSpatialLe);
+							try {
+								//parse the spatial of the webservice
+								Geometry dsGeometry = reader.read(wsSpatial.getLocation());
+								//if the dataproduct hasn't been selected yet and the spatial of the webservice
+								//intersect with the bbox, the dataproduct is selected.
+								if (!uidSet.contains(ds.getMetaId()) && inputGeometry.intersects(dsGeometry)) {
+									tempDatasetList.add(ds);
+									uidSet.add(ds.getMetaId());
+								}
+							} catch (ParseException e) {
+								LOGGER.error("Error occurs during BBOX dataproduct parsing", e);
 							}
 						}
 					}
 					//if the uid belong to an already selected dataproduct just skip the iteration
 					if(uidSet.contains(ds.getMetaId())) continue;
 					//if the dataproduct doesn't have any spatial information it is taken
-					if ( ds.getDataproductSpatialsByInstanceId() == null || ds.getDataproductSpatialsByInstanceId().isEmpty() ) {
+					if ( ds.getSpatialExtent() == null || ds.getSpatialExtent().isEmpty() ) {
 						tempDatasetList.add(ds);
 						uidSet.add(ds.getMetaId());
 					}
@@ -192,24 +183,13 @@ public class DistributionFilterSearch {
 		return datasetList;
 	}
 
-	private static List<EDMDataproduct> filterByDateRange(List<EDMDataproduct> datasetList, PeriodOfTime temporal) {
+	private static List<DataProduct> filterByDateRange(List<DataProduct> datasetList, PeriodOfTime temporal) {
 		if(temporal.getStartDate()!=null && temporal.getEndDate()!=null) {
-			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
+			ArrayList<DataProduct> tempDatasetList = new ArrayList<>();
 			datasetList.forEach(ds -> {
-				List<PeriodOfTime> dsTemporalList = ds.getDataproductTemporalsByInstanceId() != null ?
-						ds.getDataproductTemporalsByInstanceId().stream()
-						.map(elem -> {
-							PeriodOfTime periodOfTime = new PeriodOfTime();
-							periodOfTime.setStartDate(
-									elem.getStartdate() != null ?
-											elem.getStartdate().toLocalDateTime() : null
-									);
-							periodOfTime.setEndDate(
-									elem.getEnddate() != null ?
-											elem.getEnddate().toLocalDateTime() : null
-									);
-							return periodOfTime;
-						}).collect(Collectors.toList())
+				List<PeriodOfTime> dsTemporalList = ds.getTemporalExtent() != null ?
+						ds.getTemporalExtent().stream()
+						.map(elem -> (PeriodOfTime) LinkedEntityAPI.retrieveFromLinkedEntity(elem)).collect(Collectors.toList())
 						: new ArrayList<>();
 				if( dsTemporalList.size() > 0) {
 					if((dsTemporalList.get(0).getStartDate() == null || temporal.getEndDate() == null || dsTemporalList.get(0).getStartDate().isBefore(temporal.getEndDate()))
@@ -224,27 +204,27 @@ public class DistributionFilterSearch {
 		return datasetList;
 	}
 
-	private static List<EDMDataproduct> filterByOrganizations(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	private static List<DataProduct> filterByOrganizations(List<DataProduct> datasetList, Map<String,Object> parameters) {
 		if(parameters.containsKey("organisations")) {
 			List<String> organisations = Arrays.asList(parameters.get("organisations").toString().split(","));
 
-			HashSet<EDMDataproduct> tempDatasetList = new HashSet<>();
+			HashSet<DataProduct> tempDatasetList = new HashSet<>();
 			datasetList.forEach(ds -> {
 
 				List<DataServiceProvider> providers = new ArrayList<DataServiceProvider>();
-				providers.addAll(DataServiceProviderGeneration.getProviders(ds.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList())));
-				providers.addAll(DataServiceProviderGeneration.getProviders(ds.getIsDistributionsByInstanceId().stream()
-						.map(EDMIsDistribution::getDistributionByInstanceDistributionId)
-						.filter(Objects::nonNull)
-						.map(EDMDistribution::getWebserviceByAccessService)
-						.filter(Objects::nonNull)
-						.map(EDMWebservice::getEdmEntityIdByProvider)
-						.filter(Objects::nonNull).collect(Collectors.toList())));
+				providers.addAll(DataServiceProviderGeneration.getProviders(ds.getPublisher().stream().map(item -> (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(item)).collect(Collectors.toList())));
 
-
+				List<Organization> organisationList = new ArrayList<>();
+				for (LinkedEntity distribution : ds.getDistribution()) {
+					Distribution distribution1 = (Distribution) LinkedEntityAPI.retrieveFromLinkedEntity(distribution);
+					for (LinkedEntity accessService : distribution1.getAccessService()) {
+						WebService ws = (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(accessService);
+						organisationList.add((Organization) LinkedEntityAPI.retrieveFromLinkedEntity(ws.getProvider()));
+					}
+				}
+				providers.addAll(DataServiceProviderGeneration.getProviders(organisationList));
 
 				List<String> value = new ArrayList<>();
-
 
 				providers.forEach(resource->{
 					value.add(resource.getInstanceid());
@@ -268,9 +248,9 @@ public class DistributionFilterSearch {
 		return datasetList;
 	}
 
-	private static List<EDMDataproduct> filterByKeywords(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	private static List<DataProduct> filterByKeywords(List<DataProduct> datasetList, Map<String,Object> parameters) {
 		if(parameters.containsKey("keywords")) {
-			ArrayList<EDMDataproduct> tempDatasetList = new ArrayList<>();
+			ArrayList<DataProduct> tempDatasetList = new ArrayList<>();
 			String[] keywords = parameters.get("keywords").toString().split(",");
 			Set<String> keywordsSet = new HashSet<String>(Arrays.asList(keywords));
 			datasetList.forEach(ds -> {
@@ -283,16 +263,16 @@ public class DistributionFilterSearch {
 		return datasetList;
 	}
 
-	private static List<EDMDataproduct> filterByFullText(List<EDMDataproduct> datasetList, Map<String,Object> parameters) {
+	private static List<DataProduct> filterByFullText(List<DataProduct> datasetList, Map<String,Object> parameters) {
 		if(parameters.containsKey("q")) {
-			HashSet<EDMDataproduct> tempDatasetList = new HashSet<>();
+			HashSet<DataProduct> tempDatasetList = new HashSet<>();
 			String[] qs = parameters.get("q").toString().toLowerCase().split(",");
 
 			Set<String> qsSet = new HashSet<String>(Arrays.asList(qs));
 			
 			System.out.println(Arrays.toString(qs));
 
-			for (EDMDataproduct edmDataproduct : datasetList) {
+			for (DataProduct edmDataproduct : datasetList) {
 				Map<String, Boolean> qSMap = qsSet.stream()
 						.collect(Collectors.toMap(
 								key -> key, value -> Boolean.FALSE
@@ -315,8 +295,9 @@ public class DistributionFilterSearch {
 				}
 				
 				//identifier
-				if (edmDataproduct.getDataproductIdentifiersByInstanceId()!=null && !edmDataproduct.getDataproductIdentifiersByInstanceId().isEmpty()) {
-					for (EDMDataproductIdentifier edmIdentifier : edmDataproduct.getDataproductIdentifiersByInstanceId().stream().collect(Collectors.toList())) {
+				if (edmDataproduct.getIdentifier()!=null && !edmDataproduct.getIdentifier().isEmpty()) {
+					for (LinkedEntity linkedEntity : edmDataproduct.getIdentifier()) {
+						Identifier edmIdentifier = (Identifier) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity);
 						for (String q : qSMap.keySet()) {
 							if (edmIdentifier.getIdentifier().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
 							if (edmIdentifier.getType().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
@@ -326,14 +307,13 @@ public class DistributionFilterSearch {
 				}
 
 
-				if (edmDataproduct.getIsDistributionsByInstanceId() != null && !edmDataproduct.getIsDistributionsByInstanceId().isEmpty()) {
-					for (EDMDistribution edmDistribution : edmDataproduct.getIsDistributionsByInstanceId().stream().map(EDMIsDistribution::getDistributionByInstanceDistributionId).collect(Collectors.toList())) {
+				if (edmDataproduct.getDistribution() != null && !edmDataproduct.getDistribution().isEmpty()) {
+					for (LinkedEntity edmDistributionLe : edmDataproduct.getDistribution()) {
 
-						
+						Distribution edmDistribution = (Distribution) LinkedEntityAPI.retrieveFromLinkedEntity(edmDistributionLe);
 						//distribution title
-						if (edmDistribution.getDistributionTitlesByInstanceId() != null) {
-							edmDistribution.getDistributionTitlesByInstanceId()
-							.stream().map(EDMDistributionTitle::getTitle)
+						if (edmDistribution.getTitle() != null) {
+							edmDistribution.getTitle()
 							.forEach(title ->
 							{
 								for (String q : qSMap.keySet()) {
@@ -341,8 +321,7 @@ public class DistributionFilterSearch {
 										qSMap.put(q, Boolean.TRUE);
 									}
 								}
-							}
-									);
+							});
 						}
 						
 						if(Objects.nonNull(edmDistribution.getUid())){
@@ -352,9 +331,8 @@ public class DistributionFilterSearch {
 						}
 
 						//distribution description
-						if (edmDistribution.getDistributionDescriptionsByInstanceId() != null) {
-							edmDistribution.getDistributionDescriptionsByInstanceId()
-							.stream().map(EDMDistributionDescription::getDescription)
+						if (edmDistribution.getDescription() != null) {
+							edmDistribution.getDescription()
 							.forEach(description ->
 							{
 								for (String q : qSMap.keySet()) {
@@ -367,44 +345,46 @@ public class DistributionFilterSearch {
 						}
 
 						//webservice
-						if (edmDistribution.getWebserviceByAccessService() != null) {
-							EDMWebservice edmWebservice = edmDistribution.getWebserviceByAccessService();
+						if (edmDistribution.getAccessService() != null) {
+							for(LinkedEntity accessService : edmDistribution.getAccessService()){
+								WebService edmWebservice = (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(accessService);
 
-							if(Objects.nonNull(edmWebservice.getUid())){
-								for (String q : qSMap.keySet()) {
-									if (edmWebservice.getUid().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
-								}
-							}
-							
-							//webservice title
-							if (edmWebservice.getName() != null) {
-								for (String q : qSMap.keySet()) {
-									if (edmWebservice.getName().toLowerCase().contains(q)) {
-										qSMap.put(q, Boolean.TRUE);
+								if(Objects.nonNull(edmWebservice.getUid())){
+									for (String q : qSMap.keySet()) {
+										if (edmWebservice.getUid().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
 									}
 								}
-							}
 
-							//webservice description
-							if (edmWebservice.getDescription() != null) {
-								for (String q : qSMap.keySet()) {
-									if (edmWebservice.getDescription().toLowerCase().contains(q)) {
-										qSMap.put(q, Boolean.TRUE);
+								//webservice title
+								if (edmWebservice.getName() != null) {
+									for (String q : qSMap.keySet()) {
+										if (edmWebservice.getName().toLowerCase().contains(q)) {
+											qSMap.put(q, Boolean.TRUE);
+										}
 									}
 								}
-							}
 
-							if(Objects.nonNull(edmWebservice.getKeywords())){
-								List<String> webserviceKeywords = Arrays.stream(edmWebservice.getKeywords().split(","))
-										.map(String::toLowerCase)
-										.map(String::trim)
-										.collect(Collectors.toList());
-
-								for (String q : qSMap.keySet()) {
-									if (webserviceKeywords.contains(q)) qSMap.put(q, Boolean.TRUE);
+								//webservice description
+								if (edmWebservice.getDescription() != null) {
+									for (String q : qSMap.keySet()) {
+										if (edmWebservice.getDescription().toLowerCase().contains(q)) {
+											qSMap.put(q, Boolean.TRUE);
+										}
+									}
 								}
-							}
 
+								if(Objects.nonNull(edmWebservice.getKeywords())){
+									List<String> webserviceKeywords = Arrays.stream(edmWebservice.getKeywords().split(","))
+											.map(String::toLowerCase)
+											.map(String::trim)
+											.collect(Collectors.toList());
+
+									for (String q : qSMap.keySet()) {
+										if (webserviceKeywords.contains(q)) qSMap.put(q, Boolean.TRUE);
+									}
+								}
+
+							}
 						}
 
 					}

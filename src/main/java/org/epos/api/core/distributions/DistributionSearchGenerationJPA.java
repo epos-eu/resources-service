@@ -1,49 +1,48 @@
 package org.epos.api.core.distributions;
 
+import abstractapis.AbstractAPI;
+import commonapis.LinkedEntityAPI;
+import metadataapis.EntityNames;
+import model.StatusType;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.epos.api.beans.DataServiceProvider;
-import org.epos.api.beans.DiscoveryItem;
-import org.epos.api.beans.SearchResponse;
+import org.epos.api.beans.*;
 import org.epos.api.beans.DiscoveryItem.DiscoveryItemBuilder;
 import org.epos.api.core.AvailableFormatsGeneration;
 import org.epos.api.core.DataServiceProviderGeneration;
 import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.core.ZabbixExecutor;
 import org.epos.api.core.filtersearch.DistributionFilterSearch;
-import org.epos.api.beans.NodeFilters;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.Node;
-import org.epos.handler.dbapi.model.*;
-import org.epos.handler.dbapi.service.DBService;
-import org.epos.handler.dbapi.util.EDMUtil;
+import org.epos.eposdatamodel.*;
+import org.epos.eposdatamodel.DataProduct;
+import org.epos.eposdatamodel.Distribution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.stream.Collectors;
-import static org.epos.handler.dbapi.util.DBUtil.getFromDB;
+
 
 public class DistributionSearchGenerationJPA {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DistributionSearchGenerationJPA.class);
-
 	private static final String API_PATH_DETAILS  = EnvironmentVariables.API_CONTEXT+"/resources/details/";
-
 	private static final String PARAMETER__SCIENCE_DOMAIN = "sciencedomains";
 	private static final String PARAMETER__SERVICE_TYPE = "servicetypes";
 
 	public static SearchResponse generate(Map<String,Object> parameters) {
 
 		LOGGER.info("Requests start - JPA method");
-		EntityManager em = new DBService().getEntityManager();
 
 		long startTime = System.currentTimeMillis();
 
-		List<EDMDataproduct> dataproducts  = getFromDB(em, EDMDataproduct.class, "dataproduct.findAllByState", "STATE", "PUBLISHED");
-
+		// Retrieve all Dataproducts available
+		List<DataProduct> dataproducts  = (List<DataProduct>) AbstractAPI.retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll().parallelStream().filter(item -> ((org.epos.eposdatamodel.DataProduct) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+		List<SoftwareApplication> softwareApplications = AbstractAPI.retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll();
 
 		LOGGER.info("Apply filter using input parameters: "+parameters.toString());
+		// Apply filtering
 		dataproducts = DistributionFilterSearch.doFilters(dataproducts, parameters);
 
 		Map<String, DiscoveryItem> discoveryMap = new HashMap<String, DiscoveryItem>();
@@ -51,126 +50,84 @@ public class DistributionSearchGenerationJPA {
 		LOGGER.info("Start for each");
 
 		Set<String> keywords = new HashSet<>();
-		Set<EDMCategory> scienceDomains = new HashSet<>();
-		Set<EDMCategory> serviceTypes = new HashSet<>();
-		Set<EDMOrganization> organizations = new HashSet<>();
-		Set<EDMEdmEntityId> organizationsEntityIds = new HashSet<>();
+		Set<Category> scienceDomains = new HashSet<>();
+		Set<Category> serviceTypes = new HashSet<>();
+		Set<Organization> organizationsEntityIds = new HashSet<>();
 
-		dataproducts.stream().forEach(dataproduct -> {
+		dataproducts.parallelStream().forEach(dataproduct -> {
 
 			Set<String> facetsDataProviders = new HashSet<>();
+			List<String> categoryList = new ArrayList<>();
 
-			List<String> categoryList = dataproduct.getDataproductCategoriesByInstanceId().stream()
-					.map(EDMDataproductCategory::getCategoryByCategoryId)
-					.filter(Objects::nonNull)
-					.filter(e -> e.getUid().contains("category:"))
-					.map(EDMCategory::getUid)
-					.collect(Collectors.toList());
+			// DATA PRODUCT
+			if(dataproduct.getCategory()!=null)
+				categoryList = dataproduct.getCategory().parallelStream()
+						.map(LinkedEntity::getUid)
+						.filter(uid -> uid.contains("category:"))
+						.collect(Collectors.toList());
 
-			List<EDMWebservice> webservices = dataproduct.getIsDistributionsByInstanceId().stream()
-					.map(EDMIsDistribution::getDistributionByInstanceDistributionId)
-					.filter(Objects::nonNull)
-					.map(EDMDistribution::getWebserviceByAccessService)
-					.filter(Objects::nonNull)
-					.collect(Collectors.toList());
+			if(dataproduct.getPublisher()!=null)
+				dataproduct.getPublisher().parallelStream()
+						.map(linkedEntity -> (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
+						.filter(Objects::nonNull)
+						.map(Organization::getLegalName)
+						.collect(Collectors.toList())
+						.parallelStream()
+						.forEach(facetsDataProviders::addAll);
 
-			dataproduct.getPublishersByInstanceId().stream()
-			.map(EDMPublisher::getEdmEntityIdByMetaOrganizationId)
-			.filter(edmMetaId -> Objects.nonNull(edmMetaId.getOrganizationsByMetaId()) && !edmMetaId.getOrganizationsByMetaId().isEmpty())
-			.map(edmMetaId -> edmMetaId.getOrganizationsByMetaId().stream().findFirst().orElse(null))
-			.filter(Objects::nonNull)
-			.map(EDMOrganization::getOrganizationLegalnameByInstanceId)
-			.flatMap(Collection::stream)
-			.filter(legalname -> Objects.nonNull(legalname))
-			.map(EDMOrganizationLegalname::getLegalname)
-			.forEach(facetsDataProviders::add);
+			List<String> finalCategoryList = categoryList;
 
-			webservices.stream()
-			.map(EDMWebservice::getEdmEntityIdByProvider)
-			.filter(Objects::nonNull)
-			.collect(Collectors.toList())
-			.stream()
-			.filter(edmMetaId -> Objects.nonNull(edmMetaId.getOrganizationsByMetaId()) && !edmMetaId.getOrganizationsByMetaId().isEmpty())
-			.map(edmMetaId -> new ArrayList<>(edmMetaId.getOrganizationsByMetaId()))
-			.map(list -> {
-				list.sort(EDMUtil::compareEntityVersion);
-				return list;
-			})
-			.map(list -> list.get(0))
-			.filter(edmDataproductRelatedOrganization -> Objects.nonNull(edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId()) && !edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId().isEmpty())
-			.forEach(organizations::add);
+			Optional.ofNullable(dataproduct.getDistribution())
+			.ifPresent(isDistribution -> isDistribution.parallelStream()
+					.forEach(distributionLe -> {
 
-			//dp.getPublishersByInstanceId().stream().map(EDMPublisher::getEdmEntityIdByMetaOrganizationId).collect(Collectors.toList())
-			
-			dataproduct.getPublishersByInstanceId().stream()
-			.map(EDMPublisher::getEdmEntityIdByMetaOrganizationId)
-			.filter(Objects::nonNull)
-			.collect(Collectors.toList())
-			.forEach(organizationsEntityIds::add);
+						Distribution distribution = (Distribution) LinkedEntityAPI.retrieveFromLinkedEntity(distributionLe);
 
-			webservices.stream()
-			.map(EDMWebservice::getEdmEntityIdByProvider)
-			.filter(Objects::nonNull)
-			.collect(Collectors.toList())
-			.forEach(organizationsEntityIds::add);
-
-			Optional.ofNullable(dataproduct.getIsDistributionsByInstanceId())
-			.ifPresent(isDistribution -> isDistribution.stream()
-					.map(EDMIsDistribution::getDistributionByInstanceDistributionId)
-					.filter(Objects::nonNull)
-					.forEach(distribution -> {
 						Set<String> facetsServiceProviders = new HashSet<>();
 
-						dataproduct.getPublishersByInstanceId().stream()
-						.map(EDMPublisher::getEdmEntityIdByMetaOrganizationId)
-						.filter(edmMetaId -> Objects.nonNull(edmMetaId.getOrganizationsByMetaId()) && !edmMetaId.getOrganizationsByMetaId().isEmpty())
-						.map(edmMetaId -> edmMetaId.getOrganizationsByMetaId().stream().findFirst().orElse(null))
-						.filter(Objects::nonNull)
-						.map(EDMOrganization::getOrganizationLegalnameByInstanceId)
-						.flatMap(Collection::stream)
-						.filter(legalname -> Objects.nonNull(legalname))
-						.map(EDMOrganizationLegalname::getLegalname)
-						.forEach(facetsDataProviders::add);
+						List<AvailableFormat> availableFormats = new ArrayList<>();
 
-						if (Objects.nonNull(distribution.getWebserviceByAccessService()) &&
-								Objects.nonNull(distribution.getWebserviceByAccessService().getEdmEntityIdByProvider())) {
+						System.out.println(dataproduct.getPublisher());
+						if(dataproduct.getPublisher()!=null){
+							for(Organization organization : dataproduct.getPublisher().parallelStream()
+									.map(linkedEntity -> (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity)).collect(Collectors.toList())){
+								facetsDataProviders.add(String.join(",",organization.getLegalName()));
+								organizationsEntityIds.add(organization);
+							}
+						}
+						if(distribution.getAccessService()!=null){
+							for(WebService webService : distribution.getAccessService().parallelStream().map(linkedEntity -> (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity)).collect(Collectors.toList())){
+								availableFormats.addAll(AvailableFormatsGeneration.generate(distribution, webService, softwareApplications));
 
-							distribution.getWebserviceByAccessService()
-							.getEdmEntityIdByProvider()
-							.getOrganizationsByMetaId()
-							.stream()
-							.findFirst()
-							.ifPresent(edmWebserviceRelatedOrganization ->
-							edmWebserviceRelatedOrganization.getOrganizationLegalnameByInstanceId()
-							.stream()
-							.findFirst()
-							.map(EDMOrganizationLegalname::getLegalname)
-							.filter(Objects::nonNull)
-							.ifPresent(facetsServiceProviders::add)
-									);
+								if(webService.getProvider()!=null){
+									Organization organization = (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(webService.getProvider());
+									facetsServiceProviders.add(String.join(",",organization.getLegalName()));
+									organizationsEntityIds.add(organization);
+								}
+								// Service Types
+								if(webService.getCategory()!=null){
+									webService.getCategory()
+											.parallelStream()
+											.map(linkedEntity -> (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
+											.filter(Objects::nonNull)
+											.forEach(serviceTypes::add);
+								}
+							}
 						}
 
-						DiscoveryItem discoveryItem = new DiscoveryItemBuilder(distribution.getMetaId(),
-								EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.getMetaId(),
-								EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.getMetaId()+"?extended=true")
+						DiscoveryItem discoveryItem = new DiscoveryItemBuilder(distribution.getInstanceId(),
+								EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.getInstanceId(),
+								EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.getInstanceId()+"?extended=true")
 								.uid(distribution.getUid())
-								.title(distribution.getDistributionTitlesByInstanceId()
-										.stream()
-										.findFirst()
-										.map(EDMDistributionTitle::getTitle)
-										.orElse(null))
-								.description(distribution.getDistributionDescriptionsByInstanceId()
-										.stream()
-										.findFirst()
-										.map(EDMDistributionDescription::getDescription)
-										.orElse(null))
-								.availableFormats(AvailableFormatsGeneration.generate(distribution))
+								.title(String.join(";",distribution.getTitle()))
+								.description(String.join(";",distribution.getDescription()))
+								.availableFormats(availableFormats)
 								.setSha256id(DigestUtils.sha256Hex(distribution.getUid()))
 								.setDataprovider(facetsDataProviders)
 								.setServiceProvider(facetsServiceProviders)
-								.setCategories(categoryList.isEmpty() ? null : categoryList)
+								.setCategories(finalCategoryList.isEmpty() ? null : finalCategoryList)
 								.build();
-						
+
 						System.out.println(discoveryItem);
 
 						if (EnvironmentVariables.MONITORING != null && EnvironmentVariables.MONITORING.equals("true")) {
@@ -190,21 +147,12 @@ public class DistributionSearchGenerationJPA {
 					.collect(Collectors.toSet()));
 
 			// Science Domains
-			scienceDomains.addAll(Optional.ofNullable(dataproduct.getDataproductCategoriesByInstanceId())
+			scienceDomains.addAll(Optional.ofNullable(dataproduct.getCategory())
 					.orElse(Collections.emptyList())
-					.stream()
-					.map(EDMDataproductCategory::getCategoryByCategoryId)
+					.parallelStream()
+					.map(linkedEntity -> (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
 					.filter(Objects::nonNull)
 					.collect(Collectors.toSet()));
-
-			// Service Types
-			webservices.stream()
-			.flatMap(webservice -> Optional.ofNullable(webservice.getWebserviceCategoriesByInstanceId())
-					.orElse(Collections.emptyList())
-					.stream()
-					.map(EDMWebserviceCategory::getCategoryByCategoryId)
-					.filter(Objects::nonNull))
-			.forEach(serviceTypes::add);
 		});
 
 		LOGGER.info("Final number of results: "+discoveryMap.values().size());
@@ -233,7 +181,7 @@ public class DistributionSearchGenerationJPA {
 
 		LOGGER.info("Number of organizations retrieved "+organizationsEntityIds.size());
 
-		List<String> keywordsCollection = keywords.stream()
+		List<String> keywordsCollection = keywords.parallelStream()
 				.filter(Objects::nonNull)
 				.sorted()
 				.collect(Collectors.toList());
@@ -246,14 +194,14 @@ public class DistributionSearchGenerationJPA {
 			keywordsNodes.addChild(node);
 		});
 
-		/*List<EDMOrganization> organizationsCollection = organizations.stream()
-				.sorted(Comparator.comparing(o -> o.getOrganizationLegalnameByInstanceId().stream()
+		/*List<EDMOrganization> organizationsCollection = organizations.parallelStream()
+				.sorted(Comparator.comparing(o -> o.getOrganizationLegalnameByInstanceId().parallelStream()
 						.map(EDMOrganizationLegalname::getLegalname)
 						.findFirst()
 						.orElse("")))
 				.collect(Collectors.toList());*/
 
-		List<DataServiceProvider> collection = DataServiceProviderGeneration.getProviders(new ArrayList<EDMEdmEntityId>(organizationsEntityIds));
+		List<DataServiceProvider> collection = DataServiceProviderGeneration.getProviders(new ArrayList<Organization>(organizationsEntityIds));
 
 		NodeFilters organisationsNodes = new NodeFilters("organisations");
 
@@ -273,15 +221,15 @@ public class DistributionSearchGenerationJPA {
 				organisationsNodes.addChild(relatedNodeDataServiceProvider);
 			});
 		});
-		
+
 		NodeFilters scienceDomainsNodes = new NodeFilters(PARAMETER__SCIENCE_DOMAIN);
 		scienceDomains.forEach(r ->
-		scienceDomainsNodes.addChild(new NodeFilters(r.getId(), r.getName()))
+		scienceDomainsNodes.addChild(new NodeFilters(r.getInstanceId(), r.getName()))
 				);
 
 		NodeFilters serviceTypesNodes = new NodeFilters(PARAMETER__SERVICE_TYPE);
 		serviceTypes.forEach(r ->
-		serviceTypesNodes.addChild(new NodeFilters(r.getId(), r.getName()))
+		serviceTypesNodes.addChild(new NodeFilters(r.getInstanceId(), r.getName()))
 				);
 
 		ArrayList<NodeFilters> filters = new ArrayList<NodeFilters>();

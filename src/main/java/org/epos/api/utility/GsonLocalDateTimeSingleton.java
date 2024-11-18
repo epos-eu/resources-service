@@ -3,8 +3,6 @@ package org.epos.api.utility;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import java.lang.reflect.Modifier;
 import java.time.LocalDateTime;
 

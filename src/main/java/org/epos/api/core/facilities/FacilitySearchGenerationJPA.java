@@ -1,5 +1,9 @@
 package org.epos.api.core.facilities;
 
+import abstractapis.AbstractAPI;
+import commonapis.LinkedEntityAPI;
+import metadataapis.EntityNames;
+import model.StatusType;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.epos.api.beans.AvailableFormat;
 import org.epos.api.beans.DataServiceProvider;
@@ -13,15 +17,15 @@ import org.epos.api.enums.AvailableFormatType;
 import org.epos.api.beans.NodeFilters;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.Node;
-import org.epos.handler.dbapi.model.*;
-import org.epos.handler.dbapi.service.DBService;
+import org.epos.eposdatamodel.Category;
+import org.epos.eposdatamodel.Facility;
+import org.epos.eposdatamodel.LinkedEntity;
+import org.epos.eposdatamodel.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.stream.Collectors;
-import static org.epos.handler.dbapi.util.DBUtil.getFromDB;
 
 public class FacilitySearchGenerationJPA {
 
@@ -41,13 +45,12 @@ public class FacilitySearchGenerationJPA {
 	public static SearchResponse generate(Map<String,Object> parameters) {
 
 		LOGGER.info("Requests start - JPA method");
-		EntityManager em = new DBService().getEntityManager();
 
 		long startTime = System.currentTimeMillis();
 
-		List<EDMFacility> facilities  = getFromDB(em, EDMFacility.class, "facility.findAllByState", "STATE", "PUBLISHED");
-		List<EDMOrganization> organizationForOwners  = getFromDB(em, EDMOrganization.class, "organization.findAllByState", "STATE", "PUBLISHED");
-		List<EDMCategory> categoriesFromDB = getFromDB(em, EDMCategory.class, "EDMCategory.findAll");
+		List<Facility> facilities  = (List<Facility>) AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Facility) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+		List<Organization> organizationForOwners  = (List<Organization>) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Organization) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+		List<Category> categoriesFromDB = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Category) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 
 
 		LOGGER.info("Apply filter using input parameters: "+parameters.toString());
@@ -58,47 +61,46 @@ public class FacilitySearchGenerationJPA {
 		LOGGER.info("Start for each");
 
 		Set<String> keywords = new HashSet<>();
-		Set<EDMCategory> facilityTypes = new HashSet<>();
-		Set<EDMCategory> equipmentTypes = new HashSet<>();
-		Set<EDMEdmEntityId> organizationsEntityIds = new HashSet<>();
+		Set<Category> facilityTypes = new HashSet<>();
+		Set<Category> equipmentTypes = new HashSet<>();
+		Set<Organization> organizationsEntityIds = new HashSet<>();
 
 		facilities.stream().forEach(facility -> {
 
 			Set<String> facetsFacilityProviders = new HashSet<>();
 
-			List<String> categoryList = facility.getFacilityCategoriesByInstanceId().stream()
-					.map(EDMFacilityCategory::getCategoryByCategoryId)
-					.filter(Objects::nonNull)
-					.filter(e -> e.getUid().contains("category:"))
-					.map(EDMCategory::getUid)
+			List<String> categoryList = facility.getCategory().stream()
+					.map(linkedEntity -> (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
+					.map(Category::getUid)
+					.filter(uid -> uid.contains("category:"))
 					.collect(Collectors.toList());
 
 
-			if(facility.getEquipmentFacilitiesByInstanceId()!=null) {
-				organizationForOwners.stream()
-				.map(EDMOrganization::getOwnsByInstanceId)
-				.filter(Objects::nonNull)
-				.forEach(organizationowner->{
-					organizationowner.stream()
-					.filter(edmEntity -> edmEntity.getEntityMetaId().equals(facility.getMetaId()))
-					.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
-					.map(EDMOrganization::getOrganizationLegalnameByInstanceId)
-					.flatMap(Collection::stream)
-					.filter(legalname -> Objects.nonNull(legalname))
-					.map(EDMOrganizationLegalname::getLegalname)
-					.forEach(facetsFacilityProviders::add);
-
-					organizationowner.stream()
-					.filter(edmEntity -> edmEntity.getEntityMetaId().equals(facility.getMetaId()))
-					.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
-					.map(EDMOrganization::getEdmEntityIdByMetaId)
-					.filter(Objects::nonNull)
-					.collect(Collectors.toList())
-					.forEach(organizationsEntityIds::add);
-
-				});
-
-			}
+//TODO:			if(facility.getEquipmentFacilitiesByInstanceId()!=null) {
+//				organizationForOwners.stream()
+//				.map(EDMOrganization::getOwnsByInstanceId)
+//				.filter(Objects::nonNull)
+//				.forEach(organizationowner->{
+//					organizationowner.stream()
+//					.filter(edmEntity -> edmEntity.getEntityMetaId().equals(facility.getMetaId()))
+//					.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
+//					.map(EDMOrganization::getOrganizationLegalnameByInstanceId)
+//					.flatMap(Collection::stream)
+//					.filter(legalname -> Objects.nonNull(legalname))
+//					.map(EDMOrganizationLegalname::getLegalname)
+//					.forEach(facetsFacilityProviders::add);
+//
+//					organizationowner.stream()
+//					.filter(edmEntity -> edmEntity.getEntityMetaId().equals(facility.getMetaId()))
+//					.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
+//					.map(EDMOrganization::getEdmEntityIdByMetaId)
+//					.filter(Objects::nonNull)
+//					.collect(Collectors.toList())
+//					.forEach(organizationsEntityIds::add);
+//
+//				});
+//
+//			}
 
 			DiscoveryItem discoveryItem = new DiscoveryItemBuilder(facility.getMetaId(),
 					EnvironmentVariables.API_HOST + API_PATH_DETAILS + facility.getMetaId(),
@@ -129,14 +131,14 @@ public class FacilitySearchGenerationJPA {
 
 
 			//Equipment types
-			if(facility.getEquipmentFacilitiesByInstanceId()!=null) {
-				for(EDMEquipmentFacility item : facility.getEquipmentFacilitiesByInstanceId()) {
-					categoriesFromDB
-					.stream()
-					.filter(cat -> cat.getUid().equals(item.getEquipmentByInstanceEquipmentId().getType()))
-					.forEach(equipmentTypes::add);
-				}
-			}
+//TODO:			if(facility.getEquipmentFacilitiesByInstanceId()!=null) {
+//				for(EDMEquipmentFacility item : facility.getEquipmentFacilitiesByInstanceId()) {
+//					categoriesFromDB
+//					.stream()
+//					.filter(cat -> cat.getUid().equals(item.getEquipmentByInstanceEquipmentId().getType()))
+//					.forEach(equipmentTypes::add);
+//				}
+//			}
 
 			discoveryMap.put(discoveryItem.getSha256id(), discoveryItem);
 		});
@@ -177,7 +179,7 @@ public class FacilitySearchGenerationJPA {
 			keywordsNodes.addChild(node);
 		});
 
-		List<DataServiceProvider> collection = DataServiceProviderGeneration.getProviders(new ArrayList<EDMEdmEntityId>(organizationsEntityIds));
+		List<DataServiceProvider> collection = DataServiceProviderGeneration.getProviders(new ArrayList<Organization>(organizationsEntityIds));
 
 		NodeFilters organisationsNodes = new NodeFilters("organisations");
 
@@ -202,12 +204,12 @@ public class FacilitySearchGenerationJPA {
 
 		NodeFilters facilityTypesNodes = new NodeFilters(PARAMETER_FACILITY_TYPES);
 		facilityTypes.forEach(r ->
-		facilityTypesNodes.addChild(new NodeFilters(r.getId(), r.getName()))
+		facilityTypesNodes.addChild(new NodeFilters(r.getInstanceId(), r.getName()))
 				);
 
 		NodeFilters equipmentTypesNodes = new NodeFilters(PARAMETER_EQUIPMENT_TYPES);
 		equipmentTypes.forEach(r ->
-		equipmentTypesNodes.addChild(new NodeFilters(r.getId(), r.getName()))
+		equipmentTypesNodes.addChild(new NodeFilters(r.getInstanceId(), r.getName()))
 				);
 
 		ArrayList<NodeFilters> filters = new ArrayList<NodeFilters>();

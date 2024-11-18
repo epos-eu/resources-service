@@ -3,17 +3,11 @@ package org.epos.api.core.filtersearch;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import commonapis.LinkedEntityAPI;
 import org.epos.api.beans.DataServiceProvider;
 import org.epos.api.core.DataServiceProviderGeneration;
 import org.epos.api.utility.BBoxToPolygon;
-import org.epos.handler.dbapi.model.EDMCategory;
-import org.epos.handler.dbapi.model.EDMEdmEntityId;
-import org.epos.handler.dbapi.model.EDMEquipment;
-import org.epos.handler.dbapi.model.EDMEquipmentFacility;
-import org.epos.handler.dbapi.model.EDMFacility;
-import org.epos.handler.dbapi.model.EDMFacilityService;
-import org.epos.handler.dbapi.model.EDMOrganization;
-import org.epos.handler.dbapi.model.EDMOrganizationOwner;
+import org.epos.eposdatamodel.*;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.io.ParseException;
@@ -35,7 +29,7 @@ public class FacilityFilterSearch {
 	private static final String PARAMETER_FACILITY_TYPES = "facilitytypes";
 	private static final String PARAMETER_EQUIPMENT_TYPES = "equipmenttypes";
 
-	public static List<EDMFacility> doFilters(List<EDMFacility> facilityList, Map<String,Object> parameters, List<EDMCategory> categories, List<EDMOrganization> organizationForOwners) {
+	public static List<Facility> doFilters(List<Facility> facilityList, Map<String,Object> parameters, List<Category> categories, List<Organization> organizationForOwners) {
 
 		facilityList = filterFacilityByFullText(facilityList, parameters);
 		facilityList = filterFacilityByKeywords(facilityList, parameters);
@@ -47,17 +41,17 @@ public class FacilityFilterSearch {
 		return facilityList;
 	}
 
-	private static List<EDMFacility> filterByFacilityType(List<EDMFacility> facilityList, Map<String,Object> parameters, List<EDMCategory> categories) {
+	private static List<Facility> filterByFacilityType(List<Facility> facilityList, Map<String,Object> parameters, List<Category> categories) {
 
 		if(parameters.containsKey(PARAMETER_FACILITY_TYPES)) {
-			ArrayList<EDMFacility> tempFacilityList = new ArrayList<>();
+			ArrayList<Facility> tempFacilityList = new ArrayList<>();
 			List<String> scienceDomainsParameters = List.of(parameters.get(PARAMETER_FACILITY_TYPES).toString().split(","));
 			facilityList.forEach(facility -> {
 				List<String> facilityTypes = new ArrayList<String>();
 				categories
 				.stream()
 				.filter(cat -> cat.getUid().equals(facility.getType()))
-				.map(EDMCategory::getId)
+				.map(Category::getInstanceId)
 				.forEach(facilityTypes::add);
 
 				if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){
@@ -69,24 +63,25 @@ public class FacilityFilterSearch {
 		return facilityList;
 	}
 
-	private static List<EDMFacility> filterByEquipmentType(List<EDMFacility> facilityList, Map<String,Object> parameters, List<EDMCategory> categories) {
+	private static List<Facility> filterByEquipmentType(List<Facility> facilityList, Map<String,Object> parameters, List<Category> categories) {
 
 		if(parameters.containsKey(PARAMETER_EQUIPMENT_TYPES)) {
-			ArrayList<EDMFacility> tempFacilityList = new ArrayList<>();
+			ArrayList<Facility> tempFacilityList = new ArrayList<>();
 			List<String> scienceDomainsParameters = List.of(parameters.get(PARAMETER_EQUIPMENT_TYPES).toString().split(","));
 			facilityList.forEach(facility -> {
 				List<String> facilityTypes = new ArrayList<String>();
-				if(facility.getEquipmentFacilitiesByInstanceId()!=null) {
-					for(EDMEquipmentFacility item : facility.getEquipmentFacilitiesByInstanceId()) {
-						categories
-						.stream()
-						.filter(cat -> cat.getUid().equals(item.getEquipmentByInstanceEquipmentId().getType()))
-						.map(EDMCategory::getId)
-						.forEach(facilityTypes::add);
-					}
-					if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){
-						tempFacilityList.add(facility);
-					}
+				if(facility.getIsPartOf()!=null) {
+//	TODO:				for(LinkedEntity item : facility.getIsPartOf()) {
+//
+//						categories
+//						.stream()
+//						.filter(cat -> cat.getUid().equals(item.getEquipmentByInstanceEquipmentId().getType()))
+//						.map(Category::getId)
+//						.forEach(facilityTypes::add);
+//					}
+//					if(!Collections.disjoint(facilityTypes, scienceDomainsParameters)){
+//						tempFacilityList.add(facility);
+//					}
 				}
 			});
 			facilityList = tempFacilityList;
@@ -94,7 +89,7 @@ public class FacilityFilterSearch {
 		return facilityList;
 	}
 
-	private static List<EDMFacility> filterFacilityByBoundingBox(List<EDMFacility> facilityList, Map<String,Object> parameters) {
+	private static List<Facility> filterFacilityByBoundingBox(List<Facility> facilityList, Map<String,Object> parameters) {
 		//check if the bbox passed inside the parameters is complete, if not exit and return the whole list of facility
 		if (!parameters.containsKey(NORTHEN_LAT)
 				|| !parameters.containsKey(SOUTHERN_LAT)
@@ -109,22 +104,22 @@ public class FacilityFilterSearch {
 			//check if the bbox is parsed
 			if(inputGeometry!=null) {
 				//temporary facility list, it will collect the facility which are, even in part, contained inside the bbox
-				ArrayList<EDMFacility> tempFacilityList = new ArrayList<>();
+				ArrayList<Facility> tempFacilityList = new ArrayList<>();
 				//utility set to contain the all the uid of the selected facility to avoid duplicates
 				Set<String> uidSet = new HashSet<>();
 				//iterate over every dataproduct
-				for (EDMFacility fac : facilityList) {
+				for (Facility fac : facilityList) {
 					//if the uid belong to an already selected facility just skip the iteration
 					if(uidSet.contains(fac.getMetaId())) continue;
 					//iterate over every distribution related to the facility taken into account
-					fac.getFacilitySpatialsByInstanceId()
-					.forEach(spatial -> {
-						if(Objects.nonNull(spatial.getLocation())){
+					if(fac.getSpatialExtent() != null){
+						for (LinkedEntity spatialLe : fac.getSpatialExtent()) {
+							Location wsSpatial = (Location) LinkedEntityAPI.retrieveFromLinkedEntity(spatialLe);
 							try {
 								//parse the spatial of the webservice
-								Geometry dsGeometry = reader.read(spatial.getLocation());
-								//if the facility hasn't been selected yet and the spatial of the facility
-								//intersect with the bbox, the facility is selected.
+								Geometry dsGeometry = reader.read(wsSpatial.getLocation());
+								//if the dataproduct hasn't been selected yet and the spatial of the webservice
+								//intersect with the bbox, the dataproduct is selected.
 								if (!uidSet.contains(fac.getMetaId()) && inputGeometry.intersects(dsGeometry)) {
 									tempFacilityList.add(fac);
 									uidSet.add(fac.getMetaId());
@@ -133,7 +128,7 @@ public class FacilityFilterSearch {
 								LOGGER.error("Error occurs during BBOX dataproduct parsing", e);
 							}
 						}
-					});
+					}
 				}
 				//replace the old facility list with the new temporary filtered facility list
 				facilityList = tempFacilityList;
@@ -145,28 +140,28 @@ public class FacilityFilterSearch {
 	}
 
 
-	private static List<EDMFacility> filterFacilityByOrganizations(List<EDMFacility> facilityList, Map<String,Object> parameters, List<EDMOrganization> organizationForOwners) {
+	private static List<Facility> filterFacilityByOrganizations(List<Facility> facilityList, Map<String,Object> parameters, List<Organization> organizationForOwners) {
 		if(parameters.containsKey("organisations")) {
 			List<String> organisations = Arrays.asList(parameters.get("organisations").toString().split(","));
 
-			HashSet<EDMFacility> tempFacilityList = new HashSet<>();
+			HashSet<Facility> tempFacilityList = new HashSet<>();
 			facilityList.forEach(fac -> {
 
-				List<EDMEdmEntityId> organizationsEntityIds = new ArrayList<>();
-
-				organizationForOwners.stream()
-				.map(EDMOrganization::getOwnsByInstanceId)
-				.filter(Objects::nonNull)
-				.forEach(organizationowner->{
-					organizationowner.stream()
-					.filter(edmEntity -> edmEntity.getEntityMetaId().equals(fac.getMetaId()))
-					.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
-					.map(EDMOrganization::getEdmEntityIdByMetaId)
-					.filter(Objects::nonNull)
-					.collect(Collectors.toList())
-					.forEach(organizationsEntityIds::add);
-
-				});
+				List<Organization> organizationsEntityIds = new ArrayList<>();
+//TODO:
+//				organizationForOwners.stream()
+//				.map(Organization::getOwns)
+//				.filter(Objects::nonNull)
+//				.forEach(organizationowner->{
+//					organizationowner.stream()
+//					.filter(edmEntity -> edmEntity.getMetaId().equals(fac.getMetaId()))
+//					.map(OrganizationOwner::getOrganizationByInstanceOrganizationId)
+//					.map(Organization::getEdmEntityIdByMetaId)
+//					.filter(Objects::nonNull)
+//					.collect(Collectors.toList())
+//					.forEach(organizationsEntityIds::add);
+//
+//				});
 
 
 				List<DataServiceProvider> providers = new ArrayList<DataServiceProvider>();
@@ -196,9 +191,9 @@ public class FacilityFilterSearch {
 	}
 
 
-	private static List<EDMFacility> filterFacilityByKeywords(List<EDMFacility> facilityList, Map<String,Object> parameters) {
+	private static List<Facility> filterFacilityByKeywords(List<Facility> facilityList, Map<String,Object> parameters) {
 		if(parameters.containsKey("keywords")) {
-			ArrayList<EDMFacility> tempFacilityList = new ArrayList<>();
+			ArrayList<Facility> tempFacilityList = new ArrayList<>();
 			String[] keywords = parameters.get("keywords").toString().split(",");
 			facilityList.forEach(fac -> {
 				if(Objects.nonNull(fac.getKeywords())){
@@ -217,12 +212,12 @@ public class FacilityFilterSearch {
 		return facilityList;
 	}
 
-	private static List<EDMFacility> filterFacilityByFullText(List<EDMFacility> facilityList, Map<String,Object> parameters) {
+	private static List<Facility> filterFacilityByFullText(List<Facility> facilityList, Map<String,Object> parameters) {
 		if(parameters.containsKey("q")) {
-			HashSet<EDMFacility> tempDatasetList = new HashSet<>();
+			HashSet<Facility> tempDatasetList = new HashSet<>();
 			String[] qs = parameters.get("q").toString().toLowerCase().split(",");
 
-			for (EDMFacility edmFacility : facilityList) {
+			for (Facility edmFacility : facilityList) {
 				Map<String, Boolean> qSMap = Arrays.stream(qs)
 						.collect(Collectors.toMap(
 								key -> key, value -> Boolean.FALSE

@@ -1,20 +1,22 @@
 package org.epos.api.core.organizations;
 
+import abstractapis.AbstractAPI;
+import commonapis.LinkedEntityAPI;
+import metadataapis.EntityNames;
+import metadataapis.OrganizationAPI;
+import metadataapis.WebServiceAPI;
+import model.EdmEntityId;
+import model.StatusType;
 import org.epos.api.beans.DataServiceProvider;
-import org.epos.api.beans.NodeFilters;
 import org.epos.api.beans.OrganizationBean;
 import org.epos.api.core.DataServiceProviderGeneration;
 import org.epos.api.core.filtersearch.OrganizationFilterSearch;
-import org.epos.handler.dbapi.model.*;
-import org.epos.handler.dbapi.service.DBService;
+import org.epos.eposdatamodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.epos.handler.dbapi.util.DBUtil.getFromDB;
 
 public class OrganisationsGeneration {
 
@@ -24,54 +26,50 @@ public class OrganisationsGeneration {
 	public static List<OrganizationBean> generate(Map<String,Object> parameters) {
 
 		LOGGER.info("Requests start - JPA method");
-		EntityManager em = new DBService().getEntityManager();
 
-		List<EDMOrganization> organisations  = null;
+		List<Organization> organisations;
 
 		if(parameters.containsKey("id")) {
-			organisations = getFromDB(em, EDMOrganization.class, "organization.findByInstanceId", "INSTANCEID", parameters.get("id"));
+			organisations = (List<Organization>) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieve(parameters.get("id").toString());
 		}else {
-			organisations = getFromDB(em, EDMOrganization.class, "organization.findAllByState", "STATE", "PUBLISHED");
+			organisations = (List<Organization>) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Organization) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 			
 			if(parameters.containsKey("type")) {
-				List<EDMDataproduct> dataproducts = getFromDB(em, EDMDataproduct.class, "dataproduct.findAllByState", "STATE", "PUBLISHED");
-				List<EDMOrganization> tempOrganizationList = new ArrayList<>();
+				List<Distribution> distributions = (List<org.epos.eposdatamodel.Distribution>) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Distribution) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 
-				Set<EDMEdmEntityId> organizationsEntityIds = new HashSet<>();
+				List<Organization> tempOrganizationList;
 
-				dataproducts.stream().forEach(dataproduct -> {
-					List<EDMWebservice> webservices = dataproduct.getIsDistributionsByInstanceId().stream()
-							.map(EDMIsDistribution::getDistributionByInstanceDistributionId)
-							.filter(Objects::nonNull)
-							.map(EDMDistribution::getWebserviceByAccessService)
-							.filter(Objects::nonNull)
-							.collect(Collectors.toList());
+				Set<Organization> organizationsEntityIds = new HashSet<>();
 
+				distributions.forEach(distribution -> {
 					if(parameters.get("type").toString().toLowerCase().contains("dataproviders")) {
-						dataproduct.getPublishersByInstanceId().stream()
-						.map(EDMPublisher::getEdmEntityIdByMetaOrganizationId)
-						.filter(Objects::nonNull)
-						.collect(Collectors.toList())
-						.forEach(organizationsEntityIds::add);
+						if(distribution.getDataProduct()!=null){
+							for (LinkedEntity dataproduct : distribution.getDataProduct()) {
+								DataProduct dataProduct = (DataProduct) LinkedEntityAPI.retrieveFromLinkedEntity(dataproduct);
+								if(dataProduct.getPublisher()!=null)
+									dataProduct.getPublisher().forEach(publisher -> {
+										organizationsEntityIds.add((Organization) LinkedEntityAPI.retrieveFromLinkedEntity(publisher));
+									});
+							}
+						}
 					}
-					if(parameters.get("type").toString().toLowerCase().contains("serviceproviders")) {
-						webservices.stream()
-						.map(EDMWebservice::getEdmEntityIdByProvider)
-						.filter(Objects::nonNull)
-						.collect(Collectors.toList())
-						.forEach(organizationsEntityIds::add);
+					if(parameters.get("type").toString().toLowerCase().contains("serviceproviders") && distribution.getAccessService()!=null) {
+						if(distribution.getAccessService()!=null){
+							for (LinkedEntity webservice : distribution.getAccessService()) {
+								WebService webService = (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(webservice);
+								if(webService.getProvider()!=null)
+									organizationsEntityIds.add((Organization) LinkedEntityAPI.retrieveFromLinkedEntity(webService.getProvider()));
+							}
+						}
 					}
 				});
-
 				if(parameters.get("type").toString().toLowerCase().contains("facilitiesproviders")) {
-					organisations.stream()
-							.filter(org->!org.getOwnsByInstanceId().isEmpty())
-							.map(EDMOrganization::getEdmEntityIdByMetaId)
-							.collect(Collectors.toList())
-							.forEach(organizationsEntityIds::add);
+                    organizationsEntityIds.addAll(organisations.stream()
+                            .filter(org -> !org.getOwns().isEmpty())
+                            .collect(Collectors.toList()));
 				}
 				
-				List<DataServiceProvider> providers = DataServiceProviderGeneration.getProviders(new ArrayList<EDMEdmEntityId>(organizationsEntityIds));
+				List<DataServiceProvider> providers = DataServiceProviderGeneration.getProviders(new ArrayList<Organization>(organizationsEntityIds));
 				List<String> providersInstanceIds = new ArrayList<String>();
 				providers.forEach(resource->{
 					providersInstanceIds.add(resource.getInstanceid());
@@ -95,21 +93,24 @@ public class OrganisationsGeneration {
 
 			System.out.println(organisations.size());
 			
-			if(parameters.containsKey("country")) organisations = organisations.stream().filter(e->e.getAddressByAddressId()!=null && e.getAddressByAddressId().getCountry().equals(parameters.get("country"))).collect(Collectors.toList());
+			if(parameters.containsKey("country")) organisations = organisations.stream().filter(e->
+				e.getAddress()!=null && ((Address) LinkedEntityAPI.retrieveFromLinkedEntity(e.getAddress())).getCountry().equals(parameters.get("country"))
+			).collect(Collectors.toList());
 		}
-		
 		
 		List<OrganizationBean> organisationsReturn = new ArrayList<OrganizationBean>();
 
-		for(EDMOrganization singleOrganization : organisations) {
-			String legalName = null;
-			for(EDMOrganizationLegalname legalNameInstance : singleOrganization.getOrganizationLegalnameByInstanceId()) {
-				legalName = legalNameInstance.getLegalname();
+		for(Organization singleOrganization : organisations) {
+			if(singleOrganization.getLegalName()!=null){
+				String legalName = String.join(";", singleOrganization.getLegalName());
+				Address address = null;
+				if(singleOrganization.getAddress()!=null) {
+					address = (Address) LinkedEntityAPI.retrieveFromLinkedEntity(singleOrganization.getAddress());
+				}
+				OrganizationBean ob = new OrganizationBean(singleOrganization.getInstanceId(), singleOrganization.getLogo(), singleOrganization.getURL(), legalName,address!=null? address.getCountry() : null);
+				organisationsReturn.add(ob);
 			}
-			OrganizationBean ob = new OrganizationBean(singleOrganization.getInstanceId(), singleOrganization.getLogo(), singleOrganization.getUrl(), legalName,singleOrganization.getAddressByAddressId()!=null? singleOrganization.getAddressByAddressId().getCountry() : null);
-			organisationsReturn.add(ob);
 		}
-
 
 		return organisationsReturn;
 

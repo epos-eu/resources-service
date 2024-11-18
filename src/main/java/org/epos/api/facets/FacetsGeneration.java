@@ -21,15 +21,16 @@ public class FacetsGeneration {
 		fnt.getNodes().forEach(node -> {
 			List<DiscoveryItem> distributionsItem = new ArrayList<>();
 			for(DiscoveryItem dp : discoveryList) {
-				if(dp.getCategories() == null) continue;//System.err.println(dp.getTitle());
-				else {
+				System.out.println("CATEGORIES: "+dp.getCategories());
+				if(dp.getCategories() != null) {
+					System.out.println("DDSS: "+node.getDdss());
 					if(node.getDdss()!=null && dp.getCategories().contains(node.getDdss())){
-						if(!distributionsItem.stream().anyMatch(p -> p.getId().equals(dp.getId())))
+						if(distributionsItem.stream().noneMatch(p -> p.getId().equals(dp.getId())))
 							distributionsItem.add(dp);
 					}
 				}
 			}
-			if(distributionsItem.size()>0) {
+			if(!distributionsItem.isEmpty()) {
 				node.setDistributions(new ArrayList<>());
 				node.getDistributions().addAll(distributionsItem);
 			}

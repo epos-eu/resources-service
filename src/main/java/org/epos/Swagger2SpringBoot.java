@@ -14,8 +14,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
-import springfox.documentation.oas.annotations.EnableOpenApi;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -23,7 +21,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @SpringBootApplication
-@EnableOpenApi
 @EnableScheduling
 @EnableAsync
 @ComponentScan(basePackages = { "org.epos", "org.epos.api", "org.epos.api.routines", "org.epos.configuration"})
