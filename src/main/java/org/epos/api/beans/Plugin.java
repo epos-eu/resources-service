@@ -1,101 +1,59 @@
 package org.epos.api.beans;
 
-import java.util.List;
-import java.util.Map;
-
-import com.google.gson.annotations.SerializedName;
-
 public class Plugin {
-	
-	private String identifier;
-	private String name;
-	private String description;
-	private String downloadURL;
-	private String license;
-	private String softwareVersion;
-	private String documentationURL;
-    @SerializedName(value = "proxy-type")
+	private String id;
+	private String softwareSourceCodeId;
+	private String softwareApplicationId;
+	private String version;
 	private String proxyType;
-	private String requirements;
-	private Map<String, Map<String,String>> action;
-	private List<String> operations;
-	private String location;
-	
-	public Plugin(String identifier) {
-		this.identifier = identifier;
-	}
-	
-	public Plugin(String identifier, String name, String description, String downloadURL, String license,
-			String softwareVersion, String documentationURL, String proxyType, String requirements,
-			Map<String, Map<String, String>> action, List<String> operations) {
-		super();
-		this.identifier = identifier;
-		this.name = name;
-		this.description = description;
-		this.downloadURL = downloadURL;
-		this.license = license;
-		this.softwareVersion = softwareVersion;
-		this.documentationURL = documentationURL;
+	private String runtime;
+	private String execution;
+	private String installed;
+	private String enabled;
+
+	public Plugin(String id, String softwareSourceCodeId, String softwareApplicationId, String version,
+			String proxyType, String runtime, String execution, String installed, String enabled) {
+		this.id = id;
+		this.softwareSourceCodeId = softwareSourceCodeId;
+		this.softwareApplicationId = softwareApplicationId;
+		this.version = version;
 		this.proxyType = proxyType;
-		this.requirements = requirements;
-		this.action = action;
-		this.operations = operations;
+		this.runtime = runtime;
+		this.execution = execution;
+		this.installed = installed;
+		this.enabled = enabled;
 	}
 
-	public String getIdentifier() {
-		return identifier;
+	public String getId() {
+		return id;
 	}
 
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
+	public void setId(String id) {
+		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	public String getSoftwareSourceCodeId() {
+		return softwareSourceCodeId;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setSoftwareSourceCodeId(String softwareSourceCodeId) {
+		this.softwareSourceCodeId = softwareSourceCodeId;
 	}
 
-	public String getDescription() {
-		return description;
+	public String getSoftwareApplicationId() {
+		return softwareApplicationId;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public void setSoftwareApplicationId(String softwareApplicationId) {
+		this.softwareApplicationId = softwareApplicationId;
 	}
 
-	public String getDownloadURL() {
-		return downloadURL;
+	public String getVersion() {
+		return version;
 	}
 
-	public void setDownloadURL(String downloadURL) {
-		this.downloadURL = downloadURL;
-	}
-
-	public String getLicense() {
-		return license;
-	}
-
-	public void setLicense(String license) {
-		this.license = license;
-	}
-
-	public String getSoftwareVersion() {
-		return softwareVersion;
-	}
-
-	public void setSoftwareVersion(String softwareVersion) {
-		this.softwareVersion = softwareVersion;
-	}
-
-	public String getDocumentationURL() {
-		return documentationURL;
-	}
-
-	public void setDocumentationURL(String documentationURL) {
-		this.documentationURL = documentationURL;
+	public void setVersion(String version) {
+		this.version = version;
 	}
 
 	public String getProxyType() {
@@ -106,46 +64,60 @@ public class Plugin {
 		this.proxyType = proxyType;
 	}
 
-	public String getRequirements() {
-		return requirements;
+	public String getRuntime() {
+		return runtime;
 	}
 
-	public void setRequirements(String requirements) {
-		this.requirements = requirements;
+	public void setRuntime(String runtime) {
+		this.runtime = runtime;
 	}
 
-	public Map<String, Map<String, String>> getAction() {
-		return action;
+	public String getExecution() {
+		return execution;
 	}
 
-	public void setAction(Map<String, Map<String, String>> action) {
-		this.action = action;
+	public void setExecution(String execution) {
+		this.execution = execution;
 	}
 
-	public List<String> getOperations() {
-		return operations;
+	public String getInstalled() {
+		return installed;
 	}
 
-	public void setOperations(List<String> operations) {
-		this.operations = operations;
+	public void setInstalled(String installed) {
+		this.installed = installed;
 	}
 
-	public String getLocation() {
-		return location;
+	public String getEnabled() {
+		return enabled;
 	}
 
-	public void setLocation(String location) {
-		this.location = location;
+	public void setEnabled(String enabled) {
+		this.enabled = enabled;
 	}
 
 	@Override
-	public String toString() {
-		return "Plugin [identifier=" + identifier + ", name=" + name + ", description=" + description + ", downloadURL="
-				+ downloadURL + ", license=" + license + ", softwareVersion=" + softwareVersion + ", documentationURL="
-				+ documentationURL + ", proxyType=" + proxyType + ", requirements=" + requirements + ", action="
-				+ action + ", operations=" + operations + "]";
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
 	}
-	
-	
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Plugin other = (Plugin) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
 }

@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
 
 import org.epos.api.beans.AvailableFormat;
+import org.epos.api.beans.AvailableFormatConverted;
 import org.epos.api.enums.AvailableFormatType;
 import org.epos.eposdatamodel.Parameter;
 import org.epos.handler.dbapi.model.*;
+import org.epos.handler.dbapi.service.DBService;
 
 public class AvailableFormatsGeneration {
 
@@ -119,38 +122,54 @@ public class AvailableFormatsGeneration {
 					if (op.getSoftwareapplicationOperationsByInstanceId() != null && !isogcformat) {
 						for (EDMSoftwareapplication s : op.getSoftwareapplicationOperationsByInstanceId().stream().map(EDMSoftwareapplicationOperation::getSoftwareapplicationByInstanceSoftwareapplicationId).collect(Collectors.toList())) {
 							if (s.getSoftwareapplicationParametersByInstanceId() != null) {
-								ArrayList<Parameter> parameterList = new ArrayList<>();
-								s.getSoftwareapplicationParametersByInstanceId().stream()
-								.map(elem -> {
-									Parameter parameter = new Parameter();
-									parameter.setEncodingFormat(elem.getEncodingformat());
-									parameter.setAction(Parameter.ActionEnum.fromValue(elem.getAction()));
-									parameter.setConformsTo(elem.getConformsto());
-									return parameter;
-								})
-								.forEach(parameterList::add);
+								List<ParameterPair> parameterList = s.getSoftwareapplicationParametersByInstanceId()
+									.stream()
+									// Group elements by instanceSoftwareapplicationId
+									.collect(Collectors.groupingBy(EDMSoftwareapplicationParameters::getInstanceSoftwareapplicationId))
+									.values().stream()
+									// Filter groups that have exactly two elements (object and result)
+									.filter(list -> list.size() == 2)
+									// Map each group to a Pair of Parameters
+									.map(list -> {
+										if (list.get(0).getAction() == "object") 
+											return new ParameterPair(list.get(0), list.get(1));
+										return new ParameterPair(list.get(1), list.get(0));
+									})
+									.collect(Collectors.toList());
 
-								for (Parameter param : parameterList) {
-									if (param.getEncodingFormat().equals("application/epos.geo+json")
-											|| param.getEncodingFormat().equals("application/epos.table.geo+json")
-											|| param.getEncodingFormat().equals("application/epos.map.geo+json")) {
+								for (ParameterPair pair : parameterList) {
+									Parameter object = pair.getObject();
+									Parameter result = pair.getResult();
 
-										formats.add(new AvailableFormat.AvailableFormatBuilder()
-												.originalFormat(param.getEncodingFormat())
-												.format(param.getEncodingFormat())
-												.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + param.getEncodingFormat())
-												.label("GEOJSON")
-												.description(AvailableFormatType.CONVERTED)
-												.build());
-									}
-									if (param.getEncodingFormat().equals("covjson")) {
-										formats.add(new AvailableFormat.AvailableFormatBuilder()
-												.originalFormat(param.getEncodingFormat())
-												.format(param.getEncodingFormat())
-												.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + param.getEncodingFormat())
-												.label("COVJSON")
-												.description(AvailableFormatType.CONVERTED)
-												.build());
+									try {
+										if (result.getEncodingFormat().equals("application/epos.geo+json")
+												|| result.getEncodingFormat().equals("application/epos.table.geo+json")
+												|| result.getEncodingFormat().equals("application/epos.map.geo+json")) {
+
+											formats.add(new AvailableFormatConverted.AvailableFormatConvertedBuilder()
+													.inputFormat(object.getEncodingFormat())
+													.pluginId(getPluginIdFromSoftwareApplicationId(s.getInstanceId()))
+													.originalFormat(result.getEncodingFormat())
+													.format(result.getEncodingFormat())
+													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + result.getEncodingFormat())
+													.label("GEOJSON")
+													.description(AvailableFormatType.CONVERTED)
+													.build());
+										}
+										if (result.getEncodingFormat().equals("covjson")) {
+											formats.add(new AvailableFormatConverted.AvailableFormatConvertedBuilder()
+													.inputFormat(object.getEncodingFormat())
+													.pluginId(getPluginIdFromSoftwareApplicationId(s.getInstanceId()))
+													.originalFormat(result.getEncodingFormat())
+													.format(result.getEncodingFormat())
+													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + result.getEncodingFormat())
+													.label("COVJSON")
+													.description(AvailableFormatType.CONVERTED)
+													.build());
+										}
+									} catch (Exception e) {
+										// If there is an error while creating a format object just skip it
+										e.printStackTrace();
 									}
 								}
 							}
@@ -174,4 +193,41 @@ public class AvailableFormatsGeneration {
 		return formats;
 	}
 
+	public static class ParameterPair {
+		private Parameter object;
+		private Parameter result;
+
+		public ParameterPair(EDMSoftwareapplicationParameters object, EDMSoftwareapplicationParameters result) {
+			this.object = this.fromEDMSoftwareapplicationParameters(object);
+			this.result = this.fromEDMSoftwareapplicationParameters(result);
+		}
+		
+		private Parameter fromEDMSoftwareapplicationParameters(EDMSoftwareapplicationParameters elem){
+			Parameter parameter = new Parameter();
+			parameter.setEncodingFormat(elem.getEncodingformat());
+			parameter.setAction(Parameter.ActionEnum.fromValue(elem.getAction()));
+			parameter.setConformsTo(elem.getConformsto());
+			return parameter;
+		}
+
+		public Parameter getObject() {
+			return object;
+		}
+		public void setObject(Parameter object) {
+			this.object = object;
+		}
+		public Parameter getResult() {
+			return result;
+		}
+		public void setResult(Parameter result) {
+			this.result = result;
+		}
+	}
+
+	private static String getPluginIdFromSoftwareApplicationId(String softwareApplicationId) {
+		EntityManager em = new DBService().getEntityManager();
+		List<String> resultList = (List<String>)em.createNativeQuery("select id from plugin where software_application_id = '" + softwareApplicationId + "'").getResultList();
+		return resultList.get(0);
+	}
 }
+
