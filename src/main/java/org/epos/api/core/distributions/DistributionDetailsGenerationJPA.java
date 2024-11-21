@@ -111,17 +111,18 @@ public class DistributionDetailsGenerationJPA {
 		// DATASET INFO
 		ArrayList<String> internalIDs = new ArrayList<>();
 		List<String> doi = new ArrayList<>();
-		dp.getIdentifier().forEach(identifierLe -> {
-			Identifier identifier = (Identifier) LinkedEntityAPI.retrieveFromLinkedEntity(identifierLe);
-			if (identifier.getType().equals("DOI")) {
-				doi.add(identifier.getIdentifier());
-				distribution.setDOI(doi);
-			}
-			if (identifier.getType().equals("DDSS-ID")) {
-				String ddss = identifier.getIdentifier();
-				if (ddss != null) internalIDs.add(ddss);
-			}
-		});
+		if(dp.getIdentifier()!=null)
+			dp.getIdentifier().forEach(identifierLe -> {
+				Identifier identifier = (Identifier) LinkedEntityAPI.retrieveFromLinkedEntity(identifierLe);
+				if (identifier.getType().equals("DOI")) {
+					doi.add(identifier.getIdentifier());
+					distribution.setDOI(doi);
+				}
+				if (identifier.getType().equals("DDSS-ID")) {
+					String ddss = identifier.getIdentifier();
+					if (ddss != null) internalIDs.add(ddss);
+				}
+			});
 
 
 		distribution.setFrequencyUpdate(dp.getAccrualPeriodicity());

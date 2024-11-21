@@ -11,6 +11,7 @@ import org.epos.api.beans.DataServiceProvider;
 import org.epos.api.beans.OrganizationBean;
 import org.epos.api.core.DataServiceProviderGeneration;
 import org.epos.api.core.filtersearch.OrganizationFilterSearch;
+import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +31,12 @@ public class OrganisationsGeneration {
 		List<Organization> organisations;
 
 		if(parameters.containsKey("id")) {
-			organisations = (List<Organization>) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieve(parameters.get("id").toString());
+			organisations = DatabaseConnections.getInstance().getOrganizationList().stream().filter(organization -> organization.getInstanceId().equals(parameters.get("id").toString())).collect(Collectors.toList());
 		}else {
-			organisations = (List<Organization>) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Organization) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+			organisations = DatabaseConnections.getInstance().getOrganizationList();
 			
 			if(parameters.containsKey("type")) {
-				List<Distribution> distributions = (List<org.epos.eposdatamodel.Distribution>) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Distribution) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+				List<Distribution> distributions = DatabaseConnections.getInstance().getDistributionList();
 
 				List<Organization> tempOrganizationList;
 
@@ -45,20 +46,27 @@ public class OrganisationsGeneration {
 					if(parameters.get("type").toString().toLowerCase().contains("dataproviders")) {
 						if(distribution.getDataProduct()!=null){
 							for (LinkedEntity dataproduct : distribution.getDataProduct()) {
-								DataProduct dataProduct = (DataProduct) LinkedEntityAPI.retrieveFromLinkedEntity(dataproduct);
-								if(dataProduct.getPublisher()!=null)
-									dataProduct.getPublisher().forEach(publisher -> {
-										organizationsEntityIds.add((Organization) LinkedEntityAPI.retrieveFromLinkedEntity(publisher));
-									});
+								Optional<DataProduct> dataProduct = DatabaseConnections.getInstance().getDataproducts().stream().filter(dataProduct1 -> dataProduct1.getInstanceId().equals(dataproduct.getInstanceId())).findFirst();
+								if(dataProduct.isPresent()){
+									if(dataProduct.get().getPublisher()!=null)
+										dataProduct.get().getPublisher().forEach(publisher -> {
+											Optional<Organization> organization = DatabaseConnections.getInstance().getOrganizationList().stream().filter(organization1 -> organization1.getInstanceId().equals(publisher.getInstanceId())).findFirst();
+                                            organization.ifPresent(organizationsEntityIds::add);
+										});
+								}
 							}
 						}
 					}
 					if(parameters.get("type").toString().toLowerCase().contains("serviceproviders") && distribution.getAccessService()!=null) {
 						if(distribution.getAccessService()!=null){
 							for (LinkedEntity webservice : distribution.getAccessService()) {
-								WebService webService = (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(webservice);
-								if(webService.getProvider()!=null)
-									organizationsEntityIds.add((Organization) LinkedEntityAPI.retrieveFromLinkedEntity(webService.getProvider()));
+								Optional<WebService> webService = DatabaseConnections.getInstance().getWebServiceList().stream().filter(webService1 -> webService1.getInstanceId().equals(webservice.getInstanceId())).findFirst();
+								if(webService.isPresent()){
+									if(webService.get().getProvider()!=null){
+										Optional<Organization> organization = DatabaseConnections.getInstance().getOrganizationList().stream().filter(organization1 -> organization1.getInstanceId().equals(webService.get().getProvider().getInstanceId())).findFirst();
+										organization.ifPresent(organizationsEntityIds::add);
+									}
+								}
 							}
 						}
 					}
@@ -92,10 +100,21 @@ public class OrganisationsGeneration {
 			organisations = OrganizationFilterSearch.doFilters(organisations, parameters);
 
 			System.out.println(organisations.size());
+
+
 			
-			if(parameters.containsKey("country")) organisations = organisations.stream().filter(e->
-				e.getAddress()!=null && ((Address) LinkedEntityAPI.retrieveFromLinkedEntity(e.getAddress())).getCountry().equals(parameters.get("country"))
-			).collect(Collectors.toList());
+			if(parameters.containsKey("country")){
+				List<Organization> tempOrganizationList = new ArrayList<>();
+				for(Organization e : organisations) {
+					if(e.getAddress()!=null){
+						Optional<Address> address = DatabaseConnections.getInstance().getAddressList().stream().filter(address1 -> address1.getInstanceId().equals(e.getAddress().getInstanceId())).findFirst();
+						if(address.isPresent() && address.get().getCountry().equals(parameters.get("country"))){
+							tempOrganizationList.add(e);
+						}
+					}
+				}
+				organisations = tempOrganizationList;
+			}
 		}
 		
 		List<OrganizationBean> organisationsReturn = new ArrayList<OrganizationBean>();
@@ -105,7 +124,10 @@ public class OrganisationsGeneration {
 				String legalName = String.join(";", singleOrganization.getLegalName());
 				Address address = null;
 				if(singleOrganization.getAddress()!=null) {
-					address = (Address) LinkedEntityAPI.retrieveFromLinkedEntity(singleOrganization.getAddress());
+					Optional<Address> addressOptional = DatabaseConnections.getInstance().getAddressList().stream().filter(address1 -> address1.getInstanceId().equals(singleOrganization.getAddress().getInstanceId())).findFirst();
+					if(addressOptional.isPresent()){
+						address = addressOptional.get();
+					}
 				}
 				OrganizationBean ob = new OrganizationBean(singleOrganization.getInstanceId(), singleOrganization.getLogo(), singleOrganization.getURL(), legalName,address!=null? address.getCountry() : null);
 				organisationsReturn.add(ob);

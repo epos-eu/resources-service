@@ -1,13 +1,17 @@
 package org.epos.api.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import abstractapis.AbstractAPI;
 import commonapis.LinkedEntityAPI;
+import metadataapis.EntityNames;
 import org.epos.api.beans.AvailableFormat;
 import org.epos.api.enums.AvailableFormatType;
+import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.*;
 
 public class AvailableFormatsGeneration {
@@ -21,212 +25,115 @@ public class AvailableFormatsGeneration {
 		List<AvailableFormat> formats = new ArrayList<>();
 		/** Loop over all webservices related to the distribution **/
 		if(distribution.getAccessService()!=null) {
-			for (WebService webService : distribution.getAccessService().parallelStream().map(linkedEntity -> (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity)).collect(Collectors.toList())) {
+			for (LinkedEntity webServiceLe : distribution.getAccessService()) {
+				Optional<WebService> webService = DatabaseConnections.getInstance().getWebServiceList().parallelStream().filter(webserviceFromList -> webserviceFromList.getInstanceId().equals(webServiceLe.getInstanceId())).findFirst();
+				if(webService.isPresent()) {
 
-				boolean isWMS = false;
-				boolean isWMTS = false;
-				boolean isWFS = false;
+					boolean isWMS = false;
+					boolean isWMTS = false;
+					boolean isWFS = false;
 
-				if (webService != null && webService.getSupportedOperation() != null) {
-					for (LinkedEntity supportedOperationLinkedEntity : webService.getSupportedOperation()) {
-						Operation operation = (Operation) LinkedEntityAPI.retrieveFromLinkedEntity(supportedOperationLinkedEntity);
-						/** Check if is an OGC service, the check at this level si based only on the template **/
-						if(operation.getTemplate()!=null) {
-							if (operation.getTemplate().toLowerCase().contains("service=wms")) isWMS = true;
-							if (operation.getTemplate().toLowerCase().contains("service=wmts")) isWMTS = true;
-							if (operation.getTemplate().toLowerCase().contains("service=wfs")) isWFS = true;
-						}
+					if (webService.get().getSupportedOperation() != null) {
+						for (LinkedEntity supportedOperationLinkedEntity : webService.get().getSupportedOperation()) {
+							Optional<Operation> operation = DatabaseConnections.getInstance().getOperationList().parallelStream().filter(operationFromList -> operationFromList.getInstanceId().equals(supportedOperationLinkedEntity.getInstanceId())).findFirst();
+							if(operation.isPresent()) {
+								/** Check if is an OGC service, the check at this level si based only on the template **/
+								if (operation.get().getTemplate() != null) {
+									if (operation.get().getTemplate().toLowerCase().contains("service=wms")) isWMS = true;
+									if (operation.get().getTemplate().toLowerCase().contains("service=wmts")) isWMTS = true;
+									if (operation.get().getTemplate().toLowerCase().contains("service=wfs")) isWFS = true;
+								}
 
-						if(operation.getMapping()!=null){
-							for (Mapping map : operation.getMapping().parallelStream().map(linkedEntity -> (Mapping) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity)).collect(Collectors.toList())) {
-								/** Check if is an OGC service, the check on this level is based on a value of a variable **/
-								if (map.getVariable().equalsIgnoreCase("service")
-										&& map.getParamValue()!=null && (map.getParamValue().contains("WMS") || map.getParamValue().contains("wms") || map.getDefaultValue().equalsIgnoreCase("wms")))
-									isWMS = true;
-								if (map.getVariable().equalsIgnoreCase("service")
-										&& map.getParamValue()!=null &&  (map.getParamValue().contains("WMTS") || map.getParamValue().contains("wmts") || map.getDefaultValue().equalsIgnoreCase("wmts")))
-									isWMTS = true;
-								if (map.getVariable().equalsIgnoreCase("service")
-										&& map.getParamValue()!=null && (map.getParamValue().contains("WFS") || map.getParamValue().contains("wfs") || map.getDefaultValue().equalsIgnoreCase("wfs")))
-									isWFS = true;
+								if (operation.get().getMapping() != null) {
+									for (LinkedEntity mapLe : operation.get().getMapping()) {
+										Optional<Mapping> map = DatabaseConnections.getInstance().getMappingList().parallelStream().filter(mappingFromList -> mappingFromList.getInstanceId().equals(mapLe.getInstanceId())).findFirst();
+										if(map.isPresent()) {
+											/** Check if is an OGC service, the check on this level is based on a value of a variable **/
+											if (map.get().getVariable().equalsIgnoreCase("service")
+													&& map.get().getParamValue() != null && (map.get().getParamValue().contains("WMS") || map.get().getParamValue().contains("wms") || map.get().getDefaultValue().equalsIgnoreCase("wms")))
+												isWMS = true;
+											if (map.get().getVariable().equalsIgnoreCase("service")
+													&& map.get().getParamValue() != null && (map.get().getParamValue().contains("WMTS") || map.get().getParamValue().contains("wmts") || map.get().getDefaultValue().equalsIgnoreCase("wmts")))
+												isWMTS = true;
+											if (map.get().getVariable().equalsIgnoreCase("service")
+													&& map.get().getParamValue() != null && (map.get().getParamValue().contains("WFS") || map.get().getParamValue().contains("wfs") || map.get().getDefaultValue().equalsIgnoreCase("wfs")))
+												isWFS = true;
 
-								/** Check if parameter has the property "encodingFormat", if yes generate an encoding format for each value **/
-								if (map.getProperty() != null && map.getProperty().contains("encodingFormat")) {
-									for (String pv : map.getParamValue()) {
-										if (pv.startsWith("image/") && isWMS) {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(pv)
-													.method(operation.getMethod())
-													.format("application/vnd.ogc.wms_xml")
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_OGC + distribution.getMetaId())
-													.label("WMS".toUpperCase())
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										} else if (pv.startsWith("image/") && isWMTS) {
-											System.out.println("HELLO" + distribution.getUid());
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(pv)
-													.method(operation.getMethod())
-													.format("application/vnd.ogc.wmts_xml")
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_OGC + distribution.getMetaId())
-													.label("WMTS".toUpperCase())
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										} else if (pv.equals("json") && isWFS) {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(pv)
-													.method(operation.getMethod())
-													.format("application/epos.geo+json")
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + "json")
-													.label("GEOJSON (" + pv + ")")
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										} else if (pv.contains("geo%2Bjson")) {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(pv)
-													.method(operation.getMethod())
-													.format("application/epos.geo+json")
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
-													.label("GEOJSON (" + pv + ")")
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										} else if (
-												((pv.toLowerCase().contains("geojson") || pv.toLowerCase().contains("geo+json") || pv.toLowerCase().contains("geo-json"))
-														|| (pv.toLowerCase().contains("epos.table.geo+json") || pv.toLowerCase().contains("epos.map.geo+json")))
-										) {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(pv)
-													.method(operation.getMethod())
-													.format("application/epos.geo+json")
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
-													.label("GEOJSON (" + pv + ")")
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										} else {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(pv)
-													.method(operation.getMethod())
-													.format(pv)
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
-													.label(pv.toUpperCase())
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
+											/** Check if parameter has the property "encodingFormat", if yes generate an encoding format for each value **/
+											if (map.get().getProperty() != null && map.get().getProperty().contains("encodingFormat")) {
+												for (String pv : map.get().getParamValue()) {
+													if (pv.startsWith("image/") && isWMS) {
+														formats.add(new AvailableFormat.AvailableFormatBuilder()
+																.originalFormat(pv)
+																.method(operation.get().getMethod())
+																.format("application/vnd.ogc.wms_xml")
+																.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_OGC + distribution.getInstanceId())
+																.label("WMS".toUpperCase())
+																.description(AvailableFormatType.ORIGINAL)
+																.build());
+													} else if (pv.startsWith("image/") && isWMTS) {
+														System.out.println("HELLO" + distribution.getUid());
+														formats.add(new AvailableFormat.AvailableFormatBuilder()
+																.originalFormat(pv)
+																.method(operation.get().getMethod())
+																.format("application/vnd.ogc.wmts_xml")
+																.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_OGC + distribution.getInstanceId())
+																.label("WMTS".toUpperCase())
+																.description(AvailableFormatType.ORIGINAL)
+																.build());
+													} else if (pv.equals("json") && isWFS) {
+														formats.add(new AvailableFormat.AvailableFormatBuilder()
+																.originalFormat(pv)
+																.method(operation.get().getMethod())
+																.format("application/epos.geo+json")
+																.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + "json")
+																.label("GEOJSON (" + pv + ")")
+																.description(AvailableFormatType.ORIGINAL)
+																.build());
+													} else if (pv.contains("geo%2Bjson")) {
+														formats.add(new AvailableFormat.AvailableFormatBuilder()
+																.originalFormat(pv)
+																.method(operation.get().getMethod())
+																.format("application/epos.geo+json")
+																.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + pv)
+																.label("GEOJSON (" + pv + ")")
+																.description(AvailableFormatType.ORIGINAL)
+																.build());
+													} else if (
+															((pv.toLowerCase().contains("geojson") || pv.toLowerCase().contains("geo+json") || pv.toLowerCase().contains("geo-json"))
+																	|| (pv.toLowerCase().contains("epos.table.geo+json") || pv.toLowerCase().contains("epos.map.geo+json")))
+													) {
+														formats.add(new AvailableFormat.AvailableFormatBuilder()
+																.originalFormat(pv)
+																.method(operation.get().getMethod())
+																.format("application/epos.geo+json")
+																.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + pv)
+																.label("GEOJSON (" + pv + ")")
+																.description(AvailableFormatType.ORIGINAL)
+																.build());
+													} else {
+														formats.add(new AvailableFormat.AvailableFormatBuilder()
+																.originalFormat(pv)
+																.method(operation.get().getMethod())
+																.format(pv)
+																.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + pv)
+																.label(pv.toUpperCase())
+																.description(AvailableFormatType.ORIGINAL)
+																.build());
+													}
+												}
+
+											}
+											getReturnFormats(distribution, softwareApplications, formats, operation.get());
 										}
 									}
 								}
-								getReturnFormats(distribution, softwareApplications, formats, operation);
 							}
 						}
 					}
 				}
 			}
 		}
-		return getAvailableFormats(distribution, formats);
-	}
-
-	public static List<AvailableFormat> generate(Distribution distribution, WebService webService, List<SoftwareApplication> softwareApplications ) {
-
-		List<AvailableFormat> formats = new ArrayList<>();
-		/** Loop over all webservices related to the distribution **/
-
-				boolean isWMS = false;
-				boolean isWMTS = false;
-				boolean isWFS = false;
-
-				if (webService != null && webService.getSupportedOperation() != null) {
-					List<Operation> operationList = webService.getSupportedOperation().parallelStream().map(linkedEntity -> (Operation) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity)).collect(Collectors.toList());
-					for(Operation operation : operationList) {
-						/** Check if is an OGC service, the check at this level si based only on the template **/
-						if(operation.getTemplate()!=null) {
-							if (operation.getTemplate().toLowerCase().contains("service=wms")) isWMS = true;
-							if (operation.getTemplate().toLowerCase().contains("service=wmts")) isWMTS = true;
-							if (operation.getTemplate().toLowerCase().contains("service=wfs")) isWFS = true;
-						}
-
-						if(operation.getMapping()!=null){
-							List<Mapping> mappingList = operation.getMapping().parallelStream().map(linkedEntity -> (Mapping) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity)).collect(Collectors.toList());
-
-							for (Mapping map : mappingList) {
-								/** Check if is an OGC service, the check on this level is based on a value of a variable **/
-								if (map.getVariable().equalsIgnoreCase("service")
-										&& map.getParamValue()!=null && (map.getParamValue().contains("WMS") || map.getParamValue().contains("wms") || map.getDefaultValue().equalsIgnoreCase("wms")))
-									isWMS = true;
-								if (map.getVariable().equalsIgnoreCase("service")
-										&& map.getParamValue()!=null &&  (map.getParamValue().contains("WMTS") || map.getParamValue().contains("wmts") || map.getDefaultValue().equalsIgnoreCase("wmts")))
-									isWMTS = true;
-								if (map.getVariable().equalsIgnoreCase("service")
-										&& map.getParamValue()!=null && (map.getParamValue().contains("WFS") || map.getParamValue().contains("wfs") || map.getDefaultValue().equalsIgnoreCase("wfs")))
-									isWFS = true;
-
-								/** Check if parameter has the property "encodingFormat", if yes generate an encoding format for each value **/
-								if (map.getProperty() != null && map.getProperty().contains("encodingFormat")) {
-									for (String pv : map.getParamValue()) {
-										if (pv.startsWith("image/") && isWMS) {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(pv)
-													.method(operation.getMethod())
-													.format("application/vnd.ogc.wms_xml")
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_OGC + distribution.getMetaId())
-													.label("WMS".toUpperCase())
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										} else if (pv.startsWith("image/") && isWMTS) {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(pv)
-													.method(operation.getMethod())
-													.format("application/vnd.ogc.wmts_xml")
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_OGC + distribution.getMetaId())
-													.label("WMTS".toUpperCase())
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										} else if (pv.equals("json") && isWFS) {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(pv)
-													.method(operation.getMethod())
-													.format("application/epos.geo+json")
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + "json")
-													.label("GEOJSON (" + pv + ")")
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										} else if (pv.contains("geo%2Bjson")) {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(pv)
-													.method(operation.getMethod())
-													.format("application/epos.geo+json")
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
-													.label("GEOJSON (" + pv + ")")
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										} else if (
-												((pv.toLowerCase().contains("geojson") || pv.toLowerCase().contains("geo+json") || pv.toLowerCase().contains("geo-json"))
-														|| (pv.toLowerCase().contains("epos.table.geo+json") || pv.toLowerCase().contains("epos.map.geo+json")))
-										) {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(pv)
-													.method(operation.getMethod())
-													.format("application/epos.geo+json")
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
-													.label("GEOJSON (" + pv + ")")
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										} else {
-											formats.add(new AvailableFormat.AvailableFormatBuilder()
-													.originalFormat(pv)
-													.method(operation.getMethod())
-													.format(pv)
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + pv)
-													.label(pv.toUpperCase())
-													.description(AvailableFormatType.ORIGINAL)
-													.build());
-										}
-									}
-								}
-								getReturnFormats(distribution, softwareApplications, formats, operation);
-							}
-						}
-					}
-				}
-
 		return getAvailableFormats(distribution, formats);
 	}
 
@@ -302,5 +209,6 @@ public class AvailableFormatsGeneration {
 		}
 		return formats;
 	}
+
 
 }

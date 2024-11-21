@@ -37,7 +37,10 @@ public class ScheduledRuntimes {
 		LOGGER.info("[StartUp Task - Monitoring] Done");
 		LOGGER.info("[StartUp Task - Facets] Updating facets information");
 		facetsUpdater();
-		LOGGER.info("[StartUp Task - Monitoring] Done");
+		LOGGER.info("[StartUp Task - Facets] Done");
+		LOGGER.info("[StartUp Task - Resources] Updating facets information");
+		connectionsUpdater();
+		LOGGER.info("[StartUp Task - Resources] Done");
 		LOGGER.info("[Resources Service Startup Completed] -----------------------------------------------");
 	}
 
@@ -97,8 +100,15 @@ public class ScheduledRuntimes {
 			// TODO Auto-generated catch block
 			LOGGER.error(e.getLocalizedMessage());
 		}
-		System.out.println(Facets.getInstance().getFacetsFromDatabase());
 		LOGGER.info("[Scheduled Task - Facets] Facets successfully updated");
+	}
+
+	@Scheduled(fixedRate = 60000, initialDelay = 0)
+	@Async
+	public void connectionsUpdater() {
+		LOGGER.info("[Scheduled Task - Resources] Updating resources information");
+        DatabaseConnections.getInstance();
+        LOGGER.info("[Scheduled Task - Resources] Resources successfully updated");
 	}
 
 	private String getSubString(final String input, char characterStart, char characterEnd) {
