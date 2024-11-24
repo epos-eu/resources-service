@@ -12,6 +12,7 @@ import metadataapis.*;
 import model.Dataproduct;
 import model.StatusType;
 import org.epos.eposdatamodel.*;
+import org.epos.handler.dbapi.service.EntityManagerService;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,6 +54,8 @@ public class DatabaseConnections {
 
 
 	private DatabaseConnections() {
+
+		EntityManagerService.getInstance().getCache().evictAll();
 
 		List tempDataproducts  = dataProductAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 		List tempSoftwareApplications = softwareApplicationAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
