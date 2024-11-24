@@ -73,7 +73,7 @@ public class OrganisationsGeneration {
 				});
 				if(parameters.get("type").toString().toLowerCase().contains("facilitiesproviders")) {
                     organizationsEntityIds.addAll(organisations.stream()
-                            .filter(org -> !org.getOwns().isEmpty())
+                            .filter(org -> org.getOwns()!=null)
                             .collect(Collectors.toList()));
 				}
 				
