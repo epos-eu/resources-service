@@ -77,11 +77,12 @@ public class FacilitySearchGenerationJPA {
 					.collect(Collectors.toList());
 
 			organizationForOwners.forEach(organization -> {
-				for(LinkedEntity linkedEntity : organization.getOwns()){
-					if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facility.getInstanceId())){
-						facetsFacilityProviders.add(linkedEntity.getInstanceId());
+				if(organization.getOwns()!=null)
+					for(LinkedEntity linkedEntity : organization.getOwns()){
+						if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facility.getInstanceId())){
+							facetsFacilityProviders.add(linkedEntity.getInstanceId());
+						}
 					}
-				}
 			});
 
 			DiscoveryItem discoveryItem = new DiscoveryItemBuilder(facility.getInstanceId(),

@@ -4,6 +4,7 @@ import abstractapis.AbstractAPI;
 import commonapis.LinkedEntityAPI;
 import metadataapis.EntityNames;
 import model.StatusType;
+import org.apache.logging.log4j.util.Strings;
 import org.epos.api.beans.DiscoveryItem.DiscoveryItemBuilder;
 import org.epos.api.core.DataServiceProviderGeneration;
 import org.epos.api.core.EnvironmentVariables;
@@ -100,11 +101,12 @@ public class FacilityDetailsItemGenerationJPA {
 			Set<Organization> organizationsEntityIds = new HashSet<>();
 
 			organizationForOwners.forEach(organization -> {
-				for(LinkedEntity linkedEntity : organization.getOwns()){
-					if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facilitySelected.getInstanceId())){
-						organizationsEntityIds.add(organization);
+				if(organization.getOwns()!=null)
+					for(LinkedEntity linkedEntity : organization.getOwns()){
+						if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facilitySelected.getInstanceId())){
+							organizationsEntityIds.add(organization);
+						}
 					}
-				}
 			});
 
 
@@ -132,7 +134,7 @@ public class FacilityDetailsItemGenerationJPA {
 			sp.setName("equipmenttypes");
 			sp.setLabel("Equipment types");
 			sp.setEnumValue(
-					equipmentTypes.size()>0 ?
+                    !equipmentTypes.isEmpty() ?
 							equipmentTypes.stream().map(Category::getName).collect(Collectors.toList())
 							: new ArrayList<>()
 					);
@@ -152,18 +154,16 @@ public class FacilityDetailsItemGenerationJPA {
 			// TEMP SECTION
 			ArrayList<DiscoveryItem> discoveryList = new ArrayList<>();
 
-//TODO:			Set<String> facetsDataProviders = new HashSet<String>();
-//			if(facilitySelected.getEdmEntityIdByOwner() != null ) {
-//				if (facilitySelected.getEdmEntityIdByOwner().getOrganizationsByMetaId() != null && !facilitySelected.getEdmEntityIdByOwner().getOrganizationsByMetaId().isEmpty()) {
-//					ArrayList<EDMOrganization> list = new ArrayList<>(facilitySelected.getEdmEntityIdByOwner().getOrganizationsByMetaId());
-//					list.sort(EDMUtil::compareEntityVersion);
-//					EDMOrganization edmDataproductRelatedOrganization = list.get(0);
-//					if(edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId() != null && !edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId().isEmpty()) {
-//						facetsDataProviders.add(edmDataproductRelatedOrganization.getOrganizationLegalnameByInstanceId().stream().findFirst().get().getLegalname());
-//					}
-//				}
-//
-//			}
+			Set<String> facetsDataProviders = new HashSet<String>();
+
+			organizationForOwners.forEach(organization -> {
+				if(organization.getOwns()!=null)
+					for(LinkedEntity linkedEntity : organization.getOwns()){
+						if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facilitySelected.getInstanceId())){
+							facetsDataProviders.add(String.join(",",organization.getLegalName()));
+						}
+					}
+			});
 
 			List<String> categoryList = facilitySelected.getCategory().stream()
 					.map(linkedEntity -> (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
@@ -184,7 +184,7 @@ public class FacilityDetailsItemGenerationJPA {
 							.label("GEOJSON")
 							.description(AvailableFormatType.CONVERTED)
 							.build()))
-					//TODO: .setFacilityProvider(facetsDataProviders)
+					.setFacilityProvider(facetsDataProviders)
 					.setCategories(categoryList.isEmpty() ? null : categoryList)
 					.build());
 
