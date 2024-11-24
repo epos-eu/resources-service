@@ -107,7 +107,7 @@ public class ScheduledRuntimes {
 	@Async
 	public void connectionsUpdater() {
 		LOGGER.info("[Scheduled Task - Resources] Updating resources information");
-        DatabaseConnections.getInstance();
+        DatabaseConnections.getInstance().syncDatabaseConnections();
         LOGGER.info("[Scheduled Task - Resources] Resources successfully updated");
 	}
 

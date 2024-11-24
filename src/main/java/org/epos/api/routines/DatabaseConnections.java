@@ -51,10 +51,9 @@ public class DatabaseConnections {
 	private List<Equipment> equipmentList;
 	private List<Facility> facilityList;
 
+	private DatabaseConnections() {}
 
-
-	private DatabaseConnections() {
-
+	public void syncDatabaseConnections() {
 		EntityManagerService.getInstance().getCache().evictAll();
 
 		List tempDataproducts  = dataProductAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
