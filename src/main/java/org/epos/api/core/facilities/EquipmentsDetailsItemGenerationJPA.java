@@ -78,11 +78,12 @@ public class EquipmentsDetailsItemGenerationJPA {
 		List<Equipment> returnList = new ArrayList<Equipment>();
 
 		for(Equipment equipment : equipmentList) {
-			for(LinkedEntity le : equipment.getIsPartOf()) {
-				if(le.getMetaId().contains(facilitySelectedList.get(0).getMetaId())){
-					returnList.add(equipment);
+			if(equipment.getIsPartOf()!=null)
+				for(LinkedEntity le : equipment.getIsPartOf()) {
+					if(le.getMetaId().contains(facilitySelectedList.get(0).getMetaId())){
+						returnList.add(equipment);
+					}
 				}
-			}
 		}
 
 		if(parameters.containsKey("format") && parameters.get("format").toString().equals("application/epos.geo+json"))

@@ -119,14 +119,15 @@ public class FacilityDetailsItemGenerationJPA {
 
 			//Equipment types
 			DatabaseConnections.getInstance().getEquipmentList().forEach(equipment -> {
-				for(LinkedEntity linkedEntity : equipment.getIsPartOf()){
-					if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facilitySelected.getInstanceId())){
-						categoriesFromDB
-								.stream()
-								.filter(cat -> cat.getUid().equals(equipment.getType()))
-								.forEach(equipmentTypes::add);
+				if(equipment.getIsPartOf()!=null)
+					for(LinkedEntity linkedEntity : equipment.getIsPartOf()){
+						if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facilitySelected.getInstanceId())){
+							categoriesFromDB
+									.stream()
+									.filter(cat -> cat.getUid().equals(equipment.getType()))
+									.forEach(equipmentTypes::add);
+						}
 					}
-				}
 			});
 
 			facility.setServiceParameters(new ArrayList<>());

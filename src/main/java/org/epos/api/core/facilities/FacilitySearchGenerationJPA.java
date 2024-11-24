@@ -115,14 +115,15 @@ public class FacilitySearchGenerationJPA {
 
 			//Equipment types
 			DatabaseConnections.getInstance().getEquipmentList().forEach(equipment -> {
-				for(LinkedEntity linkedEntity : equipment.getIsPartOf()){
-					if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facility.getInstanceId())){
-						categoriesFromDB
-								.stream()
-								.filter(cat -> cat.getUid().equals(equipment.getType()))
-								.forEach(equipmentTypes::add);
+				if(equipment.getIsPartOf()!=null)
+					for(LinkedEntity linkedEntity : equipment.getIsPartOf()){
+						if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facility.getInstanceId())){
+							categoriesFromDB
+									.stream()
+									.filter(cat -> cat.getUid().equals(equipment.getType()))
+									.forEach(equipmentTypes::add);
+						}
 					}
-				}
 			});
 
 			discoveryMap.put(discoveryItem.getSha256id(), discoveryItem);
