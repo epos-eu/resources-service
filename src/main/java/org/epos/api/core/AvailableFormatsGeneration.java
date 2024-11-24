@@ -145,7 +145,7 @@ public class AvailableFormatsGeneration {
 							.originalFormat(returns)
 							.method(operation.getMethod())
 							.format("application/epos.geo+json")
-							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + returns)
+							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + returns)
 							.label("GEOJSON")
 							.description(AvailableFormatType.ORIGINAL)
 							.build());
@@ -154,7 +154,7 @@ public class AvailableFormatsGeneration {
 							.originalFormat(returns)
 							.method(operation.getMethod())
 							.format(returns)
-							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + returns)
+							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + returns)
 							.label(returns.toUpperCase())
 							.description(AvailableFormatType.ORIGINAL)
 							.build());
@@ -174,7 +174,7 @@ public class AvailableFormatsGeneration {
 									.originalFormat(parameter.getEncodingFormat())
 									.method(operation.getMethod())
 									.format(parameter.getEncodingFormat())
-									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + parameter.getEncodingFormat())
+									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + parameter.getEncodingFormat())
 									.label("GEOJSON")
 									.description(AvailableFormatType.CONVERTED)
 									.build());
@@ -184,7 +184,7 @@ public class AvailableFormatsGeneration {
 									.originalFormat(parameter.getEncodingFormat())
 									.method(operation.getMethod())
 									.format(parameter.getEncodingFormat())
-									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + parameter.getEncodingFormat())
+									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + parameter.getEncodingFormat())
 									.label("COVJSON")
 									.description(AvailableFormatType.CONVERTED)
 									.build());
