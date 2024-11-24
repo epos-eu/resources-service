@@ -17,6 +17,7 @@ import org.epos.api.enums.AvailableFormatType;
 import org.epos.api.beans.NodeFilters;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.Node;
+import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.Category;
 import org.epos.eposdatamodel.Facility;
 import org.epos.eposdatamodel.LinkedEntity;
@@ -48,9 +49,9 @@ public class FacilitySearchGenerationJPA {
 
 		long startTime = System.currentTimeMillis();
 
-		List<Facility> facilities  = (List<Facility>) AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Facility) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List<Organization> organizationForOwners  = (List<Organization>) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Organization) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List<Category> categoriesFromDB = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Category) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+		List<Facility> facilities  = DatabaseConnections.getInstance().getFacilityList();
+		List<Organization> organizationForOwners  = DatabaseConnections.getInstance().getOrganizationList();
+		List<Category> categoriesFromDB = DatabaseConnections.getInstance().getCategoryList();
 
 
 		LOGGER.info("Apply filter using input parameters: "+parameters.toString());
@@ -65,7 +66,7 @@ public class FacilitySearchGenerationJPA {
 		Set<Category> equipmentTypes = new HashSet<>();
 		Set<Organization> organizationsEntityIds = new HashSet<>();
 
-		facilities.stream().forEach(facility -> {
+		facilities.forEach(facility -> {
 
 			Set<String> facetsFacilityProviders = new HashSet<>();
 
@@ -75,35 +76,16 @@ public class FacilitySearchGenerationJPA {
 					.filter(uid -> uid.contains("category:"))
 					.collect(Collectors.toList());
 
+			organizationForOwners.forEach(organization -> {
+				for(LinkedEntity linkedEntity : organization.getOwns()){
+					if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facility.getInstanceId())){
+						facetsFacilityProviders.add(linkedEntity.getInstanceId());
+					}
+				}
+			});
 
-//TODO:			if(facility.getEquipmentFacilitiesByInstanceId()!=null) {
-//				organizationForOwners.stream()
-//				.map(EDMOrganization::getOwnsByInstanceId)
-//				.filter(Objects::nonNull)
-//				.forEach(organizationowner->{
-//					organizationowner.stream()
-//					.filter(edmEntity -> edmEntity.getEntityMetaId().equals(facility.getMetaId()))
-//					.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
-//					.map(EDMOrganization::getOrganizationLegalnameByInstanceId)
-//					.flatMap(Collection::stream)
-//					.filter(legalname -> Objects.nonNull(legalname))
-//					.map(EDMOrganizationLegalname::getLegalname)
-//					.forEach(facetsFacilityProviders::add);
-//
-//					organizationowner.stream()
-//					.filter(edmEntity -> edmEntity.getEntityMetaId().equals(facility.getMetaId()))
-//					.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
-//					.map(EDMOrganization::getEdmEntityIdByMetaId)
-//					.filter(Objects::nonNull)
-//					.collect(Collectors.toList())
-//					.forEach(organizationsEntityIds::add);
-//
-//				});
-//
-//			}
-
-			DiscoveryItem discoveryItem = new DiscoveryItemBuilder(facility.getMetaId(),
-					EnvironmentVariables.API_HOST + API_PATH_DETAILS + facility.getMetaId(),
+			DiscoveryItem discoveryItem = new DiscoveryItemBuilder(facility.getInstanceId(),
+					EnvironmentVariables.API_HOST + API_PATH_DETAILS + facility.getInstanceId(),
 					null)
 					.uid(facility.getUid())
 					.title(facility.getTitle())
@@ -112,7 +94,7 @@ public class FacilitySearchGenerationJPA {
 					.availableFormats(List.of(new AvailableFormat.AvailableFormatBuilder()
 							.originalFormat("application/epos.geo+json")
 							.format("application/epos.geo+json")
-							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facility.getMetaId())
+							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facility.getInstanceId())
 							.label("GEOJSON")
 							.description(AvailableFormatType.CONVERTED)
 							.build()))
@@ -131,14 +113,16 @@ public class FacilitySearchGenerationJPA {
 
 
 			//Equipment types
-//TODO:			if(facility.getEquipmentFacilitiesByInstanceId()!=null) {
-//				for(EDMEquipmentFacility item : facility.getEquipmentFacilitiesByInstanceId()) {
-//					categoriesFromDB
-//					.stream()
-//					.filter(cat -> cat.getUid().equals(item.getEquipmentByInstanceEquipmentId().getType()))
-//					.forEach(equipmentTypes::add);
-//				}
-//			}
+			DatabaseConnections.getInstance().getEquipmentList().forEach(equipment -> {
+				for(LinkedEntity linkedEntity : equipment.getIsPartOf()){
+					if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facility.getInstanceId())){
+						categoriesFromDB
+								.stream()
+								.filter(cat -> cat.getUid().equals(equipment.getType()))
+								.forEach(equipmentTypes::add);
+					}
+				}
+			});
 
 			discoveryMap.put(discoveryItem.getSha256id(), discoveryItem);
 		});

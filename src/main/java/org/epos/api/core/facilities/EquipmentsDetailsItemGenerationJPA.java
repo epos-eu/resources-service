@@ -4,6 +4,7 @@ import abstractapis.AbstractAPI;
 import commonapis.LinkedEntityAPI;
 import metadataapis.EntityNames;
 import model.StatusType;
+import org.epos.api.routines.DatabaseConnections;
 import org.epos.api.utility.Utils;
 import org.epos.eposdatamodel.*;
 import org.epos.library.feature.Feature;
@@ -34,17 +35,17 @@ public class EquipmentsDetailsItemGenerationJPA {
 		if(parameters.containsKey("facilityid")) {
 			facilitySelectedList = List.of((Facility)AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieve(parameters.get("id").toString()));
 		}else {
-			facilitySelectedList = (List<Facility>) AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Facility) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+			facilitySelectedList = DatabaseConnections.getInstance().getFacilityList();
 		}
 
-		List<Category> categoriesFromDB = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Category) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+		List<Category> categoriesFromDB = DatabaseConnections.getInstance().getCategoryList();
 
 		List<Equipment> equipmentList = null;
 
 		if(parameters.containsKey("id") && !parameters.get("id").equals("all")) {
 			equipmentList = List.of( (org.epos.eposdatamodel.Equipment) AbstractAPI.retrieveAPI(EntityNames.EQUIPMENT.name()).retrieve(parameters.get("id").toString()));
 		}else {
-			equipmentList = (List<Equipment>) AbstractAPI.retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Equipment) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+			equipmentList = DatabaseConnections.getInstance().getEquipmentList();
 		}
 
 		if(parameters.containsKey("params")) {
@@ -52,7 +53,7 @@ public class EquipmentsDetailsItemGenerationJPA {
 			JsonObject params = Utils.gson.fromJson(parameters.get("params").toString(), JsonObject.class);
 			if(params.has("equipmenttypes")) {
 				String equipmenttypes = params.get("equipmenttypes").getAsString();
-				if(!(equipmenttypes.isBlank() || equipmenttypes.isEmpty())){
+				if(!equipmenttypes.isBlank()){
 					List<String> scienceDomainsParameters = List.of(equipmenttypes.split(","));
 					List<Equipment> tempEquipmentList = new ArrayList<Equipment>();
 					for(Equipment item : equipmentList) {

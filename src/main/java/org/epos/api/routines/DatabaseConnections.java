@@ -31,6 +31,8 @@ public class DatabaseConnections {
 	private TemporalAPI temporalAPI = new TemporalAPI(EntityNames.PERIODOFTIME.name(), model.Temporal.class);
 	private IdentifierAPI identifierAPI = new IdentifierAPI(EntityNames.IDENTIFIER.name(), model.Identifier.class);
 	private MappingAPI mappingAPI = new MappingAPI(EntityNames.MAPPING.name(), model.Mapping.class);
+	private FacilityAPI facilityAPI = new FacilityAPI(EntityNames.FACILITY.name(), model.Mapping.class);
+	private EquipmentAPI equipmentAPI = new EquipmentAPI(EntityNames.EQUIPMENT.name(), model.Mapping.class);
 
 
 	private List<DataProduct> dataproducts;
@@ -45,6 +47,9 @@ public class DatabaseConnections {
 	private List<PeriodOfTime> periodOfTimeList;
 	private List<Identifier> identifierList;
 	private List<Mapping> mappingList;
+	private List<Equipment> equipmentList;
+	private List<Facility> facilityList;
+
 
 
 	private DatabaseConnections() {
@@ -61,6 +66,8 @@ public class DatabaseConnections {
 		List tempPeriodOfTimeList = temporalAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 		List tempIdentifierList = identifierAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 		List tempMappingList = mappingAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+		List tempFacilityList = facilityAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+		List tempEquipmentList = equipmentAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 
 		dataproducts = tempDataproducts;
 		softwareApplications = tempSoftwareApplications;
@@ -74,8 +81,8 @@ public class DatabaseConnections {
 		periodOfTimeList = tempPeriodOfTimeList;
 		identifierList = tempIdentifierList;
 		mappingList = tempMappingList;
-
-
+		facilityList = tempFacilityList;
+		equipmentList = tempEquipmentList;
 	}
 
 	private static DatabaseConnections connections;
@@ -130,5 +137,9 @@ public class DatabaseConnections {
 	}
 
 	public List<Mapping> getMappingList() { return mappingList;}
+
+	public List<Facility> getFacilityList() { return facilityList;}
+
+	public List<Equipment> getEquipmentList() { return equipmentList;}
 
 }

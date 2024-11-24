@@ -16,6 +16,7 @@ import org.epos.api.beans.SpatialInformation;
 import org.epos.api.enums.AvailableFormatType;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.FacetsNodeTree;
+import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.Category;
 import org.epos.eposdatamodel.LinkedEntity;
 import org.epos.eposdatamodel.Location;
@@ -46,13 +47,13 @@ public class FacilityDetailsItemGenerationJPA {
 		LOGGER.info("Parameters {}", parameters);
 
 		org.epos.eposdatamodel.Facility facilitySelected = (org.epos.eposdatamodel.Facility) AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieve(parameters.get("id").toString());
-		List<Organization> organizationForOwners  = (List<Organization>) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Organization) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List<Category> categoriesFromDB = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Category) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+		List<Organization> organizationForOwners  = DatabaseConnections.getInstance().getOrganizationList();
+		List<Category> categoriesFromDB = DatabaseConnections.getInstance().getCategoryList();
 
 		if(parameters.containsKey("format") && parameters.get("format").toString().equals("application/epos.geo+json"))
 			return generateAsGeoJson(facilitySelected, parameters.containsKey("equipmenttypes")? parameters.get("equipmenttypes").toString() : null);
 		else {
-			//TODO:
+
 			//Collection<EDMFacilityService> ws = facilitySelected.getFacilityServicesByInstanceId() != null ? facilitySelected.getFacilityServicesByInstanceId() : null;
 			//if (ws == null && facilitySelected.getFacilitiesByInstanceId() != null) return null;
 
@@ -67,14 +68,13 @@ public class FacilityDetailsItemGenerationJPA {
 				facility.setType(type[type.length - 1]);
 			}
 
-			facility.setId(Optional.ofNullable(facilitySelected.getMetaId()).orElse(null));
-			facility.setUid(Optional.ofNullable(facilitySelected.getUid()).orElse(null));
+			facility.setId(facilitySelected.getMetaId());
+			facility.setUid(facilitySelected.getUid());
 
 			facility.setHref(EnvironmentVariables.API_HOST + API_PATH_DETAILS + facilitySelected.getMetaId());
-			
-	
-			List<String> keywords = new ArrayList<String>();
-			keywords.addAll(Arrays.stream(Optional.ofNullable(facilitySelected.getKeywords()).orElse("").split(",\t")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()));
+
+
+            List<String> keywords = Arrays.stream(Optional.ofNullable(facilitySelected.getKeywords()).orElse("").split(",\t")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList());
 			
 			keywords.removeAll(Collections.singleton(null));
 			keywords.removeAll(Collections.singleton(""));
@@ -99,18 +99,13 @@ public class FacilityDetailsItemGenerationJPA {
 
 			Set<Organization> organizationsEntityIds = new HashSet<>();
 
-//TODO:			organizationForOwners.stream()
-//			.map(Organization::getOwns)
-//			.filter(Objects::nonNull)
-//			.forEach(organizationowner->{organizationowner.stream()
-//				.filter(edmEntity -> edmEntity.getEntityMetaId().equals(facilitySelected.getMetaId()))
-//				.map(EDMOrganizationOwner::getOrganizationByInstanceOrganizationId)
-//				.map(EDMOrganization::getEdmEntityIdByMetaId)
-//				.filter(Objects::nonNull)
-//				.collect(Collectors.toList())
-//				.forEach(organizationsEntityIds::add);
-//
-//			});
+			organizationForOwners.forEach(organization -> {
+				for(LinkedEntity linkedEntity : organization.getOwns()){
+					if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facilitySelected.getInstanceId())){
+						organizationsEntityIds.add(organization);
+					}
+				}
+			});
 
 
 			facility.setDataProvider(DataServiceProviderGeneration.getProviders(new ArrayList<Organization>(organizationsEntityIds)));
@@ -121,14 +116,16 @@ public class FacilityDetailsItemGenerationJPA {
 			Set<Category> equipmentTypes = new HashSet<>();
 
 			//Equipment types
-//TODO:			if(facilitySelected.getEquipmentFacilitiesByInstanceId()!=null) {
-//				for(EDMEquipmentFacility item : facilitySelected.getEquipmentFacilitiesByInstanceId()) {
-//					categoriesFromDB
-//					.stream()
-//					.filter(cat -> cat.getUid().equals(item.getEquipmentByInstanceEquipmentId().getType()))
-//					.forEach(equipmentTypes::add);
-//				}
-//			}
+			DatabaseConnections.getInstance().getEquipmentList().forEach(equipment -> {
+				for(LinkedEntity linkedEntity : equipment.getIsPartOf()){
+					if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facilitySelected.getInstanceId())){
+						categoriesFromDB
+								.stream()
+								.filter(cat -> cat.getUid().equals(equipment.getType()))
+								.forEach(equipmentTypes::add);
+					}
+				}
+			});
 
 			facility.setServiceParameters(new ArrayList<>());
 			ServiceParameter sp = new ServiceParameter();
@@ -147,7 +144,7 @@ public class FacilityDetailsItemGenerationJPA {
 			facility.setAvailableFormats(List.of(new AvailableFormat.AvailableFormatBuilder()
 					.originalFormat("application/epos.geo+json")
 					.format("application/epos.geo+json")
-					.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getMetaId())
+					.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getInstanceId())
 					.label("GEOJSON")
 					.description(AvailableFormatType.CONVERTED)
 					.build()));
@@ -174,8 +171,8 @@ public class FacilityDetailsItemGenerationJPA {
 					.filter(uid -> uid.contains("category:"))
 					.collect(Collectors.toList());
 
-			discoveryList.add(new DiscoveryItemBuilder(facilitySelected.getMetaId(),
-					EnvironmentVariables.API_HOST + API_PATH_DETAILS + facilitySelected.getMetaId(),
+			discoveryList.add(new DiscoveryItemBuilder(facilitySelected.getInstanceId(),
+					EnvironmentVariables.API_HOST + API_PATH_DETAILS + facilitySelected.getInstanceId(),
 					null)
 					.uid(facility.getUid())
 					.title(facility.getTitle())
@@ -183,7 +180,7 @@ public class FacilityDetailsItemGenerationJPA {
 					.availableFormats(List.of(new AvailableFormat.AvailableFormatBuilder()
 							.originalFormat("application/epos.geo+json")
 							.format("application/epos.geo+json")
-							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getMetaId())
+							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getInstanceId())
 							.label("GEOJSON")
 							.description(AvailableFormatType.CONVERTED)
 							.build()))
@@ -201,7 +198,7 @@ public class FacilityDetailsItemGenerationJPA {
 
 	public static FeaturesCollection generateAsGeoJson(org.epos.eposdatamodel.Facility facilitySelected, String equipmenttypes) {
 
-		List<Category> categoriesFromDB = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Category) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+		List<Category> categoriesFromDB = DatabaseConnections.getInstance().getCategoryList();
 
 		FeaturesCollection geojson = new FeaturesCollection();
 
@@ -210,7 +207,7 @@ public class FacilityDetailsItemGenerationJPA {
 		//COMMON FOR FACILITY
 		feature.addSimpleProperty("Name", Optional.ofNullable(facilitySelected.getTitle()).orElse(""));
 		feature.addSimpleProperty("Description", Optional.ofNullable(facilitySelected.getDescription()).orElse(""));
-		feature.addSimpleProperty("Type", Optional.ofNullable(categoriesFromDB
+		feature.addSimpleProperty("Type", Optional.of(categoriesFromDB
 				.stream()
 				.filter(cat -> cat.getUid().equals(facilitySelected.getType())).map(Category::getName).collect(Collectors.toList())).get().toString());
 
