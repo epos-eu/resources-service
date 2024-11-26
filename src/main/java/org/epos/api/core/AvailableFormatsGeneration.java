@@ -119,59 +119,37 @@ public class AvailableFormatsGeneration {
 							}
 						}
 					}
-					if (op.getSoftwareapplicationOperationsByInstanceId() != null && !isogcformat) {
-						for (EDMSoftwareapplication s : op.getSoftwareapplicationOperationsByInstanceId().stream().map(EDMSoftwareapplicationOperation::getSoftwareapplicationByInstanceSoftwareapplicationId).collect(Collectors.toList())) {
-							if (s.getSoftwareapplicationParametersByInstanceId() != null) {
-								List<ParameterPair> parameterList = s.getSoftwareapplicationParametersByInstanceId()
-									.stream()
-									// Group elements by instanceSoftwareapplicationId
-									.collect(Collectors.groupingBy(EDMSoftwareapplicationParameters::getInstanceSoftwareapplicationId))
-									.values().stream()
-									// Filter groups that have exactly two elements (object and result)
-									.filter(list -> list.size() == 2)
-									// Map each group to a Pair of Parameters
-									.map(list -> {
-										if (list.get(0).getAction() == "object") 
-											return new ParameterPair(list.get(0), list.get(1));
-										return new ParameterPair(list.get(1), list.get(0));
-									})
-									.collect(Collectors.toList());
+					if (op != null && !isogcformat) {
+						for(Object[] item : getAllPluginsIdFromSoftwareApplicationId(op.getInstanceId())) {
+							try {
+								if (item[2].toString().equals("application/epos.geo+json")
+										|| item[2].toString().equals("application/epos.table.geo+json")
+										|| item[2].toString().equals("application/epos.map.geo+json")) {
 
-								for (ParameterPair pair : parameterList) {
-									Parameter object = pair.getObject();
-									Parameter result = pair.getResult();
-
-									try {
-										if (result.getEncodingFormat().equals("application/epos.geo+json")
-												|| result.getEncodingFormat().equals("application/epos.table.geo+json")
-												|| result.getEncodingFormat().equals("application/epos.map.geo+json")) {
-
-											formats.add(new AvailableFormatConverted.AvailableFormatConvertedBuilder()
-													.inputFormat(object.getEncodingFormat())
-													.pluginId(getPluginIdFromSoftwareApplicationId(s.getInstanceId()))
-													.originalFormat(result.getEncodingFormat())
-													.format(result.getEncodingFormat())
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + result.getEncodingFormat())
-													.label("GEOJSON")
-													.description(AvailableFormatType.CONVERTED)
-													.build());
-										}
-										if (result.getEncodingFormat().equals("covjson")) {
-											formats.add(new AvailableFormatConverted.AvailableFormatConvertedBuilder()
-													.inputFormat(object.getEncodingFormat())
-													.pluginId(getPluginIdFromSoftwareApplicationId(s.getInstanceId()))
-													.originalFormat(result.getEncodingFormat())
-													.format(result.getEncodingFormat())
-													.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + result.getEncodingFormat())
-													.label("COVJSON")
-													.description(AvailableFormatType.CONVERTED)
-													.build());
-										}
-									} catch (Exception e) {
-										// If there is an error while creating a format object just skip it
-										e.printStackTrace();
-									}
+									formats.add(new AvailableFormatConverted.AvailableFormatConvertedBuilder()
+											.inputFormat(item[1].toString())
+											.pluginId(item[0].toString())
+											.originalFormat(item[1].toString())
+											.format(item[2].toString())
+											.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + item[2].toString())
+											.label("GEOJSON")
+											.description(AvailableFormatType.CONVERTED)
+											.build());
 								}
+								if (item[2].toString().equals("covjson")) {
+									formats.add(new AvailableFormatConverted.AvailableFormatConvertedBuilder()
+											.inputFormat(item[1].toString())
+											.pluginId(item[0].toString())
+											.originalFormat(item[1].toString())
+											.format(item[2].toString())
+										.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + item[2].toString())
+											.label("COVJSON")
+											.description(AvailableFormatType.CONVERTED)
+											.build());
+								}
+							} catch (Exception e) {
+								// If there is an error while creating a format object just skip it
+								e.printStackTrace();
 							}
 						}
 					}
@@ -224,10 +202,10 @@ public class AvailableFormatsGeneration {
 		}
 	}
 
-	private static String getPluginIdFromSoftwareApplicationId(String softwareApplicationId) {
+	private static List<Object[]> getAllPluginsIdFromSoftwareApplicationId(String operationId) {
 		EntityManager em = new DBService().getEntityManager();
-		List<String> resultList = (List<String>)em.createNativeQuery("select id from plugin where software_application_id = '" + softwareApplicationId + "'").getResultList();
-		return resultList.get(0);
+		List<Object[]> resultList = em.createNativeQuery("select id, input_format, output_format from plugin_relations where relation_id = '" + operationId + "'").getResultList();
+		return resultList;
 	}
 }
 
