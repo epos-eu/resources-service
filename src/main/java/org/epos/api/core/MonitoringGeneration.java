@@ -22,8 +22,6 @@ import org.epos.eposdatamodel.ContactPoint;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Identifier;
 import org.epos.eposdatamodel.LinkedEntity;
-import org.epos.eposdatamodel.Parameter;
-import org.epos.eposdatamodel.Parameter.ActionEnum;
 import org.epos.eposdatamodel.SoftwareApplication;
 import org.epos.eposdatamodel.WebService;
 import org.slf4j.Logger;

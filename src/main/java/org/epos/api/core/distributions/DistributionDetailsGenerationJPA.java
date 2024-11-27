@@ -284,7 +284,7 @@ public class DistributionDetailsGenerationJPA {
 					sp.setMinValue(mp.getMinValue());
 					sp.setLabel(mp.getLabel() != null ? mp.getLabel().replaceAll("@en", "") : null);
 					sp.setProperty(mp.getProperty());
-					sp.setRequired(Boolean.parseBoolean(mp.getRequired()));
+					sp.setRequired(mp.getRequired()!=null? Boolean.parseBoolean(mp.getRequired()):null);
 					sp.setType(mp.getRange() != null ? mp.getRange().replace("xsd:", "") : null);
 					sp.setValue(null);
 					sp.setValuePattern(mp.getValuePattern());
@@ -329,8 +329,8 @@ public class DistributionDetailsGenerationJPA {
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getMetaId(),
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getMetaId()+"?extended=true")
 				.uid(distribution.getUid())
-				.title(distribution.getTitle())
-				.description(distribution.getDescription())
+				.title(distribution.getTitle()!=null?String.join(";",distribution.getTitle()):null)
+				.description(distribution.getDescription()!=null? String.join(";",distribution.getDescription()):null)
 				.availableFormats(AvailableFormatsGeneration.generate(distributionSelected, softwareApplications))
 				.setSha256id(DigestUtils.sha256Hex(distribution.getUid()))
 				.setDataprovider(facetsDataProviders)

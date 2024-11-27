@@ -413,8 +413,8 @@ public class DistributionDetailsExtendedGenerationJPA {
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getMetaId(),
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getMetaId()+"?extended=true")
 				.uid(distribution.getUid())
-				.title(distribution.getTitle())
-				.description(distribution.getDescription())
+				.title(distribution.getTitle()!=null?String.join(";",distribution.getTitle()):null)
+				.description(distribution.getDescription()!=null? String.join(";",distribution.getDescription()):null)
 				.availableFormats(AvailableFormatsGeneration.generate(distributionSelected, softwareApplications))
 				.setSha256id(DigestUtils.sha256Hex(distribution.getUid()))
 				.setDataprovider(facetsDataProviders)

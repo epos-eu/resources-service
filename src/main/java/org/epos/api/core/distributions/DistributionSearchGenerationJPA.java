@@ -85,7 +85,7 @@ public class DistributionSearchGenerationJPA {
 						.forEach(linkedEntity -> {
 							Optional<Organization> organization = organizationList.parallelStream().filter(organizationFromList -> organizationFromList.getInstanceId().equals(linkedEntity.getInstanceId())).findFirst();
 							if(organization.isPresent()) {
-								facetsDataProviders.add(String.join(",",organization.get().getLegalName()));
+								if(organization.get().getLegalName()!=null) facetsDataProviders.add(String.join(",",organization.get().getLegalName()));
 								organizationsEntityIds.add(organization.get());
 							}
 						});
@@ -116,7 +116,7 @@ public class DistributionSearchGenerationJPA {
 											if(webService.get().getProvider()!=null){
 												Optional<Organization> organization = organizationList.parallelStream().filter(organizationFromList -> organizationFromList.getInstanceId().equals(webService.get().getProvider().getInstanceId())).findFirst();
 												if(organization.isPresent()) {
-													facetsServiceProviders.add(String.join(",",organization.get().getLegalName()));
+													if(organization.get().getLegalName()!=null) facetsServiceProviders.add(String.join(",",organization.get().getLegalName()));
 													organizationsEntityIds.add(organization.get());
 												}
 											}
@@ -138,8 +138,8 @@ public class DistributionSearchGenerationJPA {
 									EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.get().getInstanceId(),
 									EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.get().getInstanceId()+"?extended=true")
 									.uid(distribution.get().getUid())
-									.title(String.join(";",distribution.get().getTitle()))
-									.description(String.join(";",distribution.get().getDescription()))
+									.title(distribution.get().getTitle()!=null?String.join(";",distribution.get().getTitle()):null)
+									.description(distribution.get().getDescription()!=null? String.join(";",distribution.get().getDescription()):null)
 									.availableFormats(availableFormats)
 									.setSha256id(DigestUtils.sha256Hex(distribution.get().getUid()))
 									.setDataprovider(facetsDataProviders)

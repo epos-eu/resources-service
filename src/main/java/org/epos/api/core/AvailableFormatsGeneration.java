@@ -165,26 +165,26 @@ public class AvailableFormatsGeneration {
 			if (softwareApplication.getRelation()!=null && softwareApplication.getRelation().parallelStream().map(LinkedEntity::getInstanceId).collect(Collectors.toList()).contains(operation.getInstanceId())) {
 				if (softwareApplication.getParameter() != null) {
 					for (LinkedEntity parameterLinkedEntity : softwareApplication.getParameter()) {
-						Parameter parameter = (Parameter) LinkedEntityAPI.retrieveFromLinkedEntity(parameterLinkedEntity);
-						if (parameter.getEncodingFormat().equals("application/epos.geo+json")
-								|| parameter.getEncodingFormat().equals("application/epos.table.geo+json")
-								|| parameter.getEncodingFormat().equals("application/epos.map.geo+json")) {
+						SoftwareApplicationParameter parameter = (SoftwareApplicationParameter) LinkedEntityAPI.retrieveFromLinkedEntity(parameterLinkedEntity);
+						if (parameter.getEncodingformat().equals("application/epos.geo+json")
+								|| parameter.getEncodingformat().equals("application/epos.table.geo+json")
+								|| parameter.getEncodingformat().equals("application/epos.map.geo+json")) {
 
 							formats.add(new AvailableFormat.AvailableFormatBuilder()
-									.originalFormat(parameter.getEncodingFormat())
+									.originalFormat(parameter.getEncodingformat())
 									.method(operation.getMethod())
-									.format(parameter.getEncodingFormat())
-									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + parameter.getEncodingFormat())
+									.format(parameter.getEncodingformat())
+									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + parameter.getEncodingformat())
 									.label("GEOJSON")
 									.description(AvailableFormatType.CONVERTED)
 									.build());
 						}
-						if (parameter.getEncodingFormat().equals("covjson")) {
+						if (parameter.getEncodingformat().equals("covjson")) {
 							formats.add(new AvailableFormat.AvailableFormatBuilder()
-									.originalFormat(parameter.getEncodingFormat())
+									.originalFormat(parameter.getEncodingformat())
 									.method(operation.getMethod())
-									.format(parameter.getEncodingFormat())
-									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + parameter.getEncodingFormat())
+									.format(parameter.getEncodingformat())
+									.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + parameter.getEncodingformat())
 									.label("COVJSON")
 									.description(AvailableFormatType.CONVERTED)
 									.build());
