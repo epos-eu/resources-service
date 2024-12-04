@@ -49,13 +49,13 @@ public class AvailableFormatsGeneration {
 										Optional<Mapping> map = DatabaseConnections.getInstance().getMappingList().parallelStream().filter(mappingFromList -> mappingFromList.getInstanceId().equals(mapLe.getInstanceId())).findFirst();
 										if(map.isPresent()) {
 											/** Check if is an OGC service, the check on this level is based on a value of a variable **/
-											if (map.get().getVariable().equalsIgnoreCase("service")
+											if (map.get().getVariable()!=null && map.get().getVariable().equalsIgnoreCase("service")
 													&& map.get().getParamValue() != null && (map.get().getParamValue().contains("WMS") || map.get().getParamValue().contains("wms") || map.get().getDefaultValue().equalsIgnoreCase("wms")))
 												isWMS = true;
-											if (map.get().getVariable().equalsIgnoreCase("service")
+											if (map.get().getVariable()!=null && map.get().getVariable().equalsIgnoreCase("service")
 													&& map.get().getParamValue() != null && (map.get().getParamValue().contains("WMTS") || map.get().getParamValue().contains("wmts") || map.get().getDefaultValue().equalsIgnoreCase("wmts")))
 												isWMTS = true;
-											if (map.get().getVariable().equalsIgnoreCase("service")
+											if (map.get().getVariable()!=null && map.get().getVariable().equalsIgnoreCase("service")
 													&& map.get().getParamValue() != null && (map.get().getParamValue().contains("WFS") || map.get().getParamValue().contains("wfs") || map.get().getDefaultValue().equalsIgnoreCase("wfs")))
 												isWFS = true;
 
