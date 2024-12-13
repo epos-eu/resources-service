@@ -108,6 +108,14 @@ public class AvailableFormatsGeneration {
 										.label("GEOJSON")
 										.description(AvailableFormatType.ORIGINAL)
 										.build());
+							} else if (returns.contains("epos.covjson") || returns.contains("epos.graph.covjson")) {
+								formats.add(new AvailableFormat.AvailableFormatBuilder()
+										.originalFormat(returns)
+										.format("application/epos.geo+json")
+										.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + returns)
+										.label("COVJSON")
+										.description(AvailableFormatType.ORIGINAL)
+										.build());
 							} else {
 								formats.add(new AvailableFormat.AvailableFormatBuilder()
 										.originalFormat(returns)
@@ -170,37 +178,6 @@ public class AvailableFormatsGeneration {
 					.build());
 		}
 		return formats;
-	}
-
-	public static class ParameterPair {
-		private Parameter object;
-		private Parameter result;
-
-		public ParameterPair(EDMSoftwareapplicationParameters object, EDMSoftwareapplicationParameters result) {
-			this.object = this.fromEDMSoftwareapplicationParameters(object);
-			this.result = this.fromEDMSoftwareapplicationParameters(result);
-		}
-		
-		private Parameter fromEDMSoftwareapplicationParameters(EDMSoftwareapplicationParameters elem){
-			Parameter parameter = new Parameter();
-			parameter.setEncodingFormat(elem.getEncodingformat());
-			parameter.setAction(Parameter.ActionEnum.fromValue(elem.getAction()));
-			parameter.setConformsTo(elem.getConformsto());
-			return parameter;
-		}
-
-		public Parameter getObject() {
-			return object;
-		}
-		public void setObject(Parameter object) {
-			this.object = object;
-		}
-		public Parameter getResult() {
-			return result;
-		}
-		public void setResult(Parameter result) {
-			this.result = result;
-		}
 	}
 
 	private static List<Object[]> getAllPluginsIdFromSoftwareApplicationId(String operationId) {
