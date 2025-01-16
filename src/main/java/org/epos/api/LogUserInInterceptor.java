@@ -23,39 +23,19 @@ public class LogUserInInterceptor implements HandlerInterceptor {
 
         Map<String, String> allRequestParams = convertQueryParameterFromArrayStringToString(request);
 
-
-        /** TODO: DELETE **/
-        if (!allRequestParams.containsKey("userId")) {
-            allRequestParams.put("userId", "admin");
-        }
-
-
         System.out.println(allRequestParams);
 
-        if (!allRequestParams.containsKey("userId")) {
-            String message = "{\"message\": \"The user is not correctly logged in\"}";
-            response.setContentType("application/json");
-            response.getWriter().write(message);
-            response.setStatus(400);
-            return false;
+        if(allRequestParams.containsKey("userId")) {
+
+            User user = UserGroupManagementAPI.retrieveUserById(allRequestParams.get("userId"));
+
+            System.out.println(user);
+
+            HttpSession session = request.getSession();
+            session.setAttribute("user", user);
+
+            return true;
         }
-
-        User user = UserGroupManagementAPI.retrieveUserById(allRequestParams.get("userId"));
-
-        System.out.println(user);
-
-        if(user == null){
-
-            String message = "{\"message\": \"The user doesn't exists\"}";
-            response.setContentType("application/json");
-            response.getWriter().write(message);
-            response.setStatus(400);
-            return false;
-        }
-
-        HttpSession session = request.getSession();
-        session.setAttribute("user", user);
-
         return true;
     }
 

@@ -51,8 +51,13 @@ public class DistributionSearchGenerationJPA {
 			versions.add(StatusType.PUBLISHED);
         }
 
-        // Retrieve all needed information available (if status in status list and
-		List<DataProduct> dataproducts  = DatabaseConnections.getInstance().getDataproducts().stream().filter(Objects::nonNull).filter(item -> (versions.contains(item.getStatus()) && item.getStatus().equals(StatusType.PUBLISHED)) || (versions.contains(item.getStatus()) && !item.getStatus().equals(StatusType.PUBLISHED) && item.getEditorId().equals(user.getAuthIdentifier()))).collect(Collectors.toList());
+		List<DataProduct> dataproducts  = new ArrayList<>();
+		// Retrieve all needed information available (if status in status list and
+		if(versions.contains(StatusType.PUBLISHED)){
+			dataproducts.addAll(DatabaseConnections.getInstance().getDataproducts().stream().filter(Objects::nonNull).filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList()));
+		}
+
+		dataproducts.addAll(DatabaseConnections.getInstance().getDataproducts().stream().filter(Objects::nonNull).filter(item -> (versions.contains(item.getStatus()) && !item.getStatus().equals(StatusType.PUBLISHED) && item.getEditorId().equals(user.getAuthIdentifier()))).collect(Collectors.toList()));
 		List<SoftwareApplication> softwareApplications = DatabaseConnections.getInstance().getSoftwareApplications();
 		List<Organization> organizationList = DatabaseConnections.getInstance().getOrganizationList();
 		List<Category> categoryList1 = DatabaseConnections.getInstance().getCategoryList();
