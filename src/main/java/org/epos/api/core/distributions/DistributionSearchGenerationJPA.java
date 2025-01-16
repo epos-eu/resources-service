@@ -153,6 +153,7 @@ public class DistributionSearchGenerationJPA {
 									.availableFormats(availableFormats)
 									.setSha256id(distribution.get().getUid()!=null? DigestUtils.sha256Hex(distribution.get().getUid()) : "")
 									.setDataprovider(facetsDataProviders)
+									.setVersioningStatus(dataproduct.getStatus().name())
 									.setServiceProvider(facetsServiceProviders)
 									.setCategories(categoryList.isEmpty() ? null : categoryList)
 									.build();

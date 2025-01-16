@@ -24,6 +24,7 @@ public class DiscoveryItem implements Serializable {
 	private String title;
 	private String description;
 	private int status = 0;
+	private String versioningStatus;
 	private String statusTimestamp;
 	private List<AvailableFormat> availableFormats;
 	
@@ -42,6 +43,7 @@ public class DiscoveryItem implements Serializable {
 		this.title = builder.title;
 		this.description = builder.description;
 		this.status = builder.status;
+		this.versioningStatus = builder.versioningStatus;
 		this.statusTimestamp = builder.statusTimestamp;
 		this.availableFormats = builder.availableFormats;
 	}
@@ -134,6 +136,10 @@ public class DiscoveryItem implements Serializable {
 		this.status = status;
 	}
 
+	public String getVersioningStatus() { return versioningStatus; }
+
+	public void setVersioningStatus(String versioningStatus) { this.versioningStatus = versioningStatus; }
+
 	public String getStatusTimestamp() {
 		return statusTimestamp;
 	}
@@ -172,6 +178,7 @@ public class DiscoveryItem implements Serializable {
 		private String title;
 		private String description;
 		private int status = 0;
+		private String versioningStatus;
 		private String statusTimestamp;
 		private List<AvailableFormat> availableFormats;
 		
@@ -225,6 +232,11 @@ public class DiscoveryItem implements Serializable {
 			this.status = status;
 			return this;
 		}
+
+		public DiscoveryItemBuilder setVersioningStatus(String versioningStatus) {
+			this.versioningStatus = versioningStatus;
+			return this;
+		}
 		
 		public DiscoveryItemBuilder setStatusTimestamp(String statusTimestamp) {
 			this.statusTimestamp = statusTimestamp;
@@ -259,6 +271,7 @@ public class DiscoveryItem implements Serializable {
 				&& Objects.equals(description, other.description) && Objects.equals(href, other.href)
 				&& Objects.equals(hrefExtended, other.hrefExtended) && Objects.equals(id, other.id)
 				&& status == other.status && Objects.equals(statusTimestamp, other.statusTimestamp)
+				&& Objects.equals(versioningStatus, other.versioningStatus)
 				&& Objects.equals(title, other.title) && Objects.equals(uid, other.uid);
 	}
 
@@ -266,7 +279,7 @@ public class DiscoveryItem implements Serializable {
 	public String toString() {
 		return "DiscoveryItem [href=" + href + ", hrefExtended=" + hrefExtended + ", id=" + id + ", uid=" + uid
 				+ ", title=" + title + ", description=" + description + ", status=" + status + ", statusTimestamp="
-				+ statusTimestamp + ", availableFormats=" + availableFormats + "]";
+				+ statusTimestamp + ", versioningStatus=" + versioningStatus +", availableFormats=" + availableFormats + "]";
 	}
 
 	
