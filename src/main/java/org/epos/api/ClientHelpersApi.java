@@ -85,7 +85,8 @@ public interface ClientHelpersApi {
 			@Parameter(in = ParameterIn.QUERY, description = "servicetypes" ,schema=@Schema()) @Valid @RequestParam(value = "servicetypes", required = false) String servicetypes,
 			@Parameter(in = ParameterIn.QUERY, description = "organisations" ,schema=@Schema()) @Valid @RequestParam(value = "organisations", required = false) String organisations,
 			@Parameter(in = ParameterIn.QUERY, description = "facetstype {categories, dataproviders, serviceproviders}" ,schema=@Schema()) @Valid @RequestParam(value = "facetstype", required = false) String facetsType,
-			@Parameter(in = ParameterIn.QUERY, description = "facets" ,schema=@Schema()) @Valid @RequestParam(value = "facets", required = false) Boolean facets);
+			@Parameter(in = ParameterIn.QUERY, description = "facets" ,schema=@Schema()) @Valid @RequestParam(value = "facets", required = false) Boolean facets,
+			@Parameter(in = ParameterIn.QUERY, description = "versioningStatus" ,schema=@Schema()) @Valid @RequestParam(value = "versioningStatus", required = false) String versioningStatus);
 	
 	
 	@Operation(summary = "metadata resources details", description = "returns detailed information useful to contextualise the discovery phase", tags={ "Resources Service" })

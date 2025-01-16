@@ -65,7 +65,7 @@ public class AvailableFormatsGeneration {
 													if (pv.startsWith("image/") && isWMS) {
 														formats.add(new AvailableFormat.AvailableFormatBuilder()
 																.originalFormat(pv)
-																//.method(operation.get().getMethod())
+																.method(operation.get().getMethod())
 																.format("application/vnd.ogc.wms_xml")
 																.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_OGC + distribution.getInstanceId())
 																.label("WMS".toUpperCase())
@@ -75,7 +75,7 @@ public class AvailableFormatsGeneration {
 														System.out.println("HELLO" + distribution.getUid());
 														formats.add(new AvailableFormat.AvailableFormatBuilder()
 																.originalFormat(pv)
-																//.method(operation.get().getMethod())
+																.method(operation.get().getMethod())
 																.format("application/vnd.ogc.wmts_xml")
 																.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_OGC + distribution.getInstanceId())
 																.label("WMTS".toUpperCase())
@@ -84,7 +84,7 @@ public class AvailableFormatsGeneration {
 													} else if (pv.equals("json") && isWFS) {
 														formats.add(new AvailableFormat.AvailableFormatBuilder()
 																.originalFormat(pv)
-																//.method(operation.get().getMethod())
+																.method(operation.get().getMethod())
 																.format("application/epos.geo+json")
 																.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + "json")
 																.label("GEOJSON (" + pv + ")")
@@ -93,7 +93,7 @@ public class AvailableFormatsGeneration {
 													} else if (pv.contains("geo%2Bjson")) {
 														formats.add(new AvailableFormat.AvailableFormatBuilder()
 																.originalFormat(pv)
-																//.method(operation.get().getMethod())
+																.method(operation.get().getMethod())
 																.format("application/epos.geo+json")
 																.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + pv)
 																.label("GEOJSON (" + pv + ")")
@@ -105,7 +105,7 @@ public class AvailableFormatsGeneration {
 													) {
 														formats.add(new AvailableFormat.AvailableFormatBuilder()
 																.originalFormat(pv)
-																//.method(operation.get().getMethod())
+																.method(operation.get().getMethod())
 																.format("application/epos.geo+json")
 																.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + pv)
 																.label("GEOJSON (" + pv + ")")
@@ -114,7 +114,7 @@ public class AvailableFormatsGeneration {
 													} else {
 														formats.add(new AvailableFormat.AvailableFormatBuilder()
 																.originalFormat(pv)
-																//.method(operation.get().getMethod())
+																.method(operation.get().getMethod())
 																.format(pv)
 																.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + pv)
 																.label(pv.toUpperCase())

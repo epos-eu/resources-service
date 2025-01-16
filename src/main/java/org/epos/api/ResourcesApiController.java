@@ -259,7 +259,7 @@ public class ResourcesApiController extends ApiController implements ResourcesAp
 			requestParams = Map.of("type", type);
 		}
 
-		return standardRequest("ORGANISATIONS", requestParams);
+		return standardRequest("ORGANISATIONS", requestParams, null);
 	}
 
 }

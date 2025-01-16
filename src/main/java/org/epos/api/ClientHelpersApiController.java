@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.epos.api.beans.Distribution;
 import org.epos.api.beans.SearchResponse;
 import org.epos.api.utility.Utils;
+import org.epos.eposdatamodel.User;
 import org.epos.library.feature.FeaturesCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,10 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 	 * 
 	 */
 
+	protected User getUserFromSession() {
+		return (User) request.getSession().getAttribute("user");
+	}
+
 	public ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The distribution ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id,
     		@Parameter(in = ParameterIn.QUERY, description = "extended payload" ,schema=@Schema()) @Valid @RequestParam(value = "extended", required = false) Boolean extended){
 
@@ -74,7 +79,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		requestParams.put("id", id);
 		requestParams.put("extended", extended);
 
-		return standardRequest("DETAILS", requestParams);
+		return standardRequest("DETAILS", requestParams, null);
 	}
 
 	public ResponseEntity<SearchResponse> searchUsingGet(@Parameter(in = ParameterIn.QUERY, description = "q" ,schema=@Schema()) @Valid @RequestParam(value = "q", required = false) String q, 
@@ -86,8 +91,11 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			@Parameter(in = ParameterIn.QUERY, description = "servicetypes" ,schema=@Schema()) @Valid @RequestParam(value = "servicetypes", required = false) String servicetypes,
 			@Parameter(in = ParameterIn.QUERY, description = "organisations" ,schema=@Schema()) @Valid @RequestParam(value = "organisations", required = false) String organisations,
 			@Parameter(in = ParameterIn.QUERY, description = "facetstype {categories, dataproviders, serviceproviders}" ,schema=@Schema(allowableValues = {"categories", "dataproviders", "serviceproviders"})) @Valid @RequestParam(value = "facetstype", required = false) String facetsType,
-			@Parameter(in = ParameterIn.QUERY, description = "facets" ,schema=@Schema()) @Valid @RequestParam(value = "facets", required = false) Boolean facets) {
+			@Parameter(in = ParameterIn.QUERY, description = "facets" ,schema=@Schema()) @Valid @RequestParam(value = "facets", required = false) Boolean facets,
+			@Parameter(in = ParameterIn.QUERY, description = "versioningStatus" ,schema=@Schema()) @Valid @RequestParam(value = "versioningStatus", required = false) String versioningStatus) {
+
 		Map<String,Object> requestParameters = new HashMap<>();
+		User user = getUserFromSession();
 
 		if(!StringUtils.isBlank(q)) {
 			try {
@@ -230,6 +238,18 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			requestParameters.put("facetstype", facetsType);
 		}
 
+		if(!StringUtils.isBlank(versioningStatus)) {
+			try {
+				versioningStatus = java.net.URLDecoder.decode(versioningStatus, StandardCharsets.UTF_8.name());
+				versioningStatus = versioningStatus.replace(" ", "");
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "versioningStatus: "+ versioningStatus, e);
+				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+			requestParameters.put("versioningStatus", versioningStatus);
+		}
+
 		if(!StringUtils.isBlank(startDate)) {
 			if(Utils.convertDateUsingPattern(startDate, Utils.EPOSINTERNALFORMAT, Utils.EPOSINTERNALFORMAT)==null) {
 				SearchResponse errorResponse = new SearchResponse("Encountered an error parsing or managing the following DateTime: "+startDate);
@@ -243,7 +263,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			}
 		}
 
-		return standardRequest("SEARCH", requestParameters);
+		return standardRequest("SEARCH", requestParameters, user);
 	}
 	
 	
@@ -293,7 +313,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			requestParameters.put("format", "json/plain");
 		}
 
-		return standardRequest("FACILITYDETAILS", requestParameters);
+		return standardRequest("FACILITYDETAILS", requestParameters, null);
 	}
 
 	@Override
@@ -401,7 +421,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		}
 
 
-		return standardRequest("FACILITYSEARCH", requestParameters);
+		return standardRequest("FACILITYSEARCH", requestParameters, null);
 	}
 	
 	/**
@@ -468,7 +488,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
 
-		return standardRequest("EQUIPMENTDETAILS", requestParameters);
+		return standardRequest("EQUIPMENTDETAILS", requestParameters, null);
 	}
 
 }

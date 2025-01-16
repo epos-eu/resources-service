@@ -29,6 +29,7 @@ import org.epos.api.core.facilities.FacilityDetailsItemGenerationJPA;
 import org.epos.api.core.facilities.FacilitySearchGenerationJPA;
 import org.epos.api.core.organizations.OrganisationsGeneration;
 import org.epos.api.utility.Utils;
+import org.epos.eposdatamodel.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -48,16 +49,13 @@ abstract class ApiController<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected ResponseEntity<T> standardRequest(String service, Map<String, Object> requestParams) {
-		String cacheId = StringUtils.join(requestParams);
-		
-		String responseCode = "OK";
+	protected ResponseEntity<T> standardRequest(String service, Map<String, Object> requestParams, User user) {
 		
 		String response = null;
 		
 		switch(service) {
 		case "SEARCH":
-			response = Utils.gson.toJson(DistributionSearchGenerationJPA.generate(requestParams));
+			response = Utils.gson.toJson(DistributionSearchGenerationJPA.generate(requestParams, user));
 			break;
 		case "DETAILS":
 			if(Boolean.valueOf(requestParams.get("extended").toString()))

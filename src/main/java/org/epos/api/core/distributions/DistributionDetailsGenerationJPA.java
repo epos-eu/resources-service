@@ -272,25 +272,7 @@ public class DistributionDetailsGenerationJPA {
 			if (op.getMapping() != null && !op.getMapping().isEmpty()) {
 				for (LinkedEntity mpLe : op.getMapping()) {
 					Mapping mp = (Mapping) LinkedEntityAPI.retrieveFromLinkedEntity(mpLe);
-					ServiceParameter sp = new ServiceParameter();
-					sp.setDefaultValue(mp.getDefaultValue());
-					sp.setEnumValue(
-							mp.getParamValue() != null ?
-									mp.getParamValue()
-									: new ArrayList<>()
-							);
-					sp.setName(mp.getVariable());
-					sp.setMaxValue(mp.getMaxValue());
-					sp.setMinValue(mp.getMinValue());
-					sp.setLabel(mp.getLabel() != null ? mp.getLabel().replaceAll("@en", "") : null);
-					sp.setProperty(mp.getProperty());
-					sp.setRequired(mp.getRequired()!=null? Boolean.parseBoolean(mp.getRequired()):null);
-					sp.setType(mp.getRange() != null ? mp.getRange().replace("xsd:", "") : null);
-					sp.setValue(null);
-					sp.setValuePattern(mp.getValuePattern());
-					sp.setVersion(null);
-					sp.setReadOnlyValue(mp.getReadOnlyValue());
-					sp.setMultipleValue(mp.getMultipleValues());
+					ServiceParameter sp = getServiceParameter(mp);
 					distribution.getParameters().add(sp);
 				}
 			}
@@ -343,6 +325,29 @@ public class DistributionDetailsGenerationJPA {
 		distribution.setCategories(categories.getFacets());
 		
 		return distribution;
+	}
+
+	private static ServiceParameter getServiceParameter(Mapping mp) {
+		ServiceParameter sp = new ServiceParameter();
+		sp.setDefaultValue(mp.getDefaultValue());
+		sp.setEnumValue(
+				mp.getParamValue() != null ?
+						mp.getParamValue()
+						: new ArrayList<>()
+				);
+		sp.setName(mp.getVariable());
+		sp.setMaxValue(mp.getMaxValue());
+		sp.setMinValue(mp.getMinValue());
+		sp.setLabel(mp.getLabel() != null ? mp.getLabel().replaceAll("@en", "") : null);
+		sp.setProperty(mp.getProperty());
+		sp.setRequired(mp.getRequired()!=null? Boolean.parseBoolean(mp.getRequired()):null);
+		sp.setType(mp.getRange() != null ? mp.getRange().replace("xsd:", "") : null);
+		sp.setValue(null);
+		sp.setValuePattern(mp.getValuePattern());
+		sp.setVersion(null);
+		sp.setReadOnlyValue(Boolean.parseBoolean(mp.getReadOnlyValue())? mp.getReadOnlyValue() : null);
+		sp.setMultipleValue(Boolean.parseBoolean(mp.getMultipleValues())? mp.getMultipleValues() : null);
+		return sp;
 	}
 
 }

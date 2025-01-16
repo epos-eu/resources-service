@@ -35,14 +35,24 @@ public class DistributionSearchGenerationJPA {
 	private static final String PARAMETER__SCIENCE_DOMAIN = "sciencedomains";
 	private static final String PARAMETER__SERVICE_TYPE = "servicetypes";
 
-	public static SearchResponse generate(Map<String,Object> parameters) {
+	public static SearchResponse generate(Map<String,Object> parameters, User user) {
 
 		LOGGER.info("Requests start - JPA method");
 
 		long startTime = System.currentTimeMillis();
 
-		// Retrieve all needed information available
-		List<DataProduct> dataproducts  = DatabaseConnections.getInstance().getDataproducts();
+		List<StatusType> versions = new ArrayList<>();
+
+		if(parameters.containsKey("versioningStatus")){
+			Arrays.stream(parameters.get("versioningStatus").toString().split(",")).forEach(version -> {
+				versions.add(StatusType.valueOf(version));
+			});
+		} else {
+			versions.add(StatusType.PUBLISHED);
+        }
+
+        // Retrieve all needed information available (if status in status list and
+		List<DataProduct> dataproducts  = DatabaseConnections.getInstance().getDataproducts().stream().filter(Objects::nonNull).filter(item -> (versions.contains(item.getStatus()) && item.getStatus().equals(StatusType.PUBLISHED)) || (versions.contains(item.getStatus()) && !item.getStatus().equals(StatusType.PUBLISHED) && item.getEditorId().equals(user.getAuthIdentifier()))).collect(Collectors.toList());
 		List<SoftwareApplication> softwareApplications = DatabaseConnections.getInstance().getSoftwareApplications();
 		List<Organization> organizationList = DatabaseConnections.getInstance().getOrganizationList();
 		List<Category> categoryList1 = DatabaseConnections.getInstance().getCategoryList();
@@ -141,7 +151,7 @@ public class DistributionSearchGenerationJPA {
 									.title(distribution.get().getTitle()!=null?String.join(";",distribution.get().getTitle()):null)
 									.description(distribution.get().getDescription()!=null? String.join(";",distribution.get().getDescription()):null)
 									.availableFormats(availableFormats)
-									.setSha256id(DigestUtils.sha256Hex(distribution.get().getUid()))
+									.setSha256id(distribution.get().getUid()!=null? DigestUtils.sha256Hex(distribution.get().getUid()) : "")
 									.setDataprovider(facetsDataProviders)
 									.setServiceProvider(facetsServiceProviders)
 									.setCategories(categoryList.isEmpty() ? null : categoryList)
