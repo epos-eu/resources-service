@@ -35,7 +35,7 @@ public class Tests {
 		//headers.put("format", "application/epos.geo+json");
 		
 		//FacilityDetailsItemGenerationJPA.generate(headers);
-		System.out.println(gson.toJsonTree(DistributionSearchGenerationJPA.generate(headers)));
+		System.out.println(gson.toJsonTree(DistributionSearchGenerationJPA.generate(headers, null)));
 
 		//EntityManager em = new DBService().getEntityManager();
 		//List<EDMFacility> facilities  = getFromDB(em, EDMFacility.class, "facility.findAllByState", "STATE", "PUBLISHED");
