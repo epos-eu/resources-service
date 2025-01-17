@@ -241,7 +241,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		if(!StringUtils.isBlank(versioningStatus)) {
 			try {
 				versioningStatus = java.net.URLDecoder.decode(versioningStatus, StandardCharsets.UTF_8.name());
-				versioningStatus = versioningStatus.replace(" ", "");
+				versioningStatus = versioningStatus.replace(" ", "").toUpperCase();
 			} catch (UnsupportedEncodingException e) {
 				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "versioningStatus: "+ versioningStatus, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
