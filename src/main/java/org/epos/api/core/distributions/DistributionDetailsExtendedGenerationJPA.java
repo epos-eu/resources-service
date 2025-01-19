@@ -94,7 +94,7 @@ public class DistributionDetailsExtendedGenerationJPA {
 			);
 		}
 
-		distribution.setId(distributionSelected.getMetaId());
+		distribution.setId(distributionSelected.getInstanceId());
 		distribution.setUid(distributionSelected.getUid());
 
 		if (distributionSelected.getDownloadURL() != null) {
@@ -107,8 +107,8 @@ public class DistributionDetailsExtendedGenerationJPA {
 
 		distribution.setLicense(distributionSelected.getLicence());
 		distribution.setFrequencyUpdate(dp.getAccrualPeriodicity());
-		distribution.setHref(EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getMetaId());
-		distribution.setHrefExtended(EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getMetaId()+"?extended=true");
+		distribution.setHref(EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getInstanceId());
+		distribution.setHrefExtended(EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getInstanceId()+"?extended=true");
 
 		Set<String> keywords = new HashSet<>(Arrays.stream(Optional.ofNullable(dp.getKeywords()).orElse("").split(",\t")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()));
 		if (ws != null)
@@ -409,9 +409,9 @@ public class DistributionDetailsExtendedGenerationJPA {
 				.filter(uid -> uid.contains("category:"))
 				.collect(Collectors.toList());
 
-		discoveryList.add(new DiscoveryItem.DiscoveryItemBuilder(distributionSelected.getMetaId(),
-				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getMetaId(),
-				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getMetaId()+"?extended=true")
+		discoveryList.add(new DiscoveryItem.DiscoveryItemBuilder(distributionSelected.getInstanceId(),
+				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getInstanceId(),
+				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getInstanceId()+"?extended=true")
 				.uid(distribution.getUid())
 				.title(distribution.getTitle()!=null?String.join(";",distribution.getTitle()):null)
 				.description(distribution.getDescription()!=null? String.join(";",distribution.getDescription()):null)
