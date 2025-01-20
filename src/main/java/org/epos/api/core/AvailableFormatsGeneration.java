@@ -182,7 +182,7 @@ public class AvailableFormatsGeneration {
 
 	private static List<Object[]> getAllPluginsIdFromSoftwareApplicationId(String operationId) {
 		EntityManager em = new DBService().getEntityManager();
-		List<Object[]> resultList = em.createNativeQuery("select id, input_format, output_format from plugin_relations where relation_id = '" + operationId + "'").getResultList();
+		List<Object[]> resultList = em.createNativeQuery("select plugin.id, plugin_relations.input_format, plugin_relations.output_format from plugin_relations join plugin on plugin_relations.plugin_id = plugin.id where plugin_relations.relation_id = '" + operationId + "' and plugin.enabled = true").getResultList();
 		return resultList;
 	}
 }
