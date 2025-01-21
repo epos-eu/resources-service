@@ -35,7 +35,7 @@ public class AvailableFormatsGeneration {
 
 					if (webService.get().getSupportedOperation() != null) {
 						for (LinkedEntity supportedOperationLinkedEntity : webService.get().getSupportedOperation()) {
-							Optional<Operation> operation = DatabaseConnections.getInstance().getOperationList().parallelStream().filter(operationFromList -> operationFromList.getInstanceId().equals(supportedOperationLinkedEntity.getInstanceId())).findFirst();
+							Optional<Operation> operation = Optional.of((Operation) AbstractAPI.retrieveAPI(EntityNames.OPERATION.name()).retrieve(supportedOperationLinkedEntity.getInstanceId()));// DatabaseConnections.getInstance().getOperationList().parallelStream().filter(operationFromList -> operationFromList.getInstanceId().equals(supportedOperationLinkedEntity.getInstanceId())).findFirst();
 							if(operation.isPresent()) {
 								/** Check if is an OGC service, the check at this level si based only on the template **/
 								if (operation.get().getTemplate() != null) {
@@ -46,7 +46,7 @@ public class AvailableFormatsGeneration {
 
 								if (operation.get().getMapping() != null) {
 									for (LinkedEntity mapLe : operation.get().getMapping()) {
-										Optional<Mapping> map = DatabaseConnections.getInstance().getMappingList().parallelStream().filter(mappingFromList -> mappingFromList.getInstanceId().equals(mapLe.getInstanceId())).findFirst();
+										Optional<Mapping> map = Optional.of((Mapping) AbstractAPI.retrieveAPI(EntityNames.MAPPING.name()).retrieve(mapLe.getInstanceId())); //DatabaseConnections.getInstance().getMappingList().parallelStream().filter(mappingFromList -> mappingFromList.getInstanceId().equals(mapLe.getInstanceId())).findFirst();
 										if(map.isPresent()) {
 											/** Check if is an OGC service, the check on this level is based on a value of a variable **/
 											if (map.get().getVariable()!=null && map.get().getVariable().equalsIgnoreCase("service")
@@ -72,7 +72,6 @@ public class AvailableFormatsGeneration {
 																.description(AvailableFormatType.ORIGINAL)
 																.build());
 													} else if (pv.startsWith("image/") && isWMTS) {
-														System.out.println("HELLO" + distribution.getUid());
 														formats.add(new AvailableFormat.AvailableFormatBuilder()
 																.originalFormat(pv)
 																.method(operation.get().getMethod())
@@ -162,10 +161,10 @@ public class AvailableFormatsGeneration {
 			}
 		}
 		for (SoftwareApplication softwareApplication : softwareApplications) {
-			if (softwareApplication.getRelation()!=null && softwareApplication.getRelation().parallelStream().map(LinkedEntity::getInstanceId).collect(Collectors.toList()).contains(operation.getInstanceId())) {
+			if (softwareApplication.getRelatedOperation()!=null && softwareApplication.getRelatedOperation().parallelStream().map(LinkedEntity::getInstanceId).collect(Collectors.toList()).contains(operation.getInstanceId())) {
 				if (softwareApplication.getParameter() != null) {
 					for (LinkedEntity parameterLinkedEntity : softwareApplication.getParameter()) {
-						SoftwareApplicationParameter parameter = (SoftwareApplicationParameter) LinkedEntityAPI.retrieveFromLinkedEntity(parameterLinkedEntity);
+						SoftwareApplicationParameter parameter = (SoftwareApplicationParameter) AbstractAPI.retrieveAPI(EntityNames.SOFTWAREAPPLICATIONOUTPUTPARAMETER.name()).retrieve(parameterLinkedEntity.getInstanceId());// SoftwareApplicationParameter) LinkedEntityAPI.retrieveFromLinkedEntity(parameterLinkedEntity);
 						if (parameter.getEncodingformat().equals("application/epos.geo+json")
 								|| parameter.getEncodingformat().equals("application/epos.table.geo+json")
 								|| parameter.getEncodingformat().equals("application/epos.map.geo+json")) {

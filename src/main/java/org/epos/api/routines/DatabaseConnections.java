@@ -1,39 +1,33 @@
 package org.epos.api.routines;
 
 
-import abstractapis.AbstractAPI;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import commonapis.AddressAPI;
 import commonapis.IdentifierAPI;
 import commonapis.SpatialAPI;
 import commonapis.TemporalAPI;
 import metadataapis.*;
 import model.Dataproduct;
-import model.StatusType;
 import org.epos.eposdatamodel.*;
 import org.epos.handler.dbapi.service.EntityManagerService;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DatabaseConnections {
 
-	private DataProductAPI dataProductAPI = new DataProductAPI(EntityNames.DATAPRODUCT.name(), Dataproduct.class);
-	private DistributionAPI distributionAPI = new DistributionAPI(EntityNames.DISTRIBUTION.name(), model.Distribution.class);
-	private OrganizationAPI organizationAPI = new OrganizationAPI(EntityNames.ORGANIZATION.name(), model.Organization.class);
-	private WebServiceAPI webServiceAPI = new WebServiceAPI(EntityNames.WEBSERVICE.name(), model.Webservice.class);
-	private OperationAPI operationAPI = new OperationAPI(EntityNames.OPERATION.name(), model.Operation.class);
-	private CategoryAPI categoryAPI = new CategoryAPI(EntityNames.CATEGORY.name(), model.Category.class);
-	private SoftwareApplicationAPI softwareApplicationAPI = new SoftwareApplicationAPI(EntityNames.SOFTWAREAPPLICATION.name(), model.Softwareapplication.class);
-	private AddressAPI addressAPI = new AddressAPI(EntityNames.ADDRESS.name(), model.Address.class);
-	private SpatialAPI spatialAPI = new SpatialAPI(EntityNames.LOCATION.name(), model.Spatial.class);
-	private TemporalAPI temporalAPI = new TemporalAPI(EntityNames.PERIODOFTIME.name(), model.Temporal.class);
-	private IdentifierAPI identifierAPI = new IdentifierAPI(EntityNames.IDENTIFIER.name(), model.Identifier.class);
-	private MappingAPI mappingAPI = new MappingAPI(EntityNames.MAPPING.name(), model.Mapping.class);
-	private FacilityAPI facilityAPI = new FacilityAPI(EntityNames.FACILITY.name(), model.Mapping.class);
-	private EquipmentAPI equipmentAPI = new EquipmentAPI(EntityNames.EQUIPMENT.name(), model.Mapping.class);
+	private final DataProductAPI dataProductAPI = new DataProductAPI(EntityNames.DATAPRODUCT.name(), Dataproduct.class);
+	private final DistributionAPI distributionAPI = new DistributionAPI(EntityNames.DISTRIBUTION.name(), model.Distribution.class);
+	private final OrganizationAPI organizationAPI = new OrganizationAPI(EntityNames.ORGANIZATION.name(), model.Organization.class);
+	private final WebServiceAPI webServiceAPI = new WebServiceAPI(EntityNames.WEBSERVICE.name(), model.Webservice.class);
+	private final OperationAPI operationAPI = new OperationAPI(EntityNames.OPERATION.name(), model.Operation.class);
+	private final CategoryAPI categoryAPI = new CategoryAPI(EntityNames.CATEGORY.name(), model.Category.class);
+	private final SoftwareApplicationAPI softwareApplicationAPI = new SoftwareApplicationAPI(EntityNames.SOFTWAREAPPLICATION.name(), model.Softwareapplication.class);
+	private final AddressAPI addressAPI = new AddressAPI(EntityNames.ADDRESS.name(), model.Address.class);
+	private final SpatialAPI spatialAPI = new SpatialAPI(EntityNames.LOCATION.name(), model.Spatial.class);
+	private final TemporalAPI temporalAPI = new TemporalAPI(EntityNames.PERIODOFTIME.name(), model.Temporal.class);
+	private final IdentifierAPI identifierAPI = new IdentifierAPI(EntityNames.IDENTIFIER.name(), model.Identifier.class);
+	private final MappingAPI mappingAPI = new MappingAPI(EntityNames.MAPPING.name(), model.Mapping.class);
+	private final FacilityAPI facilityAPI = new FacilityAPI(EntityNames.FACILITY.name(), model.Mapping.class);
+	private final EquipmentAPI equipmentAPI = new EquipmentAPI(EntityNames.EQUIPMENT.name(), model.Mapping.class);
 
 
 	private List<DataProduct> dataproducts;
@@ -56,20 +50,20 @@ public class DatabaseConnections {
 	public void syncDatabaseConnections() {
 		EntityManagerService.getInstance().getCache().evictAll();
 
-		List tempDataproducts  = dataProductAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List tempSoftwareApplications = softwareApplicationAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List tempOrganizationList = organizationAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List tempCategoryList = categoryAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List tempDistributionList = distributionAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List tempOperationList = operationAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List tempWebServiceList = webServiceAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List tempAddressList = addressAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List tempLocationList = spatialAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List tempPeriodOfTimeList = temporalAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List tempIdentifierList = identifierAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List tempMappingList = mappingAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List tempFacilityList = facilityAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List tempEquipmentList = equipmentAPI.retrieveAll().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+		List<DataProduct> tempDataproducts  = dataProductAPI.retrieveAll();
+		List<SoftwareApplication> tempSoftwareApplications = softwareApplicationAPI.retrieveAll();
+		List<Organization> tempOrganizationList = organizationAPI.retrieveAll();
+		List<Category> tempCategoryList = categoryAPI.retrieveAll();
+		List<Distribution> tempDistributionList = distributionAPI.retrieveAll();
+		List<Operation> tempOperationList = operationAPI.retrieveAll();
+		List<WebService> tempWebServiceList = webServiceAPI.retrieveAll();
+		List<Address> tempAddressList = addressAPI.retrieveAll();
+		List<Location> tempLocationList = spatialAPI.retrieveAll();
+		List<PeriodOfTime> tempPeriodOfTimeList = temporalAPI.retrieveAll();
+		List<Identifier> tempIdentifierList = identifierAPI.retrieveAll();
+		List<Mapping> tempMappingList = mappingAPI.retrieveAll();
+		List<Facility> tempFacilityList = facilityAPI.retrieveAll();
+		List<Equipment> tempEquipmentList = equipmentAPI.retrieveAll();
 
 		dataproducts = tempDataproducts;
 		softwareApplications = tempSoftwareApplications;
