@@ -149,7 +149,7 @@ public class FacilityDetailsItemGenerationJPA {
 					.format("application/epos.geo+json")
 					.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getInstanceId())
 					.label("GEOJSON")
-					.description(AvailableFormatType.CONVERTED)
+					.type(AvailableFormatType.CONVERTED)
 					.build()));
 
 			// TEMP SECTION
@@ -183,7 +183,7 @@ public class FacilityDetailsItemGenerationJPA {
 							.format("application/epos.geo+json")
 							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facilitySelected.getInstanceId())
 							.label("GEOJSON")
-							.description(AvailableFormatType.CONVERTED)
+							.type(AvailableFormatType.CONVERTED)
 							.build()))
 					.setFacilityProvider(facetsDataProviders)
 					.setCategories(categoryList.isEmpty() ? null : categoryList)

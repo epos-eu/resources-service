@@ -1,11 +1,6 @@
 package org.epos.api.core;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
-import commonapis.LinkedEntityAPI;
-import io.swagger.v3.oas.models.links.Link;
-import model.StatusType;
 import org.epos.api.beans.DataServiceProvider;
 import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.Address;

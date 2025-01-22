@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import javax.annotation.PostConstruct;
 
-import abstractapis.AbstractAPI;
-import com.zaxxer.hikari.HikariDataSource;
-import dao.EposDataModelDAO;
 import org.apache.commons.lang3.StringUtils;
 import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.core.ZabbixExecutor;
@@ -32,19 +29,19 @@ public class ScheduledRuntimes {
 	@PostConstruct
 	public void onStartup() {
 		LOGGER.info("[Resources Service Startup] -----------------------------------------------");
+		LOGGER.info("[StartUp Task - Resources] Updating facets information");
+		connectionsUpdater();
+		LOGGER.info("[StartUp Task - Resources] Done");
 		LOGGER.info("[StartUp Task - Monitoring] Updating monitoring information");
 		zabbixUpdater();
 		LOGGER.info("[StartUp Task - Monitoring] Done");
 		LOGGER.info("[StartUp Task - Facets] Updating facets information");
 		facetsUpdater();
 		LOGGER.info("[StartUp Task - Facets] Done");
-		LOGGER.info("[StartUp Task - Resources] Updating facets information");
-		connectionsUpdater();
-		LOGGER.info("[StartUp Task - Resources] Done");
 		LOGGER.info("[Resources Service Startup Completed] -----------------------------------------------");
 	}
 
-	@Scheduled(fixedRate = 60000, initialDelay = 0)
+	@Scheduled(fixedRate = 320000, initialDelay = 0)
 	@Async
 	public void zabbixUpdater() {
 		if(EnvironmentVariables.MONITORING.equals("true")) {
@@ -57,7 +54,7 @@ public class ScheduledRuntimes {
 				//String items = ZabbixExecutor.getItems(auth);
 				ArrayList<String> listOfIds = new ArrayList<String>();
 				Utils.gson.fromJson(ZabbixExecutor.getProblems(auth), JsonObject.class).get("result").getAsJsonArray()
-				.forEach(e->listOfIds.add(getSubString(e.getAsJsonObject().get("name").getAsString(),'"','"')));
+				.forEach(e->listOfIds.add(getSubString(e.getAsJsonObject().get("name").getAsString())));
 
 				for(JsonElement item : Utils.gson.fromJson(ZabbixExecutor.getItems(auth), JsonObject.class).get("result").getAsJsonArray()) {
 					if(!item.getAsJsonObject().get("name").getAsString().contains("EPOS ICS-C")) {
@@ -87,7 +84,7 @@ public class ScheduledRuntimes {
 		}
 	}
 
-	@Scheduled(fixedRate = 60000, initialDelay = 0)
+	@Scheduled(fixedRate = 320000, initialDelay = 0)
 	@Async
 	public void facetsUpdater() {
 		LOGGER.info("[Scheduled Task - Facets] Updating facets information");
@@ -103,7 +100,7 @@ public class ScheduledRuntimes {
 		LOGGER.info("[Scheduled Task - Facets] Facets successfully updated");
 	}
 
-	@Scheduled(fixedRate = 60000, initialDelay = 0)
+	@Scheduled(fixedRate = 320000, initialDelay = 0)
 	@Async
 	public void connectionsUpdater() {
 		LOGGER.info("[Scheduled Task - Resources] Updating resources information");
@@ -111,19 +108,19 @@ public class ScheduledRuntimes {
         LOGGER.info("[Scheduled Task - Resources] Resources successfully updated");
 	}
 
-	private String getSubString(final String input, char characterStart, char characterEnd) {
+	private String getSubString(final String input) {
 		if(input == null) {
 			return null;
 		}
 
-		final int indexOfAt = input.indexOf(characterStart);
+		final int indexOfAt = input.indexOf('"');
 		if(input.isEmpty() || indexOfAt < 0 || indexOfAt > input.length()-1) {
 			return null;
 		}
 
 		String suffix = input.substring(indexOfAt + 1);
 
-		final int indexOfDot = suffix.indexOf(characterEnd);
+		final int indexOfDot = suffix.indexOf('"');
 
 		if(indexOfDot < 1) {
 			return null;

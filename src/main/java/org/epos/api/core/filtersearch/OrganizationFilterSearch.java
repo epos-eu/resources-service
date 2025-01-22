@@ -3,7 +3,6 @@ package org.epos.api.core.filtersearch;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import commonapis.LinkedEntityAPI;
 import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.Address;
 import org.epos.eposdatamodel.Identifier;

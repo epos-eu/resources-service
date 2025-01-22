@@ -22,6 +22,7 @@ import org.epos.api.beans.Webservice;
 import org.epos.api.enums.ProviderType;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.FacetsNodeTree;
+import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,6 @@ public class DistributionDetailsExtendedGenerationJPA {
 		LOGGER.info("Parameters {}", parameters);
 
 		Distribution distributionSelected = (Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(parameters.get("id").toString());
-		List<SoftwareApplication> softwareApplications = AbstractAPI.retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll();
 
 		List<String> operationsIdRelatedToDistribution = null;
 
@@ -380,7 +380,7 @@ public class DistributionDetailsExtendedGenerationJPA {
 		}
 
 
-		distribution.setAvailableFormats(AvailableFormatsGeneration.generate(distributionSelected, softwareApplications));
+		distribution.setAvailableFormats(AvailableFormatsGeneration.generate(distributionSelected));
 
 		// TEMP SECTION
 		ArrayList<DiscoveryItem> discoveryList = new ArrayList<>();
@@ -415,7 +415,7 @@ public class DistributionDetailsExtendedGenerationJPA {
 				.uid(distribution.getUid())
 				.title(distribution.getTitle()!=null?String.join(";",distribution.getTitle()):null)
 				.description(distribution.getDescription()!=null? String.join(";",distribution.getDescription()):null)
-				.availableFormats(AvailableFormatsGeneration.generate(distributionSelected, softwareApplications))
+				.availableFormats(AvailableFormatsGeneration.generate(distributionSelected))
 				.setSha256id(DigestUtils.sha256Hex(distribution.getUid()))
 				.setDataprovider(facetsDataProviders)
 				.setServiceProvider(facetsServiceProviders)

@@ -18,6 +18,7 @@ import model.StatusType;
 import org.epos.api.beans.Distribution;
 import org.epos.api.beans.MonitoringBean;
 import org.epos.api.core.distributions.DistributionDetailsGenerationJPA;
+import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.ContactPoint;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Identifier;
@@ -35,10 +36,9 @@ public class MonitoringGeneration {
 
 	public static List<MonitoringBean> generate() {
 
-		List<SoftwareApplication> softwareApplicationList = (List<SoftwareApplication>) AbstractAPI.retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll().stream().filter(item -> ((SoftwareApplication) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 		List<MonitoringBean> monitoringList = new ArrayList<>();
-		List<DataProduct> datasetList = (List<DataProduct>) AbstractAPI.retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll().stream().filter(item -> ((DataProduct) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
-		List<org.epos.eposdatamodel.Distribution> distributionList = (List<org.epos.eposdatamodel.Distribution>) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll().stream().filter(item -> ((org.epos.eposdatamodel.Distribution) item).getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+		List<DataProduct> datasetList = DatabaseConnections.getInstance().getDataproducts().stream().filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
+		List<org.epos.eposdatamodel.Distribution> distributionList = DatabaseConnections.getInstance().getDistributionList().stream().filter(item ->  item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList());
 
 		for(org.epos.eposdatamodel.Distribution dx : distributionList) {
 
@@ -65,7 +65,7 @@ public class MonitoringGeneration {
 				
 				if(distribution.getParameters()!=null) {
 					distribution.getParameters().forEach(p -> {
-						if (p.getValue() != null && !p.getValue().equals(""))
+						if (p.getValue() != null && !p.getValue().isEmpty())
 							parametersMap.put(p.getName(),URLGeneration.encodeValue(p.getValue()));
 						if (p.getDefaultValue() != null && p.getValue() == null && p.isRequired())
 							parametersMap.put(p.getName(), URLGeneration.encodeValue(p.getDefaultValue()));

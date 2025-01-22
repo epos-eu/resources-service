@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import abstractapis.AbstractAPI;
-import commonapis.LinkedEntityAPI;
 import org.epos.api.beans.DataServiceProvider;
 import org.epos.api.core.DataServiceProviderGeneration;
 import org.epos.api.routines.DatabaseConnections;

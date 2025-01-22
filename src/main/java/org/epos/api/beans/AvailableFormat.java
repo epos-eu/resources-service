@@ -113,7 +113,7 @@ public class AvailableFormat implements Serializable{
 			return this;
 		}
 
-		public AvailableFormatBuilder description(AvailableFormatType type) {
+		public AvailableFormatBuilder type(AvailableFormatType type) {
 			this.type = type;
 			return this;
 		}

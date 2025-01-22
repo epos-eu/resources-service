@@ -1,39 +1,20 @@
 package org.epos.api.routines;
 
-
-import commonapis.AddressAPI;
-import commonapis.IdentifierAPI;
-import commonapis.SpatialAPI;
-import commonapis.TemporalAPI;
 import metadataapis.*;
-import model.Dataproduct;
 import org.epos.eposdatamodel.*;
 import org.epos.handler.dbapi.service.EntityManagerService;
 
 import java.util.List;
 
+import static abstractapis.AbstractAPI.*;
+
 public class DatabaseConnections {
-
-	private final DataProductAPI dataProductAPI = new DataProductAPI(EntityNames.DATAPRODUCT.name(), Dataproduct.class);
-	private final DistributionAPI distributionAPI = new DistributionAPI(EntityNames.DISTRIBUTION.name(), model.Distribution.class);
-	private final OrganizationAPI organizationAPI = new OrganizationAPI(EntityNames.ORGANIZATION.name(), model.Organization.class);
-	private final WebServiceAPI webServiceAPI = new WebServiceAPI(EntityNames.WEBSERVICE.name(), model.Webservice.class);
-	private final OperationAPI operationAPI = new OperationAPI(EntityNames.OPERATION.name(), model.Operation.class);
-	private final CategoryAPI categoryAPI = new CategoryAPI(EntityNames.CATEGORY.name(), model.Category.class);
-	private final SoftwareApplicationAPI softwareApplicationAPI = new SoftwareApplicationAPI(EntityNames.SOFTWAREAPPLICATION.name(), model.Softwareapplication.class);
-	private final AddressAPI addressAPI = new AddressAPI(EntityNames.ADDRESS.name(), model.Address.class);
-	private final SpatialAPI spatialAPI = new SpatialAPI(EntityNames.LOCATION.name(), model.Spatial.class);
-	private final TemporalAPI temporalAPI = new TemporalAPI(EntityNames.PERIODOFTIME.name(), model.Temporal.class);
-	private final IdentifierAPI identifierAPI = new IdentifierAPI(EntityNames.IDENTIFIER.name(), model.Identifier.class);
-	private final MappingAPI mappingAPI = new MappingAPI(EntityNames.MAPPING.name(), model.Mapping.class);
-	private final FacilityAPI facilityAPI = new FacilityAPI(EntityNames.FACILITY.name(), model.Mapping.class);
-	private final EquipmentAPI equipmentAPI = new EquipmentAPI(EntityNames.EQUIPMENT.name(), model.Mapping.class);
-
 
 	private List<DataProduct> dataproducts;
 	private List<SoftwareApplication> softwareApplications;
 	private List<Organization> organizationList;
 	private List<Category> categoryList;
+	private List<CategoryScheme> categorySchemesList;
 	private List<Distribution> distributionList;
 	private List<Operation> operationList;
 	private List<WebService> webServiceList;
@@ -48,27 +29,29 @@ public class DatabaseConnections {
 	private DatabaseConnections() {}
 
 	public void syncDatabaseConnections() {
-		EntityManagerService.getInstance().getCache().evictAll();
+		if(EntityManagerService.getInstance()!=null) EntityManagerService.getInstance().getCache().evictAll();
 
-		List<DataProduct> tempDataproducts  = dataProductAPI.retrieveAll();
-		List<SoftwareApplication> tempSoftwareApplications = softwareApplicationAPI.retrieveAll();
-		List<Organization> tempOrganizationList = organizationAPI.retrieveAll();
-		List<Category> tempCategoryList = categoryAPI.retrieveAll();
-		List<Distribution> tempDistributionList = distributionAPI.retrieveAll();
-		List<Operation> tempOperationList = operationAPI.retrieveAll();
-		List<WebService> tempWebServiceList = webServiceAPI.retrieveAll();
-		List<Address> tempAddressList = addressAPI.retrieveAll();
-		List<Location> tempLocationList = spatialAPI.retrieveAll();
-		List<PeriodOfTime> tempPeriodOfTimeList = temporalAPI.retrieveAll();
-		List<Identifier> tempIdentifierList = identifierAPI.retrieveAll();
-		List<Mapping> tempMappingList = mappingAPI.retrieveAll();
-		List<Facility> tempFacilityList = facilityAPI.retrieveAll();
-		List<Equipment> tempEquipmentList = equipmentAPI.retrieveAll();
+		List<DataProduct> tempDataproducts  = retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll();
+		List<SoftwareApplication> tempSoftwareApplications = retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll();
+		List<Organization> tempOrganizationList = retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll();
+		List<Category> tempCategoryList = retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll();
+		List<CategoryScheme> tempCategorySchemeList = retrieveAPI(EntityNames.CATEGORYSCHEME.name()).retrieveAll();
+		List<Distribution> tempDistributionList = retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll();
+		List<Operation> tempOperationList = retrieveAPI(EntityNames.OPERATION.name()).retrieveAll();
+		List<WebService> tempWebServiceList = retrieveAPI(EntityNames.WEBSERVICE.name()).retrieveAll();
+		List<Address> tempAddressList = retrieveAPI(EntityNames.ADDRESS.name()).retrieveAll();
+		List<Location> tempLocationList = retrieveAPI(EntityNames.LOCATION.name()).retrieveAll();
+		List<PeriodOfTime> tempPeriodOfTimeList = retrieveAPI(EntityNames.PERIODOFTIME.name()).retrieveAll();
+		List<Identifier> tempIdentifierList = retrieveAPI(EntityNames.IDENTIFIER.name()).retrieveAll();
+		List<Mapping> tempMappingList = retrieveAPI(EntityNames.MAPPING.name()).retrieveAll();
+		List<Facility> tempFacilityList = retrieveAPI(EntityNames.FACILITY.name()).retrieveAll();
+		List<Equipment> tempEquipmentList = retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll();
 
 		dataproducts = tempDataproducts;
 		softwareApplications = tempSoftwareApplications;
 		organizationList = tempOrganizationList;
 		categoryList = tempCategoryList;
+		categorySchemesList = tempCategorySchemeList;
 		distributionList = tempDistributionList;
 		operationList = tempOperationList;
 		webServiceList = tempWebServiceList;
@@ -103,6 +86,8 @@ public class DatabaseConnections {
 	public List<Category> getCategoryList() {
 		return categoryList;
 	}
+
+	public List<CategoryScheme> getCategorySchemesList() {return categorySchemesList;}
 
 	public List<Distribution> getDistributionList() {
 		return distributionList;

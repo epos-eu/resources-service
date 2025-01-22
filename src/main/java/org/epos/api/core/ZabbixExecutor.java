@@ -40,30 +40,17 @@ public class ZabbixExecutor {
 				+ "    },\n"
 				+ "    \"id\": 1\n"
 				+ "}";
-		var values = Utils.gson.fromJson(authRequest, HashMap.class);
-
-		var objectMapper = new ObjectMapper();
-		String requestBody = objectMapper
-				.writeValueAsString(values);
-
-		HttpClient client = HttpClient.newHttpClient();
-		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create(EnvironmentVariables.MONITORING_URL))
-				.header("Content-Type", "application/json-rpc")
-				.POST(HttpRequest.BodyPublishers.ofString(requestBody))
-				.build();
-
-		HttpResponse<String> response = client.send(request,
-				HttpResponse.BodyHandlers.ofString());
-
-
-		return Utils.gson.fromJson(response.body(), JsonObject.class).get("result").getAsString();
+		return getStringFromJson(authRequest);
 	}
 
-	public static String logout(String auth) throws IOException, InterruptedException {
+	public static void logout(String auth) throws IOException, InterruptedException {
 
 		String retrieveItems = "{\"jsonrpc\":\"2.0\",\"method\":\"user.logout\",\"params\":[],\"auth\":\""+auth+"\",\"id\":6}\n";
 
+		getString(retrieveItems);
+	}
+
+	private static String getString(String retrieveItems) throws IOException, InterruptedException {
 		var values = Utils.gson.fromJson(retrieveItems, HashMap.class);
 		var objectMapper = new ObjectMapper();
 		String requestBody = objectMapper
@@ -105,24 +92,7 @@ public class ZabbixExecutor {
 				+ "    \"auth\": \""+ auth+"\"\n"
 				+ "}";
 
-		var values = Utils.gson.fromJson(retrieveHosts, HashMap.class);
-
-		var objectMapper = new ObjectMapper();
-		String requestBody = objectMapper
-				.writeValueAsString(values);
-
-		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create(EnvironmentVariables.MONITORING_URL))
-				.header("Content-Type", "application/json-rpc")
-				.POST(HttpRequest.BodyPublishers.ofString(requestBody))
-				.build();
-
-		HttpClient client = HttpClient.newHttpClient();
-
-		HttpResponse<String> response = client.send(request,
-				HttpResponse.BodyHandlers.ofString());
-
-		return response.body();
+		return getString(retrieveHosts);
 	}
 
 	public static String getItems(String auth) throws IOException, InterruptedException {
@@ -158,24 +128,7 @@ public class ZabbixExecutor {
 				+ "    \"id\": 2\n"
 				+ "}";
 
-		var values = Utils.gson.fromJson(retrieveItems, HashMap.class);
-		var objectMapper = new ObjectMapper();
-		String requestBody = objectMapper
-				.writeValueAsString(values);
-
-
-		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create(EnvironmentVariables.MONITORING_URL))
-				.header("Content-Type", "application/json-rpc")
-				.POST(HttpRequest.BodyPublishers.ofString(requestBody))
-				.build();
-
-		HttpClient client = HttpClient.newHttpClient();
-
-		HttpResponse<String> response = client.send(request,
-				HttpResponse.BodyHandlers.ofString());
-
-		return response.body();
+		return getString(retrieveItems);
 	}
 
 	public static String getProblems(String auth) throws IOException, InterruptedException {
@@ -197,25 +150,7 @@ public class ZabbixExecutor {
 				+ "    \"id\": 3\n"
 				+ "}";
 
-		var values = Utils.gson.fromJson(retrieveItems, HashMap.class);
-
-		var objectMapper = new ObjectMapper();
-		String requestBody = objectMapper
-				.writeValueAsString(values);
-
-
-		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create(EnvironmentVariables.MONITORING_URL))
-				.header("Content-Type", "application/json-rpc")
-				.POST(HttpRequest.BodyPublishers.ofString(requestBody))
-				.build();
-
-		HttpClient client = HttpClient.newHttpClient();
-
-		HttpResponse<String> response = client.send(request,
-				HttpResponse.BodyHandlers.ofString());
-
-		return response.body();
+		return getString(retrieveItems);
 	}
 
 	public static String getHttpItems(String auth, String hostid) throws IOException, InterruptedException {
@@ -235,67 +170,12 @@ public class ZabbixExecutor {
 				+ "        \"id\": 1\n"
 				+ "      }";
 
-		var values = Utils.gson.fromJson(retrieveItems, HashMap.class);
-
-		var objectMapper = new ObjectMapper();
-		String requestBody = objectMapper
-				.writeValueAsString(values);
-
-
-		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create(EnvironmentVariables.MONITORING_URL))
-				.header("Content-Type", "application/json-rpc")
-				.POST(HttpRequest.BodyPublishers.ofString(requestBody))
-				.build();
-
-		HttpClient client = HttpClient.newHttpClient();
-
-		HttpResponse<String> response = client.send(request,
-				HttpResponse.BodyHandlers.ofString());
-
-		return response.body();
+		return getString(retrieveItems);
 	}
 
 	protected static String getHttpTest(String auth) throws IOException, InterruptedException {
 		// TODO Auto-generated method stub
-		String httpTest = "{\n"
-				+ "    \"jsonrpc\": \"2.0\",\n"
-				+ "    \"method\": \"httptest.get\",\n"
-				+ "    \"params\": {\n"
-				+ "        \"output\": [\n"
-				+ "            \"name\",\n"
-				+ "            \"httptestid\"\n"
-				+ "        ],\n"
-				+ "        \"filter\": {\n"
-				+ "            \"hostid\": \"\"\n"
-				+ "        },\n"
-				+ "        \"selectHosts\": [\n"
-				+ "            \"hostid\",\n"
-				+ "            \"host\"\n"
-				+ "        ],\n"
-				+ "        \"recent\": false\n"
-				+ "    },\n"
-				+ "    \"auth\": \""+auth+"\",\n"
-				+ "    \"id\": 4\n"
-				+ "}";
-		var values = Utils.gson.fromJson(httpTest, HashMap.class);
-
-		var objectMapper = new ObjectMapper();
-		String requestBody = objectMapper
-				.writeValueAsString(values);
-
-		HttpClient client = HttpClient.newHttpClient();
-		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create(EnvironmentVariables.MONITORING_URL))
-				.header("Content-Type", "application/json-rpc")
-				.POST(HttpRequest.BodyPublishers.ofString(requestBody))
-				.build();
-
-		HttpResponse<String> response = client.send(request,
-				HttpResponse.BodyHandlers.ofString());
-
-
-		return Utils.gson.fromJson(response.body(), JsonObject.class).get("result").getAsString();
+        return getGraphs(auth);
 	}
 
 	protected static String getGraphs(String auth) throws IOException, InterruptedException {
@@ -320,6 +200,10 @@ public class ZabbixExecutor {
 				+ "    \"auth\": \""+auth+"\",\n"
 				+ "    \"id\": 4\n"
 				+ "}";
+		return getStringFromJson(httpTest);
+	}
+
+	private static String getStringFromJson(String httpTest) throws IOException, InterruptedException {
 		var values = Utils.gson.fromJson(httpTest, HashMap.class);
 
 		var objectMapper = new ObjectMapper();
@@ -339,7 +223,6 @@ public class ZabbixExecutor {
 
 		return Utils.gson.fromJson(response.body(), JsonObject.class).get("result").getAsString();
 	}
-
 
 
 	public JsonObject getHostResults() {

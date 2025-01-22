@@ -1,9 +1,5 @@
 package org.epos.api.core.distributions;
 
-import abstractapis.AbstractAPI;
-import commonapis.LinkedEntityAPI;
-import metadataapis.*;
-import model.Dataproduct;
 import model.StatusType;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.epos.api.beans.*;
@@ -49,7 +45,7 @@ public class DistributionSearchGenerationJPA {
 			});
 		} else {
 			versions.add(StatusType.PUBLISHED);
-        }
+		}
 
 		List<DataProduct> dataproducts  = new ArrayList<>();
 		// Retrieve all needed information available (if status in status list and
@@ -58,12 +54,11 @@ public class DistributionSearchGenerationJPA {
 		}
 
 		dataproducts.addAll(DatabaseConnections.getInstance().getDataproducts().stream().filter(Objects::nonNull).filter(item -> (versions.contains(item.getStatus()) && !item.getStatus().equals(StatusType.PUBLISHED) && item.getEditorId().equals(user.getAuthIdentifier()))).collect(Collectors.toList()));
-		List<SoftwareApplication> softwareApplications = DatabaseConnections.getInstance().getSoftwareApplications();
 		List<Organization> organizationList = DatabaseConnections.getInstance().getOrganizationList();
 		List<Category> categoryList1 = DatabaseConnections.getInstance().getCategoryList();
 
 
-        LOGGER.info("Apply filter using input parameters: {}", parameters.toString());
+		LOGGER.info("Apply filter using input parameters: {}", parameters.toString());
 		// Apply filtering
 		dataproducts = DistributionFilterSearch.doFilters(dataproducts, parameters);
 
@@ -76,16 +71,16 @@ public class DistributionSearchGenerationJPA {
 		Set<Category> serviceTypes = new HashSet<>();
 		Set<Organization> organizationsEntityIds = new HashSet<>();
 
-		dataproducts.parallelStream().forEach(dataproduct -> {
+		dataproducts.forEach(dataproduct -> {
 
 			Set<String> facetsDataProviders = new HashSet<>();
 			List<String> categoryList = new ArrayList<>();
 
 			// DATA PRODUCT
 			if(dataproduct.getCategory()!=null){
-				dataproduct.getCategory().parallelStream()
+				dataproduct.getCategory()
 						.forEach(linkedEntity -> {
-							Optional<Category> category = categoryList1.parallelStream().filter(categoryFromList -> categoryFromList.getInstanceId().equals(linkedEntity.getInstanceId())).findFirst();
+							Optional<Category> category = categoryList1.stream().filter(categoryFromList -> categoryFromList.getInstanceId().equals(linkedEntity.getInstanceId())).findFirst();
 							if(category.isPresent()) {
 								if(category.get().getUid().contains("category:")) categoryList.add(category.get().getUid());
 								else {
@@ -96,9 +91,9 @@ public class DistributionSearchGenerationJPA {
 			}
 
 			if(dataproduct.getPublisher()!=null){
-				dataproduct.getPublisher().parallelStream()
+				dataproduct.getPublisher()
 						.forEach(linkedEntity -> {
-							Optional<Organization> organization = organizationList.parallelStream().filter(organizationFromList -> organizationFromList.getInstanceId().equals(linkedEntity.getInstanceId())).findFirst();
+							Optional<Organization> organization = organizationList.stream().filter(organizationFromList -> organizationFromList.getInstanceId().equals(linkedEntity.getInstanceId())).findFirst();
 							if(organization.isPresent()) {
 								if(organization.get().getLegalName()!=null) facetsDataProviders.add(String.join(",",organization.get().getLegalName()));
 								organizationsEntityIds.add(organization.get());
@@ -114,22 +109,21 @@ public class DistributionSearchGenerationJPA {
 					.collect(Collectors.toSet()));
 
 			if(dataproduct.getDistribution()!=null)
-				dataproduct.getDistribution().parallelStream()
-						.forEach(linkedEntity -> {
-							Optional<Distribution> distribution = DatabaseConnections.getInstance().getDistributionList().parallelStream().filter(distributionFromList -> distributionFromList.getInstanceId().equals(linkedEntity.getInstanceId())).findFirst();
+				dataproduct.getDistribution().forEach(linkedEntity -> {
+							Optional<Distribution> distribution = DatabaseConnections.getInstance().getDistributionList().stream().filter(distributionFromList -> distributionFromList.getInstanceId().equals(linkedEntity.getInstanceId())).findFirst();
 							if(distribution.isPresent()) {
 
 								Set<String> facetsServiceProviders = new HashSet<>();
 
 								// AVAILABLE FORMATS
-								List<AvailableFormat> availableFormats = AvailableFormatsGeneration.generate(distribution.get(), softwareApplications);
+								List<AvailableFormat> availableFormats = AvailableFormatsGeneration.generate(distribution.get());
 
 								if(distribution.get().getAccessService()!=null){
 									distribution.get().getAccessService().forEach(linkedEntity1 -> {
-										Optional<WebService> webService = DatabaseConnections.getInstance().getWebServiceList().parallelStream().filter(webserviceFromList -> webserviceFromList.getInstanceId().equals(linkedEntity1.getInstanceId())).findFirst();
+										Optional<WebService> webService = DatabaseConnections.getInstance().getWebServiceList().stream().filter(webserviceFromList -> webserviceFromList.getInstanceId().equals(linkedEntity1.getInstanceId())).findFirst();
 										if(webService.isPresent()) {
 											if(webService.get().getProvider()!=null){
-												Optional<Organization> organization = organizationList.parallelStream().filter(organizationFromList -> organizationFromList.getInstanceId().equals(webService.get().getProvider().getInstanceId())).findFirst();
+												Optional<Organization> organization = organizationList.stream().filter(organizationFromList -> organizationFromList.getInstanceId().equals(webService.get().getProvider().getInstanceId())).findFirst();
 												if(organization.isPresent()) {
 													if(organization.get().getLegalName()!=null) facetsServiceProviders.add(String.join(",",organization.get().getLegalName()));
 													organizationsEntityIds.add(organization.get());
@@ -139,56 +133,56 @@ public class DistributionSearchGenerationJPA {
 
 											// Service Types
 											if(webService.get().getCategory()!=null){
-												webService.get().getCategory().parallelStream()
+												webService.get().getCategory()
 														.forEach(linkedEntity2 -> {
-															Optional<Category> category = categoryList1.parallelStream().filter(categoryFromList -> categoryFromList.getInstanceId().equals(linkedEntity2.getInstanceId())).findFirst();
-                                                            category.ifPresent(serviceTypes::add);
+															Optional<Category> category = categoryList1.stream().filter(categoryFromList -> categoryFromList.getInstanceId().equals(linkedEntity2.getInstanceId())).findFirst();
+															category.ifPresent(serviceTypes::add);
 														});
 											}
 										}
 									});
-							}
+								}
 
-							DiscoveryItem discoveryItem = new DiscoveryItemBuilder(distribution.get().getInstanceId(),
-									EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.get().getInstanceId(),
-									EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.get().getInstanceId()+"?extended=true")
-									.uid(distribution.get().getUid())
-									.title(distribution.get().getTitle()!=null?String.join(";",distribution.get().getTitle()):null)
-									.description(distribution.get().getDescription()!=null? String.join(";",distribution.get().getDescription()):null)
-									.availableFormats(availableFormats)
-									.setSha256id(distribution.get().getUid()!=null? DigestUtils.sha256Hex(distribution.get().getUid()) : "")
-									.setDataprovider(facetsDataProviders)
-									.setVersioningStatus(dataproduct.getStatus().name())
-									.setServiceProvider(facetsServiceProviders)
-									.setCategories(categoryList.isEmpty() ? null : categoryList)
-									.build();
+								DiscoveryItem discoveryItem = new DiscoveryItemBuilder(distribution.get().getInstanceId(),
+										EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.get().getInstanceId(),
+										EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.get().getInstanceId()+"?extended=true")
+										.uid(distribution.get().getUid())
+										.title(distribution.get().getTitle()!=null?String.join(";",distribution.get().getTitle()):null)
+										.description(distribution.get().getDescription()!=null? String.join(";",distribution.get().getDescription()):null)
+										.availableFormats(availableFormats)
+										.setSha256id(distribution.get().getUid()!=null? DigestUtils.sha256Hex(distribution.get().getUid()) : "")
+										.setDataprovider(facetsDataProviders)
+										.setVersioningStatus(dataproduct.getStatus().name())
+										.setServiceProvider(facetsServiceProviders)
+										.setCategories(categoryList.isEmpty() ? null : categoryList)
+										.build();
 
-							if (EnvironmentVariables.MONITORING != null && EnvironmentVariables.MONITORING.equals("true")) {
-								discoveryItem.setStatus(ZabbixExecutor.getInstance().getStatusInfoFromSha(discoveryItem.getSha256id()));
-								discoveryItem.setStatusTimestamp(ZabbixExecutor.getInstance().getStatusTimestampInfoFromSha(discoveryItem.getSha256id()));
-							}
+								if (EnvironmentVariables.MONITORING != null && EnvironmentVariables.MONITORING.equals("true")) {
+									discoveryItem.setStatus(ZabbixExecutor.getInstance().getStatusInfoFromSha(discoveryItem.getSha256id()));
+									discoveryItem.setStatusTimestamp(ZabbixExecutor.getInstance().getStatusTimestampInfoFromSha(discoveryItem.getSha256id()));
+								}
 
-							discoveryMap.put(discoveryItem.getSha256id(), discoveryItem);
+								discoveryMap.put(discoveryItem.getSha256id(), discoveryItem);
 							}
 						});
 		});
 
-        LOGGER.info("Final number of results: {}", discoveryMap.size());
+		LOGGER.info("Final number of results: {}", discoveryMap.size());
 
 		Node results = new Node("results");
 		if(parameters.containsKey("facets") && parameters.get("facets").toString().equals("true")) {
 			switch(parameters.get("facetstype").toString()) {
-			case "categories":
-				results.addChild(FacetsGeneration.generateResponseUsingCategories(discoveryMap.values()).getFacets());
-				break;
-			case "dataproviders":
-				results.addChild(FacetsGeneration.generateResponseUsingDataproviders(discoveryMap.values()).getFacets());
-				break;
-			case "serviceproviders":
-				results.addChild(FacetsGeneration.generateResponseUsingServiceproviders(discoveryMap.values()).getFacets());
-				break;
-			default:
-				break;
+				case "categories":
+					results.addChild(FacetsGeneration.generateResponseUsingCategories(discoveryMap.values()).getFacets());
+					break;
+				case "dataproviders":
+					results.addChild(FacetsGeneration.generateResponseUsingDataproviders(discoveryMap.values()).getFacets());
+					break;
+				case "serviceproviders":
+					results.addChild(FacetsGeneration.generateResponseUsingServiceproviders(discoveryMap.values()).getFacets());
+					break;
+				default:
+					break;
 			}
 
 		}else {
@@ -197,7 +191,7 @@ public class DistributionSearchGenerationJPA {
 			results.addChild(child);
 		}
 
-        LOGGER.info("Number of organizations retrieved {}", organizationsEntityIds.size());
+		LOGGER.info("Number of organizations retrieved {}", organizationsEntityIds.size());
 
 		List<String> keywordsCollection = keywords.stream()
 				.filter(Objects::nonNull)
@@ -235,13 +229,13 @@ public class DistributionSearchGenerationJPA {
 
 		NodeFilters scienceDomainsNodes = new NodeFilters(PARAMETER__SCIENCE_DOMAIN);
 		scienceDomains.forEach(r ->
-		scienceDomainsNodes.addChild(new NodeFilters(r.getInstanceId(), r.getName()))
-				);
+				scienceDomainsNodes.addChild(new NodeFilters(r.getInstanceId(), r.getName()))
+		);
 
 		NodeFilters serviceTypesNodes = new NodeFilters(PARAMETER__SERVICE_TYPE);
 		serviceTypes.forEach(r ->
-		serviceTypesNodes.addChild(new NodeFilters(r.getInstanceId(), r.getName()))
-				);
+				serviceTypesNodes.addChild(new NodeFilters(r.getInstanceId(), r.getName()))
+		);
 
 		ArrayList<NodeFilters> filters = new ArrayList<NodeFilters>();
 		filters.add(keywordsNodes);
@@ -254,7 +248,7 @@ public class DistributionSearchGenerationJPA {
 		long endTime = System.currentTimeMillis();
 		long duration = (endTime - startTime);
 
-        LOGGER.info("Result done in ms: {}", duration);
+		LOGGER.info("Result done in ms: {}", duration);
 
 		return response;
 

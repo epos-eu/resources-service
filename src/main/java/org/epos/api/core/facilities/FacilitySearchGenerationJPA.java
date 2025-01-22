@@ -97,7 +97,7 @@ public class FacilitySearchGenerationJPA {
 							.format("application/epos.geo+json")
 							.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE_EQUIPMENTS + "all"+ API_FORMAT + "application/epos.geo+json"+"&facilityid=" + facility.getInstanceId())
 							.label("GEOJSON")
-							.description(AvailableFormatType.CONVERTED)
+							.type(AvailableFormatType.CONVERTED)
 							.build()))
 					.setFacilityProvider(facetsFacilityProviders)
 					.setCategories(categoryList.isEmpty() ? null : categoryList)

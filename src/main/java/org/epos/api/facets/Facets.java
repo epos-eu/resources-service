@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import abstractapis.AbstractAPI;
 import metadataapis.EntityNames;
+import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.Category;
 import org.epos.eposdatamodel.CategoryScheme;
 import com.google.gson.JsonArray;
@@ -33,8 +34,8 @@ public class Facets {
 		JsonArray domainsFacets = new JsonArray();
 		JsonObject facetsObject = new JsonObject();
 
-		List<CategoryScheme> schemes = (List<CategoryScheme>) AbstractAPI.retrieveAPI(EntityNames.CATEGORYSCHEME.name()).retrieveAll();
-		List<Category> categories = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll();
+		List<CategoryScheme> schemes = DatabaseConnections.getInstance().getCategorySchemesList();
+		List<Category> categories = DatabaseConnections.getInstance().getCategoryList();
 
 		List<CategoryScheme> categorySchemesList = schemes.stream().filter(e->e.getUid().contains("category:")).collect(Collectors.toList());
 		List<Category> categoriesList = categories.stream().filter(e->e.getUid().contains("category:")).collect(Collectors.toList());
