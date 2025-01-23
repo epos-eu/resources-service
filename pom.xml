@@ -187,5 +187,20 @@
 			<artifactId>epos-geojson-java-library</artifactId>
 			<version>0.0.6</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.testcontainers/junit-jupiter -->
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>1.19.8</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>1.19.8</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

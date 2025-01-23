@@ -62,15 +62,15 @@ public class AvailableFormatsGeneration {
 								// OGC Format Check
 								if (pv.startsWith("image/")) {
 									if (operation.getTemplate().toLowerCase().contains("service=wms") || containsServiceInMappings(mappings, "WMS", map)) {
-										formats.add(buildAvailableFormat(pv, "application/vnd.ogc.wms_xml", buildHref(distribution, "ogc"), "WMS", AvailableFormatType.ORIGINAL));
+										formats.add(buildAvailableFormat(pv, "application/vnd.ogc.wms_xml", buildHrefOgc(distribution), "WMS", AvailableFormatType.ORIGINAL));
 										isOgcFormat = true;
 									} else if (operation.getTemplate().toLowerCase().contains("service=wmts") || containsServiceInMappings(mappings, "WMTS", map)) {
-										formats.add(buildAvailableFormat(pv, "application/vnd.ogc.wmts_xml", buildHref(distribution, "ogc"), "WMTS", AvailableFormatType.ORIGINAL));
+										formats.add(buildAvailableFormat(pv, "application/vnd.ogc.wmts_xml", buildHrefOgc(distribution), "WMTS", AvailableFormatType.ORIGINAL));
 										isOgcFormat = true;
 									}
 								} else if ("json".equals(pv) && (operation.getTemplate().toLowerCase().contains("service=wfs") || containsServiceInMappings(mappings, "WFS", map))) {
 									formats.add(buildAvailableFormat(pv, "application/epos.geo+json", buildHref(distribution, "json"), "GEOJSON (" + pv + ")", AvailableFormatType.ORIGINAL));
-								} else if (pv.contains("geo%2Bjson") || pv.toLowerCase().matches(".*geo(?:json|\\+json|\\-json).*")) {
+								} else if (pv.contains("geo%2Bjson") || pv.toLowerCase().matches(".*geo(?:json|\\+json|-json).*")) {
 									formats.add(buildAvailableFormat(pv, "application/epos.geo+json", buildHref(distribution, pv), "GEOJSON (" + pv + ")", AvailableFormatType.ORIGINAL));
 								} else {
 									formats.add(buildAvailableFormat(pv, pv, buildHref(distribution, pv), pv.toUpperCase(), AvailableFormatType.ORIGINAL));
@@ -109,6 +109,10 @@ public class AvailableFormatsGeneration {
 	// Helper method to build the href for a given distribution and format
 	private static String buildHref(Distribution distribution, String format) {
 		return EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + format;
+	}
+
+	private static String buildHrefOgc(Distribution distribution) {
+		return EnvironmentVariables.API_HOST + API_PATH_EXECUTE_OGC + distribution.getInstanceId();
 	}
 }
 

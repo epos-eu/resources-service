@@ -44,7 +44,7 @@ public class ScheduledRuntimes {
 	@Scheduled(fixedRate = 320000, initialDelay = 0)
 	@Async
 	public void zabbixUpdater() {
-		if(EnvironmentVariables.MONITORING.equals("true")) {
+		if(EnvironmentVariables.MONITORING != null && EnvironmentVariables.MONITORING.equals("true")) {
 			LOGGER.info("[Scheduled Task - Monitoring] Updating monitoring information");
 			JsonObject hostResults = new JsonObject();
 			String auth;

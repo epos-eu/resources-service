@@ -53,16 +53,15 @@ public class DistributionDetailsGenerationJPA {
 
 		WebService ws = distributionSelected.getAccessService() != null && !distributionSelected.getAccessService().isEmpty() ?
 				(WebService) LinkedEntityAPI.retrieveFromLinkedEntity(distributionSelected.getAccessService().get(0)) : null;
+
 		if (ws == null && distributionSelected.getAccessService() != null) return null;
 
 		Operation op = null;
-		if (distributionSelected.getSupportedOperation() != null) {
+		if (ws != null && distributionSelected.getSupportedOperation() != null) {
 			List<Operation> opList = distributionSelected.getSupportedOperation().parallelStream()
 			.map(linkedEntity -> (Operation) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
 					.filter(Objects::nonNull).collect(Collectors.toList());
 			op = !opList.isEmpty() ? opList.get(0) : null;
-		} else {
-			return null;
 		}
 
 		Distribution distribution = new Distribution();
@@ -195,7 +194,7 @@ public class DistributionDetailsGenerationJPA {
 						.collect(Collectors.joining(".")));
 			}
 
-			distribution.setServiceName(Optional.ofNullable(ws.getName()).orElse(null));
+			distribution.setServiceName(ws.getName());
 
 			if (ws.getProvider() != null) {
 				List<DataServiceProvider> serviceProviders = DataServiceProviderGeneration.getProviders(List.of((Organization) LinkedEntityAPI.retrieveFromLinkedEntity(ws.getProvider())));
