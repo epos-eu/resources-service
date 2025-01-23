@@ -202,5 +202,10 @@
 			<version>1.19.8</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.epos-eu.ics-c</groupId>
+			<artifactId>router-framework</artifactId>
+			<version>1.0.3</version>
+		</dependency>
 	</dependencies>
 </project>

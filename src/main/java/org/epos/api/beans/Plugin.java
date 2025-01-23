@@ -1,151 +1,99 @@
 package org.epos.api.beans;
 
-import java.util.List;
-import java.util.Map;
 
-import com.google.gson.annotations.SerializedName;
+import java.util.List;
+import java.util.Objects;
 
 public class Plugin {
-	
-	private String identifier;
-	private String name;
-	private String description;
-	private String downloadURL;
-	private String license;
-	private String softwareVersion;
-	private String documentationURL;
-    @SerializedName(value = "proxy-type")
-	private String proxyType;
-	private String requirements;
-	private Map<String, Map<String,String>> action;
-	private List<String> operations;
-	private String location;
-	
-	public Plugin(String identifier) {
-		this.identifier = identifier;
-	}
-	
-	public Plugin(String identifier, String name, String description, String downloadURL, String license,
-			String softwareVersion, String documentationURL, String proxyType, String requirements,
-			Map<String, Map<String, String>> action, List<String> operations) {
-		super();
-		this.identifier = identifier;
-		this.name = name;
-		this.description = description;
-		this.downloadURL = downloadURL;
-		this.license = license;
-		this.softwareVersion = softwareVersion;
-		this.documentationURL = documentationURL;
-		this.proxyType = proxyType;
-		this.requirements = requirements;
-		this.action = action;
-		this.operations = operations;
+
+	private String operationId;
+	private List<Relations> relations;
+
+	public String getOperationId() {
+		return operationId;
 	}
 
-	public String getIdentifier() {
-		return identifier;
+	public void setOperationId(String operationId) {
+		this.operationId = operationId;
 	}
 
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
+	public List<Relations> getRelations() {
+		return relations;
 	}
 
-	public String getName() {
-		return name;
+	public void setRelations(List<Relations> relations) {
+		this.relations = relations;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Plugin)) return false;
+		Plugin plugin = (Plugin) o;
+		return Objects.equals(operationId, plugin.operationId) && Objects.equals(relations, plugin.relations);
 	}
 
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getDownloadURL() {
-		return downloadURL;
-	}
-
-	public void setDownloadURL(String downloadURL) {
-		this.downloadURL = downloadURL;
-	}
-
-	public String getLicense() {
-		return license;
-	}
-
-	public void setLicense(String license) {
-		this.license = license;
-	}
-
-	public String getSoftwareVersion() {
-		return softwareVersion;
-	}
-
-	public void setSoftwareVersion(String softwareVersion) {
-		this.softwareVersion = softwareVersion;
-	}
-
-	public String getDocumentationURL() {
-		return documentationURL;
-	}
-
-	public void setDocumentationURL(String documentationURL) {
-		this.documentationURL = documentationURL;
-	}
-
-	public String getProxyType() {
-		return proxyType;
-	}
-
-	public void setProxyType(String proxyType) {
-		this.proxyType = proxyType;
-	}
-
-	public String getRequirements() {
-		return requirements;
-	}
-
-	public void setRequirements(String requirements) {
-		this.requirements = requirements;
-	}
-
-	public Map<String, Map<String, String>> getAction() {
-		return action;
-	}
-
-	public void setAction(Map<String, Map<String, String>> action) {
-		this.action = action;
-	}
-
-	public List<String> getOperations() {
-		return operations;
-	}
-
-	public void setOperations(List<String> operations) {
-		this.operations = operations;
-	}
-
-	public String getLocation() {
-		return location;
-	}
-
-	public void setLocation(String location) {
-		this.location = location;
+	@Override
+	public int hashCode() {
+		return Objects.hash(operationId, relations);
 	}
 
 	@Override
 	public String toString() {
-		return "Plugin [identifier=" + identifier + ", name=" + name + ", description=" + description + ", downloadURL="
-				+ downloadURL + ", license=" + license + ", softwareVersion=" + softwareVersion + ", documentationURL="
-				+ documentationURL + ", proxyType=" + proxyType + ", requirements=" + requirements + ", action="
-				+ action + ", operations=" + operations + "]";
+		return "Plugin{" +
+				"operationId='" + operationId + '\'' +
+				", relations=" + relations +
+				'}';
 	}
-	
-	
 
+	public class Relations {
+		private String pluginId;
+		private String inputFormat;
+		private String outputFormat;
+
+
+		public String getPluginId() {
+			return pluginId;
+		}
+
+		public void setPluginId(String pluginId) {
+			this.pluginId = pluginId;
+		}
+
+		public String getInputFormat() {
+			return inputFormat;
+		}
+
+		public void setInputFormat(String inputFormat) {
+			this.inputFormat = inputFormat;
+		}
+
+		public String getOutputFormat() {
+			return outputFormat;
+		}
+
+		public void setOutputFormat(String outputFormat) {
+			this.outputFormat = outputFormat;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (!(o instanceof Relations)) return false;
+			Relations relations = (Relations) o;
+			return Objects.equals(pluginId, relations.pluginId) && Objects.equals(inputFormat, relations.inputFormat) && Objects.equals(outputFormat, relations.outputFormat);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(pluginId, inputFormat, outputFormat);
+		}
+
+		@Override
+		public String toString() {
+			return "Relations{" +
+					"pluginId='" + pluginId + '\'' +
+					", inputFormat='" + inputFormat + '\'' +
+					", outputFormat='" + outputFormat + '\'' +
+					'}';
+		}
+	}
 }

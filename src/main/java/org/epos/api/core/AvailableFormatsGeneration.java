@@ -10,6 +10,8 @@ import abstractapis.AbstractAPI;
 import commonapis.LinkedEntityAPI;
 import metadataapis.EntityNames;
 import org.epos.api.beans.AvailableFormat;
+import org.epos.api.beans.AvailableFormatConverted;
+import org.epos.api.beans.Plugin;
 import org.epos.api.enums.AvailableFormatType;
 import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.*;
@@ -23,6 +25,18 @@ public class AvailableFormatsGeneration {
 	// Helper method to avoid repetitive creation of AvailableFormat objects
 	private static AvailableFormat buildAvailableFormat(String originalFormat, String format, String href, String label, AvailableFormatType type) {
 		return new AvailableFormat.AvailableFormatBuilder()
+				.originalFormat(originalFormat)
+				.format(format)
+				.href(href)
+				.label(label)
+				.type(type)
+				.build();
+	}
+
+	private static AvailableFormat buildAvailableFormatConverted(String inputFormat, String pluginId, String originalFormat, String format, String href, String label, AvailableFormatType type) {
+		return new AvailableFormatConverted.AvailableFormatConvertedBuilder()
+				.inputFormat(inputFormat)
+				.pluginId(pluginId)
 				.originalFormat(originalFormat)
 				.format(format)
 				.href(href)
@@ -91,7 +105,21 @@ public class AvailableFormatsGeneration {
 				}
 
 				if (operation != null && !isOgcFormat) {
-					// TODO: Plugins processing (currently commented out)
+					for(Plugin plugin : DatabaseConnections.getInstance().getPlugins()){
+						if(plugin.getOperationId().equals(operation.getInstanceId())){
+							for(Plugin.Relations relation : plugin.getRelations()){
+								if (relation.getOutputFormat().equals("application/epos.geo+json")
+										|| relation.getOutputFormat().equals("application/epos.table.geo+json")
+										|| relation.getOutputFormat().equals("application/epos.map.geo+json")) {
+									formats.add(buildAvailableFormatConverted(relation.getInputFormat(), relation.getPluginId(), relation.getInputFormat(), relation.getOutputFormat(), buildHref(distribution, relation.getOutputFormat()), "GEOJSON", AvailableFormatType.CONVERTED));
+								} else if (relation.getOutputFormat().equals("application/epos.graph.covjson") || relation.getOutputFormat().equals("application/epos.covjson")) {
+									formats.add(buildAvailableFormatConverted(relation.getInputFormat(), relation.getPluginId(), relation.getInputFormat(), relation.getOutputFormat(), buildHref(distribution, relation.getOutputFormat()), "COVJSON", AvailableFormatType.CONVERTED));
+								} else {
+									System.out.println("Unknown format: " + relation.getOutputFormat());
+								}
+							}
+						}
+					}
 				}
 			}
 		}

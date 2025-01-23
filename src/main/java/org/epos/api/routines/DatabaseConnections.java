@@ -1,14 +1,24 @@
 package org.epos.api.routines;
 
+import com.google.gson.JsonObject;
 import metadataapis.*;
+import org.epos.api.beans.Plugin;
+import org.epos.api.utility.Utils;
 import org.epos.eposdatamodel.*;
 import org.epos.handler.dbapi.service.EntityManagerService;
+import org.epos.router_framework.RpcRouter;
+import org.epos.router_framework.RpcRouterBuilder;
+import org.epos.router_framework.domain.*;
+import org.epos.router_framework.types.ServiceType;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static abstractapis.AbstractAPI.*;
 
 public class DatabaseConnections {
+
+	private RpcRouter router;
 
 	private List<DataProduct> dataproducts;
 	private List<SoftwareApplication> softwareApplications;
@@ -25,6 +35,8 @@ public class DatabaseConnections {
 	private List<Mapping> mappingList;
 	private List<Equipment> equipmentList;
 	private List<Facility> facilityList;
+
+	private List<Plugin> plugins;
 
 	private DatabaseConnections() {}
 
@@ -46,6 +58,18 @@ public class DatabaseConnections {
 		List<Mapping> tempMappingList = retrieveAPI(EntityNames.MAPPING.name()).retrieveAll();
 		List<Facility> tempFacilityList = retrieveAPI(EntityNames.FACILITY.name()).retrieveAll();
 		List<Equipment> tempEquipmentList = retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll();
+		List<Plugin> tempPlugins = new ArrayList<>();
+
+		try {
+			Map<String, Object> params = new HashMap<>();
+			params.put("plugins", "all");
+			Response conversionResponse = doRequest(ServiceType.METADATA, Actor.getInstance(BuiltInActorType.CONVERTER), params);
+			if (conversionResponse != null && conversionResponse.getPayloadAsPlainText().isPresent()) {
+				tempPlugins = Arrays.stream(Utils.gson.fromJson(conversionResponse.getPayloadAsPlainText().get(), Plugin[].class)).collect(Collectors.toList());
+			}
+		}catch (Exception e) {
+			System.err.println("[CONNECTION ERROR] Router not initializated, unable to retrieve information from the converter service. Stack:\n"+e.getMessage());
+		}
 
 		dataproducts = tempDataproducts;
 		softwareApplications = tempSoftwareApplications;
@@ -62,12 +86,29 @@ public class DatabaseConnections {
 		mappingList = tempMappingList;
 		facilityList = tempFacilityList;
 		equipmentList = tempEquipmentList;
+		plugins = tempPlugins;
+
 	}
 
 	private static DatabaseConnections connections;
 
 	public static DatabaseConnections getInstance() {
-		if(connections==null) connections = new DatabaseConnections();
+		if(connections==null) {
+			connections = new DatabaseConnections();
+		}
+		if(connections.router==null){
+			try {
+				connections.router = RpcRouterBuilder.instance(Actor.getInstance(BuiltInActorType.TCS_CONNECTOR.verbLabel()).get())
+						.addServiceSupport(ServiceType.EXTERNAL, Actor.getInstance(BuiltInActorType.CONVERTER.verbLabel()).get())
+						.setNumberOfPublishers(1)
+						.setNumberOfConsumers(1)
+						.setRoutingKeyPrefix("resources")
+						.build().get();
+				System.out.println("[CONNECTION] Router initialized");
+			}catch (Exception e) {
+				System.err.println("[CONNECTION ERROR] Router not initializated, unable to retrieve information from the converter service. Stack:\n"+e.getMessage());
+			}
+		}
 		return connections;
 	}
 
@@ -122,5 +163,29 @@ public class DatabaseConnections {
 	public List<Facility> getFacilityList() { return facilityList;}
 
 	public List<Equipment> getEquipmentList() { return equipmentList;}
+
+	public List<Plugin> getPlugins() { return plugins;}
+
+	protected Response doRequest(ServiceType service, Map<String, Object> requestParams) {
+		return this.doRequest(service, null, requestParams);
+	}
+
+	protected Response doRequest(ServiceType service, Actor nextComponentOverride, Map<String, Object> requestParams)
+	{
+
+		Request localRequest = RequestBuilder.instance(service, "get", "plugininfo")
+				.addPayloadPlainText(Utils.gson.toJson(requestParams))
+				.addHeaders(new HashMap<>())
+				.build();
+
+		Response response;
+		if (nextComponentOverride != null) {
+			response = router.makeRequest(localRequest, nextComponentOverride);
+		} else {
+			response = router.makeRequest(localRequest);
+		}
+
+		return response;
+	}
 
 }
