@@ -135,8 +135,7 @@ public class AvailableFormatsGeneration {
 											.label("GEOJSON")
 											.description(AvailableFormatType.CONVERTED)
 											.build());
-								}
-								if (item[2].toString().equals("covjson")) {
+								} else if (item[2].toString().equals("application/epos.graph.covjson") || item[2].toString().equals("application/epos.covjson")) {
 									formats.add(new AvailableFormatConverted.AvailableFormatConvertedBuilder()
 											.inputFormat(item[1].toString())
 											.pluginId(item[0].toString())
@@ -146,6 +145,8 @@ public class AvailableFormatsGeneration {
 											.label("COVJSON")
 											.description(AvailableFormatType.CONVERTED)
 											.build());
+								} else {
+									System.out.println("Unknown format: " + item[2].toString());
 								}
 							} catch (Exception e) {
 								// If there is an error while creating a format object just skip it
@@ -171,40 +172,9 @@ public class AvailableFormatsGeneration {
 		return formats;
 	}
 
-	public static class ParameterPair {
-		private Parameter object;
-		private Parameter result;
-
-		public ParameterPair(EDMSoftwareapplicationParameters object, EDMSoftwareapplicationParameters result) {
-			this.object = this.fromEDMSoftwareapplicationParameters(object);
-			this.result = this.fromEDMSoftwareapplicationParameters(result);
-		}
-		
-		private Parameter fromEDMSoftwareapplicationParameters(EDMSoftwareapplicationParameters elem){
-			Parameter parameter = new Parameter();
-			parameter.setEncodingFormat(elem.getEncodingformat());
-			parameter.setAction(Parameter.ActionEnum.fromValue(elem.getAction()));
-			parameter.setConformsTo(elem.getConformsto());
-			return parameter;
-		}
-
-		public Parameter getObject() {
-			return object;
-		}
-		public void setObject(Parameter object) {
-			this.object = object;
-		}
-		public Parameter getResult() {
-			return result;
-		}
-		public void setResult(Parameter result) {
-			this.result = result;
-		}
-	}
-
 	private static List<Object[]> getAllPluginsIdFromSoftwareApplicationId(String operationId) {
 		EntityManager em = new DBService().getEntityManager();
-		List<Object[]> resultList = em.createNativeQuery("select id, input_format, output_format from plugin_relations where relation_id = '" + operationId + "'").getResultList();
+		List<Object[]> resultList = em.createNativeQuery("select plugin.id, plugin_relations.input_format, plugin_relations.output_format from plugin_relations join plugin on plugin_relations.plugin_id = plugin.id where plugin_relations.relation_id = '" + operationId + "' and plugin.enabled = true").getResultList();
 		return resultList;
 	}
 }
