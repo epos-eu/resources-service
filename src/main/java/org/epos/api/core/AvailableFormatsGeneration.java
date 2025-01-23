@@ -108,14 +108,6 @@ public class AvailableFormatsGeneration {
 										.label("GEOJSON")
 										.description(AvailableFormatType.ORIGINAL)
 										.build());
-							} else if (returns.contains("epos.covjson") || returns.contains("epos.graph.covjson")) {
-								formats.add(new AvailableFormat.AvailableFormatBuilder()
-										.originalFormat(returns)
-										.format("application/epos.geo+json")
-										.href(EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getMetaId() + API_FORMAT + returns)
-										.label("COVJSON")
-										.description(AvailableFormatType.ORIGINAL)
-										.build());
 							} else {
 								formats.add(new AvailableFormat.AvailableFormatBuilder()
 										.originalFormat(returns)
