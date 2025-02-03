@@ -1,6 +1,5 @@
 package org.epos.api.routines;
 
-import com.google.gson.JsonObject;
 import metadataapis.*;
 import org.epos.api.beans.Plugin;
 import org.epos.api.utility.Utils;
@@ -38,7 +37,22 @@ public class DatabaseConnections {
 
 	private List<Plugin> plugins;
 
-	private DatabaseConnections() {}
+	private DatabaseConnections() {
+		try {
+			router = RpcRouterBuilder.instance(Actor.getInstance(BuiltInActorType.CONVERTER))
+					.addServiceSupport(ServiceType.METADATA, Actor.getInstance(BuiltInActorType.CONVERTER))
+					.setNumberOfPublishers(1)
+					.setNumberOfConsumers(1)
+					.setRoutingKeyPrefix("resources")
+					.build().get();
+			router.init(System.getenv("BROKER_HOST"), System.getenv("BROKER_VHOST"), System.getenv("BROKER_USERNAME"),
+					System.getenv("BROKER_PASSWORD"));
+			System.out.println("[CONNECTION] Router initialized");
+		} catch (Exception e) {
+			System.err.println(
+					"[CONNECTION ERROR] Error while initializing router. Stack:\n" + e.getMessage());
+		}
+	}
 
 	public void syncDatabaseConnections() {
 		if(EntityManagerService.getInstance()!=null) EntityManagerService.getInstance().getCache().evictAll();
@@ -63,12 +77,16 @@ public class DatabaseConnections {
 		try {
 			Map<String, Object> params = new HashMap<>();
 			params.put("plugins", "all");
-			Response conversionResponse = doRequest(ServiceType.METADATA, Actor.getInstance(BuiltInActorType.CONVERTER), params);
+			Response conversionResponse = doRequest(
+				ServiceType.METADATA,
+				Actor.getInstance(BuiltInActorType.CONVERTER),
+				params
+			);
 			if (conversionResponse != null && conversionResponse.getPayloadAsPlainText().isPresent()) {
 				tempPlugins = Arrays.stream(Utils.gson.fromJson(conversionResponse.getPayloadAsPlainText().get(), Plugin[].class)).collect(Collectors.toList());
 			}
-		}catch (Exception e) {
-			System.err.println("[CONNECTION ERROR] Router not initializated, unable to retrieve information from the converter service. Stack:\n"+e.getMessage());
+		} catch (Exception e) {
+			System.err.println("[CONNECTION ERROR] Error getting respoonse from router: " + e.getMessage());
 		}
 
 		dataproducts = tempDataproducts;
@@ -93,21 +111,8 @@ public class DatabaseConnections {
 	private static DatabaseConnections connections;
 
 	public static DatabaseConnections getInstance() {
-		if(connections==null) {
+		if (connections == null) {
 			connections = new DatabaseConnections();
-		}
-		if(connections.router==null){
-			try {
-				connections.router = RpcRouterBuilder.instance(Actor.getInstance(BuiltInActorType.TCS_CONNECTOR.verbLabel()).get())
-						.addServiceSupport(ServiceType.EXTERNAL, Actor.getInstance(BuiltInActorType.CONVERTER.verbLabel()).get())
-						.setNumberOfPublishers(1)
-						.setNumberOfConsumers(1)
-						.setRoutingKeyPrefix("resources")
-						.build().get();
-				System.out.println("[CONNECTION] Router initialized");
-			}catch (Exception e) {
-				System.err.println("[CONNECTION ERROR] Router not initializated, unable to retrieve information from the converter service. Stack:\n"+e.getMessage());
-			}
 		}
 		return connections;
 	}
@@ -170,8 +175,7 @@ public class DatabaseConnections {
 		return this.doRequest(service, null, requestParams);
 	}
 
-	protected Response doRequest(ServiceType service, Actor nextComponentOverride, Map<String, Object> requestParams)
-	{
+	protected Response doRequest(ServiceType service, Actor nextComponentOverride, Map<String, Object> requestParams) {
 
 		Request localRequest = RequestBuilder.instance(service, "get", "plugininfo")
 				.addPayloadPlainText(Utils.gson.toJson(requestParams))
