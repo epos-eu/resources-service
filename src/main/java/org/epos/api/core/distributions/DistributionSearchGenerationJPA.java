@@ -53,7 +53,16 @@ public class DistributionSearchGenerationJPA {
 			dataproducts.addAll(DatabaseConnections.getInstance().getDataproducts().stream().filter(Objects::nonNull).filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList()));
 		}
 
-		dataproducts.addAll(DatabaseConnections.getInstance().getDataproducts().stream().filter(Objects::nonNull).filter(item -> (versions.contains(item.getStatus()) && !item.getStatus().equals(StatusType.PUBLISHED) && item.getEditorId().equals(user.getAuthIdentifier()))).collect(Collectors.toList()));
+		for(DataProduct dataProduct : DatabaseConnections.getInstance().getDataproducts()) {
+			if(Objects.nonNull(dataProduct)){
+				if(dataProduct.getEditorId().equals(user.getAuthIdentifier())){
+					if(versions.contains(dataProduct.getStatus())){
+						dataproducts.add(dataProduct);
+					}
+				}
+			}
+		}
+		//dataproducts.addAll(DatabaseConnections.getInstance().getDataproducts().stream().filter(Objects::nonNull).filter(item -> (versions.contains(item.getStatus()) && !item.getStatus().equals(StatusType.PUBLISHED) && item.getEditorId().equals(finalUser.getAuthIdentifier()))).collect(Collectors.toList()));
 		List<Organization> organizationList = DatabaseConnections.getInstance().getOrganizationList();
 		List<Category> categoryList1 = DatabaseConnections.getInstance().getCategoryList();
 
