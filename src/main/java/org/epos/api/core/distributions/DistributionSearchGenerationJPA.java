@@ -56,6 +56,7 @@ public class DistributionSearchGenerationJPA {
 		for(DataProduct dataProduct : DatabaseConnections.getInstance().getDataproducts()) {
 			if(Objects.nonNull(dataProduct)){
 				if(dataProduct.getEditorId().equals(user.getAuthIdentifier())){
+					System.out.println("[VersioningStatus] Found dataproduct "+dataProduct.getEditorId()+" "+user.getAuthIdentifier()+" "+dataProduct.getStatus()+" "+dataProduct.getInstanceId());
 					if(versions.contains(dataProduct.getStatus())){
 						dataproducts.add(dataProduct);
 					}
