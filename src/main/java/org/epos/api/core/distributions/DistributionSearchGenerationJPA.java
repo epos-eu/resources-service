@@ -49,17 +49,18 @@ public class DistributionSearchGenerationJPA {
 
 		List<DataProduct> dataproducts  = new ArrayList<>();
 		// Retrieve all needed information available (if status in status list and
-		if(versions.contains(StatusType.PUBLISHED)){
-			dataproducts.addAll(DatabaseConnections.getInstance().getDataproducts().stream().filter(Objects::nonNull).filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList()));
-		}
+		//if(versions.contains(StatusType.PUBLISHED)){
+		//	dataproducts.addAll(DatabaseConnections.getInstance().getDataproducts().stream().filter(Objects::nonNull).filter(item -> item.getStatus().equals(StatusType.PUBLISHED)).collect(Collectors.toList()));
+		//}
 
 		for(DataProduct dataProduct : DatabaseConnections.getInstance().getDataproducts()) {
 			if(Objects.nonNull(dataProduct)){
-				if(dataProduct.getEditorId().equals(user.getAuthIdentifier())){
-					System.out.println("[VersioningStatus] Found dataproduct "+dataProduct.getEditorId()+" "+user.getAuthIdentifier()+" "+dataProduct.getStatus()+" "+dataProduct.getInstanceId());
-					if(versions.contains(dataProduct.getStatus())){
-						dataproducts.add(dataProduct);
-					}
+				if(versions.contains(StatusType.PUBLISHED) && dataProduct.getStatus().equals(StatusType.PUBLISHED)){
+					dataproducts.add(dataProduct);
+				}
+				if(versions.contains(dataProduct.getStatus()) && dataProduct.getEditorId().equals(user.getAuthIdentifier())){
+                    LOGGER.info("[VersioningStatus] Found dataproduct {} {} {} {}", dataProduct.getEditorId(), user.getAuthIdentifier(), dataProduct.getStatus(), dataProduct.getInstanceId());
+					dataproducts.add(dataProduct);
 				}
 			}
 		}
