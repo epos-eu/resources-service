@@ -58,7 +58,7 @@ public class DistributionSearchGenerationJPA {
 				if(versions.contains(StatusType.PUBLISHED) && dataProduct.getStatus().equals(StatusType.PUBLISHED)){
 					dataproducts.add(dataProduct);
 				}
-				if(versions.contains(dataProduct.getStatus()) && dataProduct.getEditorId().equals(user.getAuthIdentifier())){
+				if(user != null && versions.contains(dataProduct.getStatus()) && dataProduct.getEditorId().equals(user.getAuthIdentifier())){
                     LOGGER.info("[VersioningStatus] Found dataproduct {} {} {} {}", dataProduct.getEditorId(), user.getAuthIdentifier(), dataProduct.getStatus(), dataProduct.getInstanceId());
 					dataproducts.add(dataProduct);
 				}
