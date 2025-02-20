@@ -73,7 +73,7 @@ public class DistributionSearchGenerationJPA {
 		// Apply filtering
 		dataproducts = DistributionFilterSearch.doFilters(dataproducts, parameters);
 
-		Map<String, DiscoveryItem> discoveryMap = new HashMap<String, DiscoveryItem>();
+		Set<DiscoveryItem> discoveryMap = new HashSet<DiscoveryItem>();
 
 		LOGGER.info("Start for each");
 
@@ -173,7 +173,7 @@ public class DistributionSearchGenerationJPA {
 									discoveryItem.setStatusTimestamp(ZabbixExecutor.getInstance().getStatusTimestampInfoFromSha(discoveryItem.getSha256id()));
 								}
 
-								discoveryMap.put(discoveryItem.getSha256id(), discoveryItem);
+								discoveryMap.add(discoveryItem);
 							}
 						});
 		});
@@ -184,13 +184,13 @@ public class DistributionSearchGenerationJPA {
 		if(parameters.containsKey("facets") && parameters.get("facets").toString().equals("true")) {
 			switch(parameters.get("facetstype").toString()) {
 				case "categories":
-					results.addChild(FacetsGeneration.generateResponseUsingCategories(discoveryMap.values()).getFacets());
+					results.addChild(FacetsGeneration.generateResponseUsingCategories(discoveryMap).getFacets());
 					break;
 				case "dataproviders":
-					results.addChild(FacetsGeneration.generateResponseUsingDataproviders(discoveryMap.values()).getFacets());
+					results.addChild(FacetsGeneration.generateResponseUsingDataproviders(discoveryMap).getFacets());
 					break;
 				case "serviceproviders":
-					results.addChild(FacetsGeneration.generateResponseUsingServiceproviders(discoveryMap.values()).getFacets());
+					results.addChild(FacetsGeneration.generateResponseUsingServiceproviders(discoveryMap).getFacets());
 					break;
 				default:
 					break;
@@ -198,7 +198,7 @@ public class DistributionSearchGenerationJPA {
 
 		}else {
 			Node child = new Node();
-			child.setDistributions(discoveryMap.values());
+			child.setDistributions(discoveryMap);
 			results.addChild(child);
 		}
 
