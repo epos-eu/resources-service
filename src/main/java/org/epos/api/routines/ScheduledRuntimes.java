@@ -41,7 +41,7 @@ public class ScheduledRuntimes {
 		LOGGER.info("[Resources Service Startup Completed] -----------------------------------------------");
 	}
 
-	@Scheduled(fixedRate = 60000, initialDelay = 0)
+	@Scheduled(fixedRate = 90000, initialDelay = 0)
 	@Async
 	public void zabbixUpdater() {
 		if(EnvironmentVariables.MONITORING != null && EnvironmentVariables.MONITORING.equals("true")) {
@@ -84,7 +84,7 @@ public class ScheduledRuntimes {
 		}
 	}
 
-	@Scheduled(fixedRate = 60000, initialDelay = 0)
+	@Scheduled(fixedRate = 90000, initialDelay = 0)
 	@Async
 	public void facetsUpdater() {
 		LOGGER.info("[Scheduled Task - Facets] Updating facets information");
@@ -100,7 +100,7 @@ public class ScheduledRuntimes {
 		LOGGER.info("[Scheduled Task - Facets] Facets successfully updated");
 	}
 
-	@Scheduled(fixedRate = 60000, initialDelay = 0)
+	@Scheduled(fixedRate = 90000, initialDelay = 0)
 	@Async
 	public void connectionsUpdater() {
 		LOGGER.info("[Scheduled Task - Resources] Updating resources information");
