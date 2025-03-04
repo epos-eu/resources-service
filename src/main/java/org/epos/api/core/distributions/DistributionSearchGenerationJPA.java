@@ -57,10 +57,16 @@ public class DistributionSearchGenerationJPA {
 			if(Objects.nonNull(dataProduct)){
 				if(versions.contains(StatusType.PUBLISHED) && dataProduct.getStatus().equals(StatusType.PUBLISHED)){
 					dataproducts.add(dataProduct);
+					continue;
 				}
-				if(user != null && versions.contains(dataProduct.getStatus()) && dataProduct.getEditorId().equals(user.getAuthIdentifier())){
-                    LOGGER.info("[VersioningStatus] Found dataproduct {} {} {} {}", dataProduct.getEditorId(), user.getAuthIdentifier(), dataProduct.getStatus(), dataProduct.getInstanceId());
-					dataproducts.add(dataProduct);
+				// If the user exists and in the query parameters there is the status of the current dataProduct
+				if (user != null && versions.contains(dataProduct.getStatus())) {
+					// If the user is an admin or the editor of this dataproducts
+					if (user.getIsAdmin() || dataProduct.getEditorId().equals(user.getAuthIdentifier())) {
+						LOGGER.debug("[VersioningStatus] Found dataproduct {} {} {} {}", dataProduct.getEditorId(), user.getAuthIdentifier(), dataProduct.getStatus(), dataProduct.getInstanceId());
+						// show it
+						dataproducts.add(dataProduct);
+					}
 				}
 			}
 		}

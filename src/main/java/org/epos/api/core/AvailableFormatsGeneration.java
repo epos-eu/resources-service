@@ -86,8 +86,6 @@ public class AvailableFormatsGeneration {
 								.contains(item.getInstanceId()))
 						.collect(Collectors.toList());
 				for (Mapping map : mappings) {
-					if (map != null && map.getProperty() != null) {
-					}
 					if (map != null && map.getProperty() != null && map.getProperty().contains("encodingFormat")) {
 						for (String pv : map.getParamValue()) {
 							// OGC Format Check
