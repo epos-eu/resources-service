@@ -13,7 +13,7 @@ public class DiscoveryItem implements Serializable {
 	private String hrefExtended;
 	private String id;
 	private String uid;
-	private String metaid;
+	private String metaId;
 	private transient String sha256id;
 	private transient Set<String> dataprovider;
 	private transient Set<String> facilityprovider;
@@ -25,6 +25,7 @@ public class DiscoveryItem implements Serializable {
 	private String versioningStatus;
 	private String statusTimestamp;
 	private List<AvailableFormat> availableFormats;
+	private String editorId;
 
 	public DiscoveryItem() {
 	}
@@ -34,7 +35,7 @@ public class DiscoveryItem implements Serializable {
 		this.hrefExtended = builder.hrefExtended;
 		this.id = builder.id;
 		this.uid = builder.uid;
-		this.metaid = builder.metaid;
+		this.metaId = builder.metaId;
 		this.sha256id = builder.sha256id;
 		this.dataprovider = builder.dataprovider;
 		this.serviceprovider = builder.serviceprovider;
@@ -46,6 +47,7 @@ public class DiscoveryItem implements Serializable {
 		this.versioningStatus = builder.versioningStatus;
 		this.statusTimestamp = builder.statusTimestamp;
 		this.availableFormats = builder.availableFormats;
+		this.editorId = builder.editorId;
 	}
 
 	public String getHref() {
@@ -80,12 +82,12 @@ public class DiscoveryItem implements Serializable {
 		this.id = id;
 	}
 
-	public String getMetaid() {
-		return metaid;
+	public String getMetaId() {
+		return metaId;
 	}
 
-	public void setMetaid(String metaid) {
-		this.metaid = metaid;
+	public void setMetaId(String metaid) {
+		this.metaId = metaid;
 	}
 
 	public String getSha256id() {
@@ -176,13 +178,21 @@ public class DiscoveryItem implements Serializable {
 		this.facilityprovider = facilityprovider;
 	}
 
+	public String getEditorId() {
+		return this.editorId;
+	}
+
+	public void setEditorId(String editorId) {
+		this.editorId = editorId;
+	}
+
 	public static class DiscoveryItemBuilder {
 
 		private String href;
 		private String hrefExtended;
 		private String id;
 		private String uid;
-		private String metaid;
+		private String metaId;
 		private transient String sha256id;
 		private transient Set<String> dataprovider;
 		private transient Set<String> serviceprovider;
@@ -194,6 +204,7 @@ public class DiscoveryItem implements Serializable {
 		private String versioningStatus;
 		private String statusTimestamp;
 		private List<AvailableFormat> availableFormats;
+		private String editorId;
 
 		public DiscoveryItemBuilder(String id, String href, String hrefExtended) {
 			this.id = id;
@@ -206,8 +217,8 @@ public class DiscoveryItem implements Serializable {
 			return this;
 		}
 
-		public DiscoveryItemBuilder metaid(String metaid) {
-			this.metaid = metaid;
+		public DiscoveryItemBuilder setMetaId(String metaId) {
+			this.metaId = metaId;
 			return this;
 		}
 
@@ -266,6 +277,11 @@ public class DiscoveryItem implements Serializable {
 			return this;
 		}
 
+		public DiscoveryItemBuilder setEditorId(String editorId) {
+			this.editorId = editorId;
+			return this;
+		}
+
 		public DiscoveryItem build() {
 			return new DiscoveryItem(this);
 		}
@@ -283,7 +299,8 @@ public class DiscoveryItem implements Serializable {
 				statusTimestamp,
 				title,
 				uid,
-				metaid);
+				metaId,
+				editorId);
 	}
 
 	@Override
@@ -305,7 +322,8 @@ public class DiscoveryItem implements Serializable {
 				&& Objects.equals(versioningStatus, other.versioningStatus)
 				&& Objects.equals(title, other.title)
 				&& Objects.equals(uid, other.uid)
-				&& Objects.equals(metaid, other.metaid);
+				&& Objects.equals(metaId, other.metaId)
+				&& Objects.equals(editorId, other.editorId);
 	}
 
 	@Override
@@ -314,7 +332,8 @@ public class DiscoveryItem implements Serializable {
 				+ ", hrefExtended=" + hrefExtended
 				+ ", id=" + id
 				+ ", uid=" + uid
-				+ ", metaid=" + metaid
+				+ ", metaid=" + metaId
+				+ ", editorId" + editorId
 				+ ", title=" + title
 				+ ", description=" + description
 				+ ", status=" + status

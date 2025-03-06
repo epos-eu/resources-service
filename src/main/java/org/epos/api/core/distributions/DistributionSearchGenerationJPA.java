@@ -1,9 +1,23 @@
 package org.epos.api.core.distributions;
 
-import model.StatusType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.commons.codec.digest.DigestUtils;
-import org.epos.api.beans.*;
+import org.epos.api.beans.AvailableFormat;
+import org.epos.api.beans.DataServiceProvider;
+import org.epos.api.beans.DiscoveryItem;
 import org.epos.api.beans.DiscoveryItem.DiscoveryItemBuilder;
+import org.epos.api.beans.NodeFilters;
+import org.epos.api.beans.SearchResponse;
 import org.epos.api.core.AvailableFormatsGeneration;
 import org.epos.api.core.DataServiceProviderGeneration;
 import org.epos.api.core.EnvironmentVariables;
@@ -12,16 +26,16 @@ import org.epos.api.core.filtersearch.DistributionFilterSearch;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.Node;
 import org.epos.api.routines.DatabaseConnections;
-import org.epos.eposdatamodel.*;
+import org.epos.eposdatamodel.Category;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Distribution;
-import org.epos.eposdatamodel.Operation;
+import org.epos.eposdatamodel.Organization;
+import org.epos.eposdatamodel.User;
+import org.epos.eposdatamodel.WebService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.text.html.Option;
-import java.util.*;
-import java.util.stream.Collectors;
+import model.StatusType;
 
 
 public class DistributionSearchGenerationJPA {
@@ -164,7 +178,7 @@ public class DistributionSearchGenerationJPA {
 										EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.get().getInstanceId(),
 										EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.get().getInstanceId()+"?extended=true")
 										.uid(distribution.get().getUid())
-										.metaid(distribution.get().getMetaId())
+										.setMetaId(distribution.get().getMetaId())
 										.title(distribution.get().getTitle()!=null?String.join(";",distribution.get().getTitle()):null)
 										.description(distribution.get().getDescription()!=null? String.join(";",distribution.get().getDescription()):null)
 										.availableFormats(availableFormats)

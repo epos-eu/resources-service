@@ -1,16 +1,20 @@
 package org.epos.api.core.distributions;
 
-import abstractapis.AbstractAPI;
-import commonapis.LinkedEntityAPI;
-import io.swagger.v3.oas.models.links.Link;
-import metadataapis.EntityNames;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.epos.api.beans.AvailableContactPoints.AvailableContactPointsBuilder;
 import org.epos.api.beans.DataProduct;
-import org.epos.api.core.AvailableFormatsGeneration;
-import org.epos.api.core.DataServiceProviderGeneration;
-import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.beans.DataServiceProvider;
 import org.epos.api.beans.DiscoveryItem;
 import org.epos.api.beans.DistributionExtended;
@@ -19,17 +23,30 @@ import org.epos.api.beans.ServiceParameter;
 import org.epos.api.beans.SpatialInformation;
 import org.epos.api.beans.TemporalCoverage;
 import org.epos.api.beans.Webservice;
+import org.epos.api.core.AvailableFormatsGeneration;
+import org.epos.api.core.DataServiceProviderGeneration;
+import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.enums.ProviderType;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.FacetsNodeTree;
-import org.epos.api.routines.DatabaseConnections;
-import org.epos.eposdatamodel.*;
+import org.epos.eposdatamodel.Category;
+import org.epos.eposdatamodel.ContactPoint;
+import org.epos.eposdatamodel.Distribution;
+import org.epos.eposdatamodel.Documentation;
+import org.epos.eposdatamodel.Identifier;
+import org.epos.eposdatamodel.LinkedEntity;
+import org.epos.eposdatamodel.Location;
+import org.epos.eposdatamodel.Mapping;
+import org.epos.eposdatamodel.Organization;
+import org.epos.eposdatamodel.PeriodOfTime;
+import org.epos.eposdatamodel.Person;
+import org.epos.eposdatamodel.WebService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.stream.Collectors;
+import abstractapis.AbstractAPI;
+import commonapis.LinkedEntityAPI;
+import metadataapis.EntityNames;
 
 public class DistributionDetailsExtendedGenerationJPA {
 
@@ -96,6 +113,7 @@ public class DistributionDetailsExtendedGenerationJPA {
 
 		distribution.setId(distributionSelected.getInstanceId());
 		distribution.setUid(distributionSelected.getUid());
+		distribution.setVersioningStatus(distributionSelected.getVersion());
 
 		if (distributionSelected.getDownloadURL() != null) {
 			distribution.setDownloadURL(
@@ -413,14 +431,16 @@ public class DistributionDetailsExtendedGenerationJPA {
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getInstanceId(),
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getInstanceId()+"?extended=true")
 				.uid(distribution.getUid())
-				.metaid(distribution.getMetaid())
+				.setMetaId(distribution.getMetaId())
 				.title(distribution.getTitle()!=null?String.join(";",distribution.getTitle()):null)
 				.description(distribution.getDescription()!=null? String.join(";",distribution.getDescription()):null)
 				.availableFormats(AvailableFormatsGeneration.generate(distributionSelected))
 				.setSha256id(DigestUtils.sha256Hex(distribution.getUid()))
 				.setDataprovider(facetsDataProviders)
+				.setVersioningStatus(distribution.getVersioningStatus())
 				.setServiceProvider(facetsServiceProviders)
 				.setCategories(categoryList.isEmpty()? null : categoryList)
+				.setEditorId(distribution.getEditorId())
 				.build());
 
 		FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList);

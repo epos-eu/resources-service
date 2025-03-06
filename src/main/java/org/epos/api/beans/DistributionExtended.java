@@ -1,7 +1,8 @@
 package org.epos.api.beans;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.epos.api.facets.Node;
 
@@ -18,7 +19,7 @@ public class DistributionExtended implements Serializable {
 
 	private String id;
 	private String uid;
-	private String metaid;
+	private String metaId;
 	private String type;
 	private String title;
 	private String description;
@@ -29,6 +30,8 @@ public class DistributionExtended implements Serializable {
 	private List<String> scienceDomain;
 	private String hasQualityAnnotation;
 	private List<AvailableFormat> availableFormats;
+	private String versioningStatus;
+	private String editorId;
 
 	private List<AvailableContactPoints> availableContactPoints;
 
@@ -74,12 +77,12 @@ public class DistributionExtended implements Serializable {
 		this.uid = uid;
 	}
 
-	public String getMetaid() {
-		return this.metaid;
+	public String getMetaId() {
+		return this.metaId;
 	}
 
-	public void setMetaid(String metaid) {
-		this.metaid = metaid;
+	public void setMetaId(String metaid) {
+		this.metaId = metaid;
 	}
 
 	public String getType() {
@@ -224,5 +227,21 @@ public class DistributionExtended implements Serializable {
 	 */
 	public void setRelatedWebservice(List<Webservice> relatedWebservice) {
 		this.relatedWebservice = relatedWebservice;
+	}
+
+	public String getVersioningStatus() {
+		return versioningStatus;
+	}
+
+	public void setVersioningStatus(String versioningStatus) {
+		this.versioningStatus = versioningStatus;
+	}
+
+	public String getEditorId() {
+		return this.editorId;
+	}
+
+	public void setEditorId(String editorid) {
+		this.editorId = editorid;
 	}
 }

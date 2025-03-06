@@ -1,9 +1,12 @@
 package org.epos.api.beans;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.epos.api.facets.Node;
+
+import model.StatusType;
 
 public class Distribution implements Serializable {
 
@@ -22,7 +25,7 @@ public class Distribution implements Serializable {
 
 	private String id;
 	private String uid;
-	private String metaid;
+	private String metaId;
 	private String type;
 	private String title;
 	private String description;
@@ -39,6 +42,8 @@ public class Distribution implements Serializable {
 	private String hasQualityAnnotation;
 	private List<AvailableFormat> availableFormats;
 	private List<AvailableContactPoints> availableContactPoints;
+	private StatusType versioningStatus;
+	private String editorId;
 
 	// WEBSERVICE
 
@@ -90,7 +95,9 @@ public class Distribution implements Serializable {
 			String serviceEndpoint,
 			String serviceDocumentation,
 			String endpoint,
-			List<ServiceParameter> serviceParameters) {
+			List<ServiceParameter> serviceParameters,
+			StatusType versioningStatus,
+			String editorid) {
 		super();
 		this.productid = productid;
 		this.distributionid = distributionid;
@@ -98,7 +105,7 @@ public class Distribution implements Serializable {
 		this.href = href;
 		this.id = id;
 		this.uid = uid;
-		this.metaid = metaid;
+		this.metaId = metaid;
 		this.type = type;
 		this.title = title;
 		this.description = description;
@@ -121,6 +128,8 @@ public class Distribution implements Serializable {
 		this.serviceDocumentation = serviceDocumentation;
 		this.endpoint = endpoint;
 		this.serviceParameters = serviceParameters;
+		this.versioningStatus = versioningStatus;
+		this.editorId = editorid;
 	}
 
 	public String getErrorMessage() {
@@ -179,12 +188,12 @@ public class Distribution implements Serializable {
 		this.uid = uid;
 	}
 
-	public String getMetaid() {
-		return this.metaid;
+	public String getMetaId() {
+		return this.metaId;
 	}
 
-	public void setMetaid(String metaid) {
-		this.metaid = metaid;
+	public void setMetaId(String metaId) {
+		this.metaId = metaId;
 	}
 
 	public String getType() {
@@ -437,6 +446,22 @@ public class Distribution implements Serializable {
 		this.hasQualityAnnotation = hasQualityAnnotation;
 	}
 
+	public StatusType getVersioningStatus() {
+		return versioningStatus;
+	}
+
+	public void setVersioningStatus(StatusType versioningStatus) {
+		this.versioningStatus = versioningStatus;
+	}
+
+	public String getEditorId() {
+		return this.editorId;
+	}
+
+	public void setEditorId(String editorid) {
+		this.editorId = editorid;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -466,6 +491,10 @@ public class Distribution implements Serializable {
 		result = prime * result + ((temporalCoverage == null) ? 0 : temporalCoverage.hashCode());
 		result = prime * result + ((title == null) ? 0 : title.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((metaId == null) ? 0 : metaId.hashCode());
+		result = prime * result + ((uid == null) ? 0 : uid.hashCode());
+		result = prime * result + ((versioningStatus == null) ? 0 : versioningStatus.hashCode());
+		result = prime * result + ((editorId == null) ? 0 : editorId.hashCode());
 		return result;
 	}
 
@@ -603,13 +632,35 @@ public class Distribution implements Serializable {
 				return false;
 		} else if (!type.equals(other.type))
 			return false;
+		if (uid == null) {
+			if (other.uid != null)
+				return false;
+		} else if (!uid.equals(other.uid))
+			return false;
+		if (metaId == null) {
+			if (other.metaId != null)
+				return false;
+		} else if (!metaId.equals(other.metaId))
+			return false;
+		if (versioningStatus == null) {
+			if (other.versioningStatus != null)
+				return false;
+		} else if (!versioningStatus.equals(other.versioningStatus))
+			return false;
+		if (editorId == null) {
+			if (other.editorId != null)
+				return false;
+		} else if (!editorId.equals(other.editorId))
+			return false;
+
 		return true;
 	}
 
 	@Override
 	public String toString() {
 		return "Distribution [operationid=" + operationid + ", href=" + href + ", categories=" + categories + ", id="
-				+ id + ", uid=" + uid + ", type=" + type + ", title=" + title + ", description=" + description
+				+ id + ", uid=" + uid + ", metaId=" + metaId + ", type=" + type + ", title=" + title + ", description="
+				+ description
 				+ ", license=" + license + ", downloadURL=" + downloadURL + ", keywords=" + keywords + ", dataProvider="
 				+ dataProvider + ", frequencyUpdate=" + frequencyUpdate + ", internalID=" + internalID + ", DOI=" + DOI
 				+ ", spatial=" + spatial + ", temporalCoverage=" + temporalCoverage + ", scienceDomain=" + scienceDomain
@@ -619,6 +670,7 @@ public class Distribution implements Serializable {
 				+ ", serviceSpatial=" + serviceSpatial + ", serviceTemporalCoverage=" + serviceTemporalCoverage
 				+ ", serviceEndpoint=" + serviceEndpoint + ", serviceDocumentation=" + serviceDocumentation
 				+ ", serviceType=" + serviceType + ", endpoint=" + endpoint + ", serviceParameters=" + serviceParameters
+				+ ", versioningStatus=" + versioningStatus
 				+ "]";
 	}
 }
