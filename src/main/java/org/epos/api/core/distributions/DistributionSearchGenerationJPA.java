@@ -164,6 +164,7 @@ public class DistributionSearchGenerationJPA {
 										EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.get().getInstanceId(),
 										EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.get().getInstanceId()+"?extended=true")
 										.uid(distribution.get().getUid())
+										.metaid(distribution.get().getMetaId())
 										.title(distribution.get().getTitle()!=null?String.join(";",distribution.get().getTitle()):null)
 										.description(distribution.get().getDescription()!=null? String.join(";",distribution.get().getDescription()):null)
 										.availableFormats(availableFormats)

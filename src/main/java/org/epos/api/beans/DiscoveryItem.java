@@ -7,15 +7,13 @@ import java.util.Set;
 
 public class DiscoveryItem implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	private String href;
 	private String hrefExtended;
 	private String id;
 	private String uid;
+	private String metaid;
 	private transient String sha256id;
 	private transient Set<String> dataprovider;
 	private transient Set<String> facilityprovider;
@@ -27,14 +25,16 @@ public class DiscoveryItem implements Serializable {
 	private String versioningStatus;
 	private String statusTimestamp;
 	private List<AvailableFormat> availableFormats;
-	
-	public DiscoveryItem() {}
+
+	public DiscoveryItem() {
+	}
 
 	public DiscoveryItem(DiscoveryItemBuilder builder) {
 		this.href = builder.href;
 		this.hrefExtended = builder.hrefExtended;
 		this.id = builder.id;
 		this.uid = builder.uid;
+		this.metaid = builder.metaid;
 		this.sha256id = builder.sha256id;
 		this.dataprovider = builder.dataprovider;
 		this.serviceprovider = builder.serviceprovider;
@@ -71,13 +71,21 @@ public class DiscoveryItem implements Serializable {
 	public void setUid(String uid) {
 		this.uid = uid;
 	}
-	
+
 	public String getUid() {
 		return uid;
 	}
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public String getMetaid() {
+		return metaid;
+	}
+
+	public void setMetaid(String metaid) {
+		this.metaid = metaid;
 	}
 
 	public String getSha256id() {
@@ -136,9 +144,13 @@ public class DiscoveryItem implements Serializable {
 		this.status = status;
 	}
 
-	public String getVersioningStatus() { return versioningStatus; }
+	public String getVersioningStatus() {
+		return versioningStatus;
+	}
 
-	public void setVersioningStatus(String versioningStatus) { this.versioningStatus = versioningStatus; }
+	public void setVersioningStatus(String versioningStatus) {
+		this.versioningStatus = versioningStatus;
+	}
 
 	public String getStatusTimestamp() {
 		return statusTimestamp;
@@ -164,12 +176,13 @@ public class DiscoveryItem implements Serializable {
 		this.facilityprovider = facilityprovider;
 	}
 
-	public static class DiscoveryItemBuilder{
-		
+	public static class DiscoveryItemBuilder {
+
 		private String href;
 		private String hrefExtended;
 		private String id;
 		private String uid;
+		private String metaid;
 		private transient String sha256id;
 		private transient Set<String> dataprovider;
 		private transient Set<String> serviceprovider;
@@ -181,7 +194,7 @@ public class DiscoveryItem implements Serializable {
 		private String versioningStatus;
 		private String statusTimestamp;
 		private List<AvailableFormat> availableFormats;
-		
+
 		public DiscoveryItemBuilder(String id, String href, String hrefExtended) {
 			this.id = id;
 			this.href = href;
@@ -193,26 +206,31 @@ public class DiscoveryItem implements Serializable {
 			return this;
 		}
 
+		public DiscoveryItemBuilder metaid(String metaid) {
+			this.metaid = metaid;
+			return this;
+		}
+
 		public DiscoveryItemBuilder setSha256id(String sha256id) {
 			this.sha256id = sha256id;
 			return this;
 		}
-		
+
 		public DiscoveryItemBuilder setDataprovider(Set<String> facetsDataProviders) {
 			this.dataprovider = facetsDataProviders;
 			return this;
 		}
-		
+
 		public DiscoveryItemBuilder setServiceProvider(Set<String> serviceprovider) {
 			this.serviceprovider = serviceprovider;
 			return this;
 		}
-		
+
 		public DiscoveryItemBuilder setFacilityProvider(Set<String> facilityprovider) {
 			this.facilityprovider = facilityprovider;
 			return this;
 		}
-		
+
 		public DiscoveryItemBuilder setCategories(List<String> categories) {
 			this.categories = categories;
 			return this;
@@ -222,7 +240,7 @@ public class DiscoveryItem implements Serializable {
 			this.title = title;
 			return this;
 		}
-		
+
 		public DiscoveryItemBuilder description(String description) {
 			this.description = description;
 			return this;
@@ -237,7 +255,7 @@ public class DiscoveryItem implements Serializable {
 			this.versioningStatus = versioningStatus;
 			return this;
 		}
-		
+
 		public DiscoveryItemBuilder setStatusTimestamp(String statusTimestamp) {
 			this.statusTimestamp = statusTimestamp;
 			return this;
@@ -247,15 +265,25 @@ public class DiscoveryItem implements Serializable {
 			this.availableFormats = availableFormats;
 			return this;
 		}
-		
+
 		public DiscoveryItem build() {
-            return new DiscoveryItem(this);
-        }
+			return new DiscoveryItem(this);
+		}
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(availableFormats, description, href, hrefExtended, id, status, statusTimestamp, title, uid);
+		return Objects.hash(
+				availableFormats,
+				description,
+				href,
+				hrefExtended,
+				id,
+				status,
+				statusTimestamp,
+				title,
+				uid,
+				metaid);
 	}
 
 	@Override
@@ -268,19 +296,31 @@ public class DiscoveryItem implements Serializable {
 			return false;
 		DiscoveryItem other = (DiscoveryItem) obj;
 		return Objects.equals(availableFormats, other.availableFormats)
-				&& Objects.equals(description, other.description) && Objects.equals(href, other.href)
-				&& Objects.equals(hrefExtended, other.hrefExtended) && Objects.equals(id, other.id)
-				&& status == other.status && Objects.equals(statusTimestamp, other.statusTimestamp)
+				&& Objects.equals(description, other.description)
+				&& Objects.equals(href, other.href)
+				&& Objects.equals(hrefExtended, other.hrefExtended)
+				&& Objects.equals(id, other.id)
+				&& status == other.status
+				&& Objects.equals(statusTimestamp, other.statusTimestamp)
 				&& Objects.equals(versioningStatus, other.versioningStatus)
-				&& Objects.equals(title, other.title) && Objects.equals(uid, other.uid);
+				&& Objects.equals(title, other.title)
+				&& Objects.equals(uid, other.uid)
+				&& Objects.equals(metaid, other.metaid);
 	}
 
 	@Override
 	public String toString() {
-		return "DiscoveryItem [href=" + href + ", hrefExtended=" + hrefExtended + ", id=" + id + ", uid=" + uid
-				+ ", title=" + title + ", description=" + description + ", status=" + status + ", statusTimestamp="
-				+ statusTimestamp + ", versioningStatus=" + versioningStatus +", availableFormats=" + availableFormats + "]";
+		return "DiscoveryItem [href=" + href
+				+ ", hrefExtended=" + hrefExtended
+				+ ", id=" + id
+				+ ", uid=" + uid
+				+ ", metaid=" + metaid
+				+ ", title=" + title
+				+ ", description=" + description
+				+ ", status=" + status
+				+ ", statusTimestamp=" + statusTimestamp
+				+ ", versioningStatus=" + versioningStatus
+				+ ", availableFormats=" + availableFormats
+				+ "]";
 	}
-
-	
 }

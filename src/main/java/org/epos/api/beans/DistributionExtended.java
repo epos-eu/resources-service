@@ -7,20 +7,18 @@ import org.epos.api.facets.Node;
 
 public class DistributionExtended implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	private String errorMessage;
-	
+
 	private String href;
 	private String hrefExtended;
 
 	private Node categories;
-	
+
 	private String id;
 	private String uid;
+	private String metaid;
 	private String type;
 	private String title;
 	private String description;
@@ -33,16 +31,16 @@ public class DistributionExtended implements Serializable {
 	private List<AvailableFormat> availableFormats;
 
 	private List<AvailableContactPoints> availableContactPoints;
-	
+
 	private List<DataProduct> relatedDataProducts;
 	private List<Webservice> relatedWebservice;
-	
-	public DistributionExtended() {}
-	
+
+	public DistributionExtended() {
+	}
+
 	public DistributionExtended(String errorMessage) {
 		this.errorMessage = errorMessage;
 	}
-
 
 	public String getErrorMessage() {
 		return errorMessage;
@@ -51,7 +49,6 @@ public class DistributionExtended implements Serializable {
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;
 	}
-
 
 	public Node getCategories() {
 		return categories;
@@ -68,13 +65,21 @@ public class DistributionExtended implements Serializable {
 	public void setId(String id) {
 		this.id = id;
 	}
-	
+
 	public String getUid() {
 		return uid;
 	}
 
 	public void setUid(String uid) {
 		this.uid = uid;
+	}
+
+	public String getMetaid() {
+		return this.metaid;
+	}
+
+	public void setMetaid(String metaid) {
+		this.metaid = metaid;
 	}
 
 	public String getType() {
@@ -118,13 +123,15 @@ public class DistributionExtended implements Serializable {
 	}
 
 	public List<String> getKeywords() {
-		if(keywords==null) keywords = new ArrayList<String>();
+		if (keywords == null)
+			keywords = new ArrayList<String>();
 		return keywords;
 	}
 
 	public void setKeywords(List<String> keywords) {
 		this.keywords = keywords;
 	}
+
 	public String getFrequencyUpdate() {
 		return frequencyUpdate;
 	}
@@ -134,7 +141,8 @@ public class DistributionExtended implements Serializable {
 	}
 
 	public List<AvailableFormat> getAvailableFormats() {
-		if(availableFormats==null) availableFormats = new ArrayList<AvailableFormat>();
+		if (availableFormats == null)
+			availableFormats = new ArrayList<AvailableFormat>();
 		return availableFormats;
 	}
 
@@ -143,7 +151,8 @@ public class DistributionExtended implements Serializable {
 	}
 
 	public List<AvailableContactPoints> getAvailableContactPoints() {
-		if(availableContactPoints==null) availableContactPoints = new ArrayList<AvailableContactPoints>();
+		if (availableContactPoints == null)
+			availableContactPoints = new ArrayList<AvailableContactPoints>();
 		return availableContactPoints;
 	}
 
@@ -158,7 +167,7 @@ public class DistributionExtended implements Serializable {
 	public void setHref(String href) {
 		this.href = href;
 	}
-	
+
 	public String getHrefExtended() {
 		return hrefExtended;
 	}
@@ -168,14 +177,14 @@ public class DistributionExtended implements Serializable {
 	}
 
 	public List<String> getScienceDomain() {
-		if(scienceDomain==null) scienceDomain = new ArrayList<String>();
+		if (scienceDomain == null)
+			scienceDomain = new ArrayList<String>();
 		return scienceDomain;
 	}
 
 	public void setScienceDomain(List<String> scienceDomain) {
 		this.scienceDomain = scienceDomain;
 	}
-
 
 	public String getHasQualityAnnotation() {
 		return hasQualityAnnotation;
@@ -189,7 +198,8 @@ public class DistributionExtended implements Serializable {
 	 * @return the relatedDataProducts
 	 */
 	public List<DataProduct> getRelatedDataProducts() {
-		if(relatedDataProducts==null) relatedDataProducts = new ArrayList<DataProduct>();
+		if (relatedDataProducts == null)
+			relatedDataProducts = new ArrayList<DataProduct>();
 		return relatedDataProducts;
 	}
 
@@ -204,7 +214,8 @@ public class DistributionExtended implements Serializable {
 	 * @return the relatedWebservice
 	 */
 	public List<Webservice> getRelatedWebservice() {
-		if(relatedWebservice==null) relatedWebservice = new ArrayList<Webservice>();
+		if (relatedWebservice == null)
+			relatedWebservice = new ArrayList<Webservice>();
 		return relatedWebservice;
 	}
 
@@ -214,5 +225,4 @@ public class DistributionExtended implements Serializable {
 	public void setRelatedWebservice(List<Webservice> relatedWebservice) {
 		this.relatedWebservice = relatedWebservice;
 	}
-
 }

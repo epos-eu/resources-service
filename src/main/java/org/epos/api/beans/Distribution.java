@@ -7,24 +7,22 @@ import org.epos.api.facets.Node;
 
 public class Distribution implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	private String errorMessage;
-	
+
 	private transient String productid;
 	private transient String distributionid;
 	private String operationid;
-	
+
 	private String href;
 	private String hrefExtended;
 
 	private Node categories;
-	
+
 	private String id;
 	private String uid;
+	private String metaid;
 	private String type;
 	private String title;
 	private String description;
@@ -36,14 +34,14 @@ public class Distribution implements Serializable {
 	private List<String> internalID;
 	private List<String> DOI;
 	private SpatialInfo spatial;
-	private TemporalCoverage temporalCoverage;	
+	private TemporalCoverage temporalCoverage;
 	private List<String> scienceDomain;
 	private String hasQualityAnnotation;
 	private List<AvailableFormat> availableFormats;
 	private List<AvailableContactPoints> availableContactPoints;
-	
+
 	// WEBSERVICE
-	
+
 	private String serviceName;
 	private String serviceDescription;
 	private DataServiceProvider serviceProvider;
@@ -55,20 +53,44 @@ public class Distribution implements Serializable {
 	private String endpoint;
 
 	private List<ServiceParameter> serviceParameters;
-	
-	public Distribution() {}
-	
+
+	public Distribution() {
+	}
+
 	public Distribution(String errorMessage) {
 		this.errorMessage = errorMessage;
 	}
 
-	public Distribution(String productid, String distributionid, String operationid, String href, String id, String uid,
-						String type, String title, String description, String license, String downloadURL, List<String> keywords,
-						List<DataServiceProvider> dataProvider, String frequencyUpdate, List<String> internalID, List<String> DOI, SpatialInfo spatial,
-						TemporalCoverage temporalCoverage, List<AvailableFormat> availableFormats, String serviceName,
-						String serviceDescription, DataServiceProvider serviceProvider, SpatialInfo serviceSpatial,
-						TemporalCoverage serviceTemporalCoverage, String serviceEndpoint, String serviceDocumentation,
-						String endpoint, List<ServiceParameter> serviceParameters) {
+	public Distribution(
+			String productid,
+			String distributionid,
+			String operationid,
+			String href,
+			String id,
+			String uid,
+			String metaid,
+			String type,
+			String title,
+			String description,
+			String license,
+			String downloadURL,
+			List<String> keywords,
+			List<DataServiceProvider> dataProvider,
+			String frequencyUpdate,
+			List<String> internalID,
+			List<String> DOI,
+			SpatialInfo spatial,
+			TemporalCoverage temporalCoverage,
+			List<AvailableFormat> availableFormats,
+			String serviceName,
+			String serviceDescription,
+			DataServiceProvider serviceProvider,
+			SpatialInfo serviceSpatial,
+			TemporalCoverage serviceTemporalCoverage,
+			String serviceEndpoint,
+			String serviceDocumentation,
+			String endpoint,
+			List<ServiceParameter> serviceParameters) {
 		super();
 		this.productid = productid;
 		this.distributionid = distributionid;
@@ -76,6 +98,7 @@ public class Distribution implements Serializable {
 		this.href = href;
 		this.id = id;
 		this.uid = uid;
+		this.metaid = metaid;
 		this.type = type;
 		this.title = title;
 		this.description = description;
@@ -99,8 +122,6 @@ public class Distribution implements Serializable {
 		this.endpoint = endpoint;
 		this.serviceParameters = serviceParameters;
 	}
-
-
 
 	public String getErrorMessage() {
 		return errorMessage;
@@ -149,13 +170,21 @@ public class Distribution implements Serializable {
 	public void setId(String id) {
 		this.id = id;
 	}
-	
+
 	public String getUid() {
 		return uid;
 	}
 
 	public void setUid(String uid) {
 		this.uid = uid;
+	}
+
+	public String getMetaid() {
+		return this.metaid;
+	}
+
+	public void setMetaid(String metaid) {
+		this.metaid = metaid;
 	}
 
 	public String getType() {
@@ -199,7 +228,8 @@ public class Distribution implements Serializable {
 	}
 
 	public List<String> getKeywords() {
-		if(keywords==null) keywords = new ArrayList<String>();
+		if (keywords == null)
+			keywords = new ArrayList<String>();
 		return keywords;
 	}
 
@@ -208,7 +238,8 @@ public class Distribution implements Serializable {
 	}
 
 	public List<DataServiceProvider> getDataProvider() {
-		if(dataProvider==null) dataProvider = new ArrayList<DataServiceProvider>();
+		if (dataProvider == null)
+			dataProvider = new ArrayList<DataServiceProvider>();
 		return dataProvider;
 	}
 
@@ -225,7 +256,8 @@ public class Distribution implements Serializable {
 	}
 
 	public List<String> getInternalID() {
-		if(internalID==null) internalID = new ArrayList<String>();
+		if (internalID == null)
+			internalID = new ArrayList<String>();
 		return internalID;
 	}
 
@@ -234,7 +266,8 @@ public class Distribution implements Serializable {
 	}
 
 	public List<String> getDOI() {
-		if(DOI==null) DOI = new ArrayList<String>();
+		if (DOI == null)
+			DOI = new ArrayList<String>();
 		return DOI;
 	}
 
@@ -243,7 +276,8 @@ public class Distribution implements Serializable {
 	}
 
 	public SpatialInfo getSpatial() {
-		if(spatial ==  null) spatial = new SpatialInfo();
+		if (spatial == null)
+			spatial = new SpatialInfo();
 		return spatial;
 	}
 
@@ -252,7 +286,8 @@ public class Distribution implements Serializable {
 	}
 
 	public TemporalCoverage getTemporalCoverage() {
-		if(temporalCoverage ==  null) temporalCoverage = new TemporalCoverage();
+		if (temporalCoverage == null)
+			temporalCoverage = new TemporalCoverage();
 		return temporalCoverage;
 	}
 
@@ -261,7 +296,8 @@ public class Distribution implements Serializable {
 	}
 
 	public List<AvailableFormat> getAvailableFormats() {
-		if(availableFormats==null) availableFormats = new ArrayList<AvailableFormat>();
+		if (availableFormats == null)
+			availableFormats = new ArrayList<AvailableFormat>();
 		return availableFormats;
 	}
 
@@ -270,7 +306,8 @@ public class Distribution implements Serializable {
 	}
 
 	public List<AvailableContactPoints> getAvailableContactPoints() {
-		if(availableContactPoints==null) availableContactPoints = new ArrayList<AvailableContactPoints>();
+		if (availableContactPoints == null)
+			availableContactPoints = new ArrayList<AvailableContactPoints>();
 		return availableContactPoints;
 	}
 
@@ -303,7 +340,8 @@ public class Distribution implements Serializable {
 	}
 
 	public SpatialInfo getServiceSpatial() {
-		if(serviceSpatial ==  null) serviceSpatial = new SpatialInfo();
+		if (serviceSpatial == null)
+			serviceSpatial = new SpatialInfo();
 		return serviceSpatial;
 	}
 
@@ -312,7 +350,8 @@ public class Distribution implements Serializable {
 	}
 
 	public TemporalCoverage getServiceTemporalCoverage() {
-		if(temporalCoverage ==  null) serviceTemporalCoverage = new TemporalCoverage();
+		if (temporalCoverage == null)
+			serviceTemporalCoverage = new TemporalCoverage();
 		return serviceTemporalCoverage;
 	}
 
@@ -337,7 +376,8 @@ public class Distribution implements Serializable {
 	}
 
 	public List<ServiceParameter> getParameters() {
-		if(serviceParameters==null) serviceParameters = new ArrayList<ServiceParameter>();
+		if (serviceParameters == null)
+			serviceParameters = new ArrayList<ServiceParameter>();
 		return serviceParameters;
 	}
 
@@ -360,7 +400,7 @@ public class Distribution implements Serializable {
 	public void setHref(String href) {
 		this.href = href;
 	}
-	
+
 	public String getHrefExtended() {
 		return hrefExtended;
 	}
@@ -370,7 +410,8 @@ public class Distribution implements Serializable {
 	}
 
 	public List<String> getScienceDomain() {
-		if(scienceDomain==null) scienceDomain = new ArrayList<String>();
+		if (scienceDomain == null)
+			scienceDomain = new ArrayList<String>();
 		return scienceDomain;
 	}
 
@@ -379,14 +420,14 @@ public class Distribution implements Serializable {
 	}
 
 	public List<String> getServiceType() {
-		if(serviceType==null) serviceType = new ArrayList<String>();
+		if (serviceType == null)
+			serviceType = new ArrayList<String>();
 		return serviceType;
 	}
 
 	public void setServiceType(List<String> serviceType) {
 		this.serviceType = serviceType;
 	}
-
 
 	public String getHasQualityAnnotation() {
 		return hasQualityAnnotation;
@@ -580,7 +621,4 @@ public class Distribution implements Serializable {
 				+ ", serviceType=" + serviceType + ", endpoint=" + endpoint + ", serviceParameters=" + serviceParameters
 				+ "]";
 	}
-	
-	
-
 }

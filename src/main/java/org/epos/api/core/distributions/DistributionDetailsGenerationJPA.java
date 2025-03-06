@@ -89,6 +89,7 @@ public class DistributionDetailsGenerationJPA {
 
 		distribution.setId(distributionSelected.getInstanceId());
 		distribution.setUid(distributionSelected.getUid());
+		distribution.setMetaid(distributionSelected.getMetaId());
 
 		if (distributionSelected.getDownloadURL() != null) {
 			distribution.setDownloadURL(
@@ -311,6 +312,7 @@ public class DistributionDetailsGenerationJPA {
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getInstanceId(),
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getInstanceId()+"?extended=true")
 				.uid(distribution.getUid())
+				.metaid(distribution.getMetaid())
 				.title(distribution.getTitle()!=null?String.join(";",distribution.getTitle()):null)
 				.description(distribution.getDescription()!=null? String.join(";",distribution.getDescription()):null)
 				.availableFormats(AvailableFormatsGeneration.generate(distributionSelected))
