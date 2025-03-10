@@ -122,32 +122,47 @@ public class DistributionFilterSearch {
 				Set<String> uidSet = new HashSet<>();
 				//iterate over every dataproduct
 				for (DataProduct ds : datasetList) {
+
 					//if the uid belong to an already selected dataproduct just skip the iteration
 					if(uidSet.contains(ds.getMetaId())) continue;
+
 					//iterate over every distribution related to the dataproduct taken into account
 					for (LinkedEntity distribution : ds.getDistribution()) {
 						Optional<Distribution> distribution1 = DatabaseConnections.getInstance().getDistributionList().stream().filter(obj -> obj.getInstanceId().equals(distribution.getInstanceId())).findFirst();
-						if(distribution1.isPresent()){
-							for (LinkedEntity accessService : distribution1.get().getAccessService()) {
-								Optional<WebService> ws = DatabaseConnections.getInstance().getWebServiceList().stream().filter(obj -> obj.getInstanceId().equals(accessService.getInstanceId())).findFirst();
-								if(ws.isPresent()){
-									for (LinkedEntity wsSpatialLe : ws.get().getSpatialExtent()) {
-										Optional<Location> wsSpatial = DatabaseConnections.getInstance().getLocationList().stream().filter(obj -> obj.getInstanceId().equals(wsSpatialLe.getInstanceId())).findFirst();
-										if(wsSpatial.isPresent()){
-											try {
-												//parse the spatial of the webservice
-												Geometry dsGeometry = reader.read(wsSpatial.get().getLocation());
-												//if the dataproduct hasn't been selected yet and the spatial of the webservice
-												//intersect with the bbox, the dataproduct is selected.
-												if (!uidSet.contains(ds.getMetaId()) && inputGeometry.intersects(dsGeometry)) {
-													tempDatasetList.add(ds);
-													uidSet.add(ds.getMetaId());
-												}
-											} catch (ParseException e) {
-												LOGGER.error("Error occurs during BBOX dataproduct parsing", e);
-											}
-										}
+
+						// if no distribution was found, skip it
+						if (!distribution1.isPresent())
+							continue;
+						// if the distribution does not have an accessService, skip it
+						if (distribution1.get().getAccessService() == null)
+							continue;
+
+						for (LinkedEntity accessService : distribution1.get().getAccessService()) {
+							Optional<WebService> ws = DatabaseConnections.getInstance().getWebServiceList().stream().filter(obj -> obj.getInstanceId().equals(accessService.getInstanceId())).findFirst();
+
+							// if this distribution does not have a spatial extent, don't add it
+							if (!ws.isPresent() || ws.get().getSpatialExtent() == null)
+								continue;
+
+							for (LinkedEntity wsSpatialLe : ws.get().getSpatialExtent()) {
+								Optional<Location> wsSpatial = DatabaseConnections.getInstance().getLocationList().stream().filter(obj -> obj.getInstanceId().equals(wsSpatialLe.getInstanceId())).findFirst();
+
+								// if not present, skip it
+								if (!wsSpatial.isPresent())
+									continue;
+
+								try {
+									// parse the spatial of the webservice
+									Geometry dsGeometry = reader.read(wsSpatial.get().getLocation());
+									// if the dataproduct hasn't been selected yet and the spatial of the webservice
+									// intersect with the bbox, the dataproduct is selected.
+									if (!uidSet.contains(ds.getMetaId()) && inputGeometry.intersects(dsGeometry)) {
+										tempDatasetList.add(ds);
+										uidSet.add(ds.getMetaId());
 									}
+								} catch (ParseException e) {
+									LOGGER.error("Error occurs during BBOX dataproduct parsing", e);
+									continue;
 								}
 							}
 						}
