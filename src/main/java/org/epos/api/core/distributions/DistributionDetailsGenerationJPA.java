@@ -262,7 +262,7 @@ public class DistributionDetailsGenerationJPA {
 
 		// CONTACT POINTS
 
-		if(ws!=null && !ws.getContactPoint().isEmpty()) {
+		if (ws != null && ws.getContactPoint() != null && !ws.getContactPoint().isEmpty()) {
 			distribution.getAvailableContactPoints()
 			.add(new AvailableContactPointsBuilder()
 					.href(EnvironmentVariables.API_HOST + EMAIL_SENDER + ws.getInstanceId()+"&contactType="+ProviderType.SERVICEPROVIDERS)
@@ -270,14 +270,14 @@ public class DistributionDetailsGenerationJPA {
 		}
 
 
-		if(!dp.getContactPoint().isEmpty()) {
+		if (dp.getContactPoint() != null && !dp.getContactPoint().isEmpty()) {
 			distribution.getAvailableContactPoints()
 			.add(new AvailableContactPointsBuilder()
 					.href(EnvironmentVariables.API_HOST + EMAIL_SENDER + dp.getInstanceId()+"&contactType="+ProviderType.DATAPROVIDERS)
 					.type(ProviderType.DATAPROVIDERS).build());
 		}
 
-		if((ws!=null && !ws.getContactPoint().isEmpty() && !dp.getContactPoint().isEmpty())){
+		if ((ws != null && ws.getContactPoint() != null && !ws.getContactPoint().isEmpty() && dp.getContactPoint() != null && !dp.getContactPoint().isEmpty())) {
 			distribution.getAvailableContactPoints()
 			.add(new AvailableContactPointsBuilder()
 					.href(EnvironmentVariables.API_HOST + EMAIL_SENDER + distribution.getId()+"&contactType="+ProviderType.ALL)
