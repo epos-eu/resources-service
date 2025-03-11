@@ -110,7 +110,7 @@ public class AvailableFormatsGeneration {
 									isOgcFormat = true;
 								}
 							} else if (pv.equals("json")
-									&& (operation.getTemplate().toLowerCase().contains("service=wfs")
+									&& operation.getTemplate()!=null && (operation.getTemplate().toLowerCase().contains("service=wfs")
 											|| containsServiceInMappings(mappings, "WFS", map))) {
 								formats.add(buildAvailableFormat(
 										pv,
