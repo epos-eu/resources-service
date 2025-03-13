@@ -1,24 +1,48 @@
 package org.epos.api.routines;
 
-import metadataapis.*;
+import static abstractapis.AbstractAPI.retrieveAPI;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
+
 import org.epos.api.beans.Plugin;
 import org.epos.api.utility.Utils;
-import org.epos.eposdatamodel.*;
+import org.epos.eposdatamodel.Address;
+import org.epos.eposdatamodel.Category;
+import org.epos.eposdatamodel.CategoryScheme;
+import org.epos.eposdatamodel.DataProduct;
+import org.epos.eposdatamodel.Distribution;
+import org.epos.eposdatamodel.Equipment;
+import org.epos.eposdatamodel.Facility;
+import org.epos.eposdatamodel.Identifier;
+import org.epos.eposdatamodel.Location;
+import org.epos.eposdatamodel.Mapping;
+import org.epos.eposdatamodel.Operation;
+import org.epos.eposdatamodel.Organization;
+import org.epos.eposdatamodel.PeriodOfTime;
+import org.epos.eposdatamodel.SoftwareApplication;
+import org.epos.eposdatamodel.WebService;
 import org.epos.handler.dbapi.service.EntityManagerService;
 import org.epos.router_framework.RpcRouter;
 import org.epos.router_framework.RpcRouterBuilder;
-import org.epos.router_framework.domain.*;
+import org.epos.router_framework.domain.Actor;
+import org.epos.router_framework.domain.BuiltInActorType;
+import org.epos.router_framework.domain.Request;
+import org.epos.router_framework.domain.RequestBuilder;
+import org.epos.router_framework.domain.Response;
 import org.epos.router_framework.types.ServiceType;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static abstractapis.AbstractAPI.*;
+import metadataapis.EntityNames;
 
 public class DatabaseConnections {
-
-	private RpcRouter router;
-
 	private List<DataProduct> dataproducts;
 	private List<SoftwareApplication> softwareApplications;
 	private List<Organization> organizationList;
@@ -36,6 +60,11 @@ public class DatabaseConnections {
 	private List<Facility> facilityList;
 
 	private List<Plugin> plugins;
+	private RpcRouter router;
+
+	private int maxDbConnections = 15;
+	private static DatabaseConnections connections;
+	private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
 	private DatabaseConnections() {
 		try {
@@ -45,138 +74,309 @@ public class DatabaseConnections {
 					.setNumberOfConsumers(1)
 					.setRoutingKeyPrefix("resources")
 					.build().get();
-			router.init(System.getenv("BROKER_HOST"), System.getenv("BROKER_VHOST"), System.getenv("BROKER_USERNAME"),
+			router.init(
+					System.getenv("BROKER_HOST"),
+					System.getenv("BROKER_VHOST"),
+					System.getenv("BROKER_USERNAME"),
 					System.getenv("BROKER_PASSWORD"));
 			System.out.println("[CONNECTION] Router initialized");
 		} catch (Exception e) {
-			System.err.println(
-					"[CONNECTION ERROR] Error while initializing router. Stack:\n" + e.getMessage());
+			System.err.println("[CONNECTION ERROR] Error while initializing router. Stack:\n" + e.toString());
+		}
+
+		try {
+			int connPoolMaxSize = Integer.parseInt(System.getenv("CONNECTION_POOL_MAX_SIZE"));
+			this.maxDbConnections = Math.min(connPoolMaxSize, this.maxDbConnections);
+		} catch (NumberFormatException e) {
+			System.err.println("Error while parsing env variable CONNECTION_POOL_MAX_SIZE: " + e.toString());
 		}
 	}
 
 	public void syncDatabaseConnections() {
-		if(EntityManagerService.getInstance()!=null) EntityManagerService.getInstance().getCache().evictAll();
+		if (EntityManagerService.getInstance() != null)
+			EntityManagerService.getInstance().getCache().evictAll();
 
-		List<DataProduct> tempDataproducts  = retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll();
-		List<SoftwareApplication> tempSoftwareApplications = retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll();
-		List<Organization> tempOrganizationList = retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll();
-		List<Category> tempCategoryList = retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll();
-		List<CategoryScheme> tempCategorySchemeList = retrieveAPI(EntityNames.CATEGORYSCHEME.name()).retrieveAll();
-		List<Distribution> tempDistributionList = retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll();
-		List<Operation> tempOperationList = retrieveAPI(EntityNames.OPERATION.name()).retrieveAll();
-		List<WebService> tempWebServiceList = retrieveAPI(EntityNames.WEBSERVICE.name()).retrieveAll();
-		List<Address> tempAddressList = retrieveAPI(EntityNames.ADDRESS.name()).retrieveAll();
-		List<Location> tempLocationList = retrieveAPI(EntityNames.LOCATION.name()).retrieveAll();
-		List<PeriodOfTime> tempPeriodOfTimeList = retrieveAPI(EntityNames.PERIODOFTIME.name()).retrieveAll();
-		List<Identifier> tempIdentifierList = retrieveAPI(EntityNames.IDENTIFIER.name()).retrieveAll();
-		List<Mapping> tempMappingList = retrieveAPI(EntityNames.MAPPING.name()).retrieveAll();
-		List<Facility> tempFacilityList = retrieveAPI(EntityNames.FACILITY.name()).retrieveAll();
-		List<Equipment> tempEquipmentList = retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll();
-		List<Plugin> tempPlugins = new ArrayList<>();
+		// one thread for each query
+		ExecutorService executor = Executors.newFixedThreadPool(maxDbConnections);
 
+		// wrap each query in a future
+		CompletableFuture<List<DataProduct>> tempDataproductsFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<SoftwareApplication>> tempSoftwareApplicationsFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<Organization>> tempOrganizationListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<Category>> tempCategoryListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<CategoryScheme>> tempCategorySchemeListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.CATEGORYSCHEME.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<Distribution>> tempDistributionListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<Operation>> tempOperationListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.OPERATION.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<WebService>> tempWebServiceListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.WEBSERVICE.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<Address>> tempAddressListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.ADDRESS.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<Location>> tempLocationListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.LOCATION.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<PeriodOfTime>> tempPeriodOfTimeListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.PERIODOFTIME.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<Identifier>> tempIdentifierListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.IDENTIFIER.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<Mapping>> tempMappingListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.MAPPING.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<Facility>> tempFacilityListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.FACILITY.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<Equipment>> tempEquipmentListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<Plugin>> tempPluginsFuture = CompletableFuture.supplyAsync(() -> retreivePlugins(),
+				executor);
+
+		// join the futures together
+		CompletableFuture<Void> allFutures = CompletableFuture.allOf(
+				tempDataproductsFuture,
+				tempSoftwareApplicationsFuture,
+				tempOrganizationListFuture,
+				tempCategoryListFuture,
+				tempCategorySchemeListFuture,
+				tempDistributionListFuture,
+				tempOperationListFuture,
+				tempWebServiceListFuture,
+				tempAddressListFuture,
+				tempLocationListFuture,
+				tempPeriodOfTimeListFuture,
+				tempIdentifierListFuture,
+				tempMappingListFuture,
+				tempFacilityListFuture,
+				tempEquipmentListFuture,
+				tempPluginsFuture);
+
+		// block until all done
+		allFutures.join();
+
+		// retreive the results of the queries
+		List<DataProduct> tempDataproducts = tempDataproductsFuture.join();
+		List<SoftwareApplication> tempSoftwareApplications = tempSoftwareApplicationsFuture.join();
+		List<Organization> tempOrganizationList = tempOrganizationListFuture.join();
+		List<Category> tempCategoryList = tempCategoryListFuture.join();
+		List<CategoryScheme> tempCategorySchemeList = tempCategorySchemeListFuture.join();
+		List<Distribution> tempDistributionList = tempDistributionListFuture.join();
+		List<Operation> tempOperationList = tempOperationListFuture.join();
+		List<WebService> tempWebServiceList = tempWebServiceListFuture.join();
+		List<Address> tempAddressList = tempAddressListFuture.join();
+		List<Location> tempLocationList = tempLocationListFuture.join();
+		List<PeriodOfTime> tempPeriodOfTimeList = tempPeriodOfTimeListFuture.join();
+		List<Identifier> tempIdentifierList = tempIdentifierListFuture.join();
+		List<Mapping> tempMappingList = tempMappingListFuture.join();
+		List<Facility> tempFacilityList = tempFacilityListFuture.join();
+		List<Equipment> tempEquipmentList = tempEquipmentListFuture.join();
+		List<Plugin> tempPlugins = tempPluginsFuture.join();
+
+		lock.writeLock().lock();
+
+		// hot-swap the temp variables
 		try {
-			Map<String, Object> params = new HashMap<>();
-			params.put("plugins", "all");
-			Response conversionResponse = doRequest(
-				ServiceType.METADATA,
-				Actor.getInstance(BuiltInActorType.CONVERTER),
-				params
-			);
-			if (conversionResponse != null && conversionResponse.getPayloadAsPlainText().isPresent()) {
-				tempPlugins = Arrays.stream(Utils.gson.fromJson(conversionResponse.getPayloadAsPlainText().get(), Plugin[].class)).collect(Collectors.toList());
-			}
-		} catch (Exception e) {
-			System.err.println("[CONNECTION ERROR] Error getting respoonse from router: " + e.getMessage());
+			dataproducts = tempDataproducts;
+			softwareApplications = tempSoftwareApplications;
+			organizationList = tempOrganizationList;
+			categoryList = tempCategoryList;
+			categorySchemesList = tempCategorySchemeList;
+			distributionList = tempDistributionList;
+			operationList = tempOperationList;
+			webServiceList = tempWebServiceList;
+			addressList = tempAddressList;
+			locationList = tempLocationList;
+			periodOfTimeList = tempPeriodOfTimeList;
+			identifierList = tempIdentifierList;
+			mappingList = tempMappingList;
+			facilityList = tempFacilityList;
+			equipmentList = tempEquipmentList;
+			plugins = tempPlugins;
+
+			// free the executor's resources
+			executor.shutdown();
+		} finally {
+			lock.writeLock().unlock();
 		}
-
-		dataproducts = tempDataproducts;
-		softwareApplications = tempSoftwareApplications;
-		organizationList = tempOrganizationList;
-		categoryList = tempCategoryList;
-		categorySchemesList = tempCategorySchemeList;
-		distributionList = tempDistributionList;
-		operationList = tempOperationList;
-		webServiceList = tempWebServiceList;
-		addressList = tempAddressList;
-		locationList = tempLocationList;
-		periodOfTimeList = tempPeriodOfTimeList;
-		identifierList = tempIdentifierList;
-		mappingList = tempMappingList;
-		facilityList = tempFacilityList;
-		equipmentList = tempEquipmentList;
-		plugins = tempPlugins;
-
 	}
 
-	private static DatabaseConnections connections;
-
 	public static DatabaseConnections getInstance() {
-		if (connections == null) {
-			connections = new DatabaseConnections();
+		lock.readLock().lock();
+		try {
+			if (connections == null) {
+				connections = new DatabaseConnections();
+			}
+			return connections;
+		} finally {
+			lock.readLock().unlock();
 		}
-		return connections;
 	}
 
 	public List<DataProduct> getDataproducts() {
-		return dataproducts;
+		lock.readLock().lock();
+		try {
+			return dataproducts;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public List<SoftwareApplication> getSoftwareApplications() {
-		return softwareApplications;
+		lock.readLock().lock();
+		try {
+			return softwareApplications;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public List<Organization> getOrganizationList() {
-		return organizationList;
+		lock.readLock().lock();
+		try {
+			return organizationList;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public List<Category> getCategoryList() {
-		return categoryList;
+		lock.readLock().lock();
+		try {
+			return categoryList;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
-	public List<CategoryScheme> getCategorySchemesList() {return categorySchemesList;}
+	public List<CategoryScheme> getCategorySchemesList() {
+		lock.readLock().lock();
+		try {
+			return categorySchemesList;
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
 
 	public List<Distribution> getDistributionList() {
-		return distributionList;
+		lock.readLock().lock();
+		try {
+			return distributionList;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public List<Operation> getOperationList() {
-		return operationList;
+		lock.readLock().lock();
+		try {
+			return operationList;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public List<WebService> getWebServiceList() {
-		return webServiceList;
+		lock.readLock().lock();
+		try {
+			return webServiceList;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public List<Address> getAddressList() {
-		return addressList;
+		lock.readLock().lock();
+		try {
+			return addressList;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public List<Location> getLocationList() {
-		return locationList;
+		lock.readLock().lock();
+		try {
+			return locationList;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public List<PeriodOfTime> getPeriodOfTimeList() {
-		return periodOfTimeList;
+		lock.readLock().lock();
+		try {
+			return periodOfTimeList;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public List<Identifier> getIdentifierList() {
-		return identifierList;
+		lock.readLock().lock();
+		try {
+			return identifierList;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
-	public List<Mapping> getMappingList() { return mappingList;}
+	public List<Mapping> getMappingList() {
+		lock.readLock().lock();
+		try {
+			return mappingList;
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
 
-	public List<Facility> getFacilityList() { return facilityList;}
+	public List<Facility> getFacilityList() {
+		lock.readLock().lock();
+		try {
+			return facilityList;
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
 
-	public List<Equipment> getEquipmentList() { return equipmentList;}
+	public List<Equipment> getEquipmentList() {
+		lock.readLock().lock();
+		try {
+			return equipmentList;
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
 
-	public List<Plugin> getPlugins() { return plugins;}
+	public List<Plugin> getPlugins() {
+		lock.readLock().lock();
+		try {
+			return plugins;
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
 
 	protected Response doRequest(ServiceType service, Map<String, Object> requestParams) {
 		return this.doRequest(service, null, requestParams);
 	}
 
 	protected Response doRequest(ServiceType service, Actor nextComponentOverride, Map<String, Object> requestParams) {
-
 		Request localRequest = RequestBuilder.instance(service, "get", "plugininfo")
 				.addPayloadPlainText(Utils.gson.toJson(requestParams))
 				.addHeaders(new HashMap<>())
@@ -192,4 +392,22 @@ public class DatabaseConnections {
 		return response;
 	}
 
+	private List<Plugin> retreivePlugins() {
+		try {
+			Map<String, Object> params = new HashMap<>();
+			params.put("plugins", "all");
+			Response conversionResponse = doRequest(
+					ServiceType.METADATA,
+					Actor.getInstance(BuiltInActorType.CONVERTER),
+					params);
+			if (conversionResponse != null && conversionResponse.getPayloadAsPlainText().isPresent()) {
+				return Arrays
+						.stream(Utils.gson.fromJson(conversionResponse.getPayloadAsPlainText().get(), Plugin[].class))
+						.collect(Collectors.toList());
+			}
+		} catch (Exception e) {
+			System.err.println("[CONNECTION ERROR] Error getting respoonse from router: " + e.toString());
+		}
+		return new ArrayList<Plugin>();
+	}
 }
