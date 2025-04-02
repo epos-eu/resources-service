@@ -2,7 +2,6 @@ package org.epos.api.routines;
 
 import static abstractapis.AbstractAPI.retrieveAPI;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +58,7 @@ public class DatabaseConnections {
 	private List<Equipment> equipmentList;
 	private List<Facility> facilityList;
 
-	private List<Plugin> plugins;
+	private Map<String, List<Plugin.Relations>> plugins;
 	private RpcRouter router;
 
 	private int maxDbConnections = 15;
@@ -70,7 +69,7 @@ public class DatabaseConnections {
 		try {
 			router = RpcRouterBuilder.instance(Actor.getInstance(BuiltInActorType.CONVERTER))
 					.addServiceSupport(ServiceType.METADATA, Actor.getInstance(BuiltInActorType.CONVERTER))
-					.setNumberOfPublishers(1)
+					.setNumberOfPublishers(2)
 					.setNumberOfConsumers(1)
 					.setRoutingKeyPrefix("resources")
 					.build().get();
@@ -145,7 +144,8 @@ public class DatabaseConnections {
 		CompletableFuture<List<Equipment>> tempEquipmentListFuture = CompletableFuture
 				.supplyAsync(() -> retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll(), executor);
 
-		CompletableFuture<List<Plugin>> tempPluginsFuture = CompletableFuture.supplyAsync(() -> retreivePlugins(),
+		CompletableFuture<Map<String, List<Plugin.Relations>>> tempPluginsFuture = CompletableFuture.supplyAsync(
+				() -> retreivePlugins(),
 				executor);
 
 		// join the futures together
@@ -186,7 +186,7 @@ public class DatabaseConnections {
 		List<Mapping> tempMappingList = tempMappingListFuture.join();
 		List<Facility> tempFacilityList = tempFacilityListFuture.join();
 		List<Equipment> tempEquipmentList = tempEquipmentListFuture.join();
-		List<Plugin> tempPlugins = tempPluginsFuture.join();
+		Map<String, List<Plugin.Relations>> tempPlugins = tempPluginsFuture.join();
 
 		lock.writeLock().lock();
 
@@ -363,7 +363,7 @@ public class DatabaseConnections {
 		}
 	}
 
-	public List<Plugin> getPlugins() {
+	public Map<String, List<Plugin.Relations>> getPlugins() {
 		lock.readLock().lock();
 		try {
 			return plugins;
@@ -392,7 +392,8 @@ public class DatabaseConnections {
 		return response;
 	}
 
-	private List<Plugin> retreivePlugins() {
+	private Map<String, List<Plugin.Relations>> retreivePlugins() {
+		var result = new HashMap<String, List<Plugin.Relations>>();
 		try {
 			Map<String, Object> params = new HashMap<>();
 			params.put("plugins", "all");
@@ -401,13 +402,16 @@ public class DatabaseConnections {
 					Actor.getInstance(BuiltInActorType.CONVERTER),
 					params);
 			if (conversionResponse != null && conversionResponse.getPayloadAsPlainText().isPresent()) {
-				return Arrays
+				var plugins = Arrays
 						.stream(Utils.gson.fromJson(conversionResponse.getPayloadAsPlainText().get(), Plugin[].class))
 						.collect(Collectors.toList());
+				for (Plugin plugin : plugins) {
+					result.putIfAbsent(plugin.getDistributionId(), plugin.getRelations());
+				}
 			}
 		} catch (Exception e) {
 			System.err.println("[CONNECTION ERROR] Error getting respoonse from router: " + e.toString());
 		}
-		return new ArrayList<Plugin>();
+		return result;
 	}
 }

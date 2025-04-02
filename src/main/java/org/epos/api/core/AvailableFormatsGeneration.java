@@ -19,6 +19,8 @@ public class AvailableFormatsGeneration {
 	private static final String API_PATH_EXECUTE = EnvironmentVariables.API_CONTEXT + "/execute/";
 	private static final String API_PATH_EXECUTE_OGC = EnvironmentVariables.API_CONTEXT + "/ogcexecute/";
 	private static final String API_FORMAT = "?format=";
+	private static final String API_INPUT_FORMAT = "inputFormat=";
+	private static final String API_PLUGIN_ID = "pluginId=";
 
 	// Helper method to avoid repetitive creation of AvailableFormat objects
 	private static AvailableFormat buildAvailableFormat(String originalFormat, String format, String href, String label,
@@ -160,33 +162,32 @@ public class AvailableFormatsGeneration {
 			}
 
 			if (!isOgcFormat) {
-				for (Plugin plugin : DatabaseConnections.getInstance().getPlugins()) {
-					if (plugin.getOperationId().equals(operation.getInstanceId())) {
-						for (Plugin.Relations relation : plugin.getRelations()) {
-							if (relation.getOutputFormat().equals("application/epos.geo+json")
-									|| relation.getOutputFormat().equals("application/epos.table.geo+json")
-									|| relation.getOutputFormat().equals("application/epos.map.geo+json")) {
-								formats.add(buildAvailableFormatConverted(
-										relation.getInputFormat(),
-										relation.getPluginId(),
-										relation.getInputFormat(),
-										relation.getOutputFormat(),
-										buildHref(distribution, relation.getOutputFormat()),
-										"GEOJSON",
-										AvailableFormatType.CONVERTED));
-							} else if (relation.getOutputFormat().equals("application/epos.graph.covjson")
-									|| relation.getOutputFormat().equals("application/epos.covjson")) {
-								formats.add(buildAvailableFormatConverted(
-										relation.getInputFormat(),
-										relation.getPluginId(),
-										relation.getInputFormat(),
-										relation.getOutputFormat(),
-										buildHref(distribution, relation.getOutputFormat()),
-										"COVJSON",
-										AvailableFormatType.CONVERTED));
-							} else {
-								System.out.println("Unknown format: " + relation.getOutputFormat());
-							}
+				if (DatabaseConnections.getInstance().getPlugins().containsKey(distribution.getInstanceId())) {
+					for (Plugin.Relations relation : DatabaseConnections.getInstance().getPlugins()
+							.get(distribution.getInstanceId())) {
+						if (relation.getOutputFormat().equals("application/epos.geo+json")
+								|| relation.getOutputFormat().equals("application/epos.table.geo+json")
+								|| relation.getOutputFormat().equals("application/epos.map.geo+json")) {
+							formats.add(buildAvailableFormatConverted(
+									relation.getInputFormat(),
+									relation.getPluginId(),
+									relation.getInputFormat(),
+									relation.getOutputFormat(),
+									buildHrefConverted(distribution, relation.getOutputFormat(), relation.getInputFormat(), relation.getPluginId()),
+									"GEOJSON",
+									AvailableFormatType.CONVERTED));
+						} else if (relation.getOutputFormat().equals("application/epos.graph.covjson")
+								|| relation.getOutputFormat().equals("application/epos.covjson")) {
+							formats.add(buildAvailableFormatConverted(
+									relation.getInputFormat(),
+									relation.getPluginId(),
+									relation.getInputFormat(),
+									relation.getOutputFormat(),
+									buildHrefConverted(distribution, relation.getOutputFormat(), relation.getInputFormat(), relation.getPluginId()),
+									"COVJSON",
+									AvailableFormatType.CONVERTED));
+						} else {
+							System.out.println("Unknown format: " + relation.getOutputFormat());
 						}
 					}
 				}
@@ -207,6 +208,10 @@ public class AvailableFormatsGeneration {
 	// Helper method to build the href for a given distribution and format
 	private static String buildHref(Distribution distribution, String format) {
 		return EnvironmentVariables.API_HOST + API_PATH_EXECUTE + distribution.getInstanceId() + API_FORMAT + format;
+	}
+
+	private static String buildHrefConverted(Distribution distribution, String outputFormat, String inputFormat, String pluginId) {
+		return buildHref(distribution, outputFormat) + "&" + API_INPUT_FORMAT + inputFormat + "&" + API_PLUGIN_ID + pluginId;
 	}
 
 	private static String buildHrefOgc(Distribution distribution) {
