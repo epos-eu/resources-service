@@ -27,6 +27,7 @@ import org.epos.eposdatamodel.Mapping;
 import org.epos.eposdatamodel.Operation;
 import org.epos.eposdatamodel.Organization;
 import org.epos.eposdatamodel.OutputMapping;
+import org.epos.eposdatamodel.Payload;
 import org.epos.eposdatamodel.PeriodOfTime;
 import org.epos.eposdatamodel.SoftwareApplication;
 import org.epos.eposdatamodel.WebService;
@@ -59,12 +60,13 @@ public class DatabaseConnections {
 	private List<Equipment> equipmentList;
 	private List<Facility> facilityList;
 	private List<OutputMapping> outputMappingsList;
+	private List<Payload> payloadsList;
 
 	// distributionId -> list of relations with plugins
 	private Map<String, List<Plugin.Relations>> plugins;
 	private RpcRouter router;
 
-	private int maxDbConnections = 16;
+	private int maxDbConnections = 17;
 	private static DatabaseConnections connections;
 	private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -72,7 +74,7 @@ public class DatabaseConnections {
 		try {
 			router = RpcRouterBuilder.instance(Actor.getInstance(BuiltInActorType.CONVERTER))
 					.addServiceSupport(ServiceType.METADATA, Actor.getInstance(BuiltInActorType.CONVERTER))
-					.setNumberOfPublishers(2)
+					.setNumberOfPublishers(1)
 					.setNumberOfConsumers(1)
 					.setRoutingKeyPrefix("resources")
 					.build().get();
@@ -150,6 +152,9 @@ public class DatabaseConnections {
 		CompletableFuture<List<OutputMapping>> tempOutputMappingListFuture = CompletableFuture
 				.supplyAsync(() -> retrieveAPI(EntityNames.OUTPUTMAPPING.name()).retrieveAll(), executor);
 
+		CompletableFuture<List<Payload>> tempPayloadListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.PAYLOAD.name()).retrieveAll(), executor);
+
 		CompletableFuture<Map<String, List<Plugin.Relations>>> tempPluginsFuture = CompletableFuture.supplyAsync(
 				() -> retreivePlugins(),
 				executor);
@@ -172,6 +177,7 @@ public class DatabaseConnections {
 				tempFacilityListFuture,
 				tempEquipmentListFuture,
 				tempOutputMappingListFuture,
+				tempPayloadListFuture,
 				tempPluginsFuture);
 
 		// block until all done
@@ -194,6 +200,7 @@ public class DatabaseConnections {
 		List<Facility> tempFacilityList = tempFacilityListFuture.join();
 		List<Equipment> tempEquipmentList = tempEquipmentListFuture.join();
 		List<OutputMapping> tempOutputMappingList = tempOutputMappingListFuture.join();
+		List<Payload> tempPayloadList = tempPayloadListFuture.join();
 		Map<String, List<Plugin.Relations>> tempPlugins = tempPluginsFuture.join();
 
 		lock.writeLock().lock();
@@ -216,6 +223,7 @@ public class DatabaseConnections {
 			facilityList = tempFacilityList;
 			equipmentList = tempEquipmentList;
 			outputMappingsList = tempOutputMappingList;
+			payloadsList = tempPayloadList;
 			plugins = tempPlugins;
 
 			// free the executor's resources
@@ -381,6 +389,14 @@ public class DatabaseConnections {
 		}
 	}
 
+	public List<Payload> getPayloads() {
+		lock.readLock().lock();
+		try {
+			return payloadsList;
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
 
 	public Map<String, List<Plugin.Relations>> getPlugins() {
 		lock.readLock().lock();

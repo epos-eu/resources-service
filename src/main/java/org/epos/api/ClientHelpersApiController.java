@@ -12,7 +12,9 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.epos.api.beans.Distribution;
 import org.epos.api.beans.LinkedResponse;
+import org.epos.api.beans.ParametersResponse;
 import org.epos.api.beans.SearchResponse;
+import org.epos.api.core.distributions.LinkedEntityParametersSearch;
 import org.epos.api.core.distributions.LinkedEntityWebserviceSearch;
 import org.epos.api.utility.Utils;
 import org.epos.eposdatamodel.User;
@@ -499,7 +501,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 	}
 
 	@Override
-	public ResponseEntity<LinkedResponse> searchLinkedUsingGet(String id, Set<String> params) {
+	public ResponseEntity<LinkedResponse> searchLinkedWebservices(String id, Set<String> params) {
 		// validate the parameters
 		if (params == null || params.isEmpty()) {
 			return ResponseEntity.badRequest().build();
@@ -517,6 +519,19 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			return ResponseEntity.noContent().build();
 		}
 
+		return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
+	}
+
+	@Override
+	public ResponseEntity<ParametersResponse> searchLinkedParameters(String id) {
+		// validate the parameters
+		if (id == null || id == "") {
+			return ResponseEntity.badRequest().build();
+		}
+		var response = LinkedEntityParametersSearch.generate(id);
+		if (response == null) {
+			return ResponseEntity.noContent().build();
+		}
 		return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
 	}
 }
