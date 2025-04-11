@@ -1,29 +1,38 @@
 package org.epos.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Schema;
-import org.apache.commons.lang3.StringUtils;
-import org.epos.api.beans.Distribution;
-import org.epos.api.beans.SearchResponse;
-import org.epos.api.utility.Utils;
-import org.epos.eposdatamodel.User;
-import org.epos.library.feature.FeaturesCollection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import javax.validation.Valid;
-import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
+import org.apache.commons.lang3.StringUtils;
+import org.epos.api.beans.Distribution;
+import org.epos.api.beans.LinkedResponse;
+import org.epos.api.beans.ParametersResponse;
+import org.epos.api.beans.SearchResponse;
+import org.epos.api.core.distributions.LinkedEntityParametersSearch;
+import org.epos.api.core.distributions.LinkedEntityWebserviceSearch;
+import org.epos.api.utility.Utils;
+import org.epos.eposdatamodel.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-10-11T14:51:06.469Z[GMT]")
@@ -491,4 +500,41 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		return standardRequest("EQUIPMENTDETAILS", requestParameters, null);
 	}
 
+	@Override
+	public ResponseEntity<LinkedResponse> searchLinkedWebservices(String id, String paramsString) {
+		// validate the parameters
+		if (paramsString == null || paramsString.isEmpty()) {
+			return ResponseEntity.badRequest().build();
+		}
+
+		// the paramString comes as a json so we have to convert it
+		Map<String, String> params = Utils.gson.fromJson(paramsString, Map.class);
+
+		LinkedResponse response = null;
+		if (id != null && id != "") {
+			response = LinkedEntityWebserviceSearch.generate(id, params);
+		} else {
+			response = LinkedEntityWebserviceSearch.generate(params);
+		}
+
+		// if got no results return no content
+		if (response.getItems().isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+
+		return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
+	}
+
+	@Override
+	public ResponseEntity<ParametersResponse> searchLinkedParameters(String id) {
+		// validate the parameters
+		if (id == null || id == "") {
+			return ResponseEntity.badRequest().build();
+		}
+		var response = LinkedEntityParametersSearch.generate(id);
+		if (response == null) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
+	}
 }

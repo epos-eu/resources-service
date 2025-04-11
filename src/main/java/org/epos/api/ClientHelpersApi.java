@@ -5,28 +5,30 @@
  */
 package org.epos.api;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
+import javax.validation.Valid;
 
 import org.epos.api.beans.Distribution;
 import org.epos.api.beans.Facility;
+import org.epos.api.beans.LinkedResponse;
+import org.epos.api.beans.ParametersResponse;
 import org.epos.api.beans.SearchResponse;
 import org.epos.eposdatamodel.Equipment;
 import org.epos.library.feature.FeaturesCollection;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-10-11T14:51:06.469Z[GMT]")
 @Validated
@@ -168,6 +170,32 @@ public interface ClientHelpersApi {
     		@Parameter(in = ParameterIn.QUERY, description = "format {json/plain, application/epos.geo+json}" ,schema=@Schema()) @Valid @RequestParam(value = "format", required = false) String format,
     		@Parameter(in = ParameterIn.QUERY, description = "params" ,schema=@Schema()) @Valid @RequestParam(value = "params", required = false) String params);
 
+	@Operation(summary = "linke entities", description = "returns distributions that permit all the parameters specified", tags = {
+			"Resources Service" })
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = LinkedResponse.class))),
+			@ApiResponse(responseCode = "204", description = "No content."),
+			@ApiResponse(responseCode = "301", description = "Moved Permanently."),
+			@ApiResponse(responseCode = "400", description = "Bad request."),
+			@ApiResponse(responseCode = "401", description = "Access token is missing or invalid"),
+			@ApiResponse(responseCode = "403", description = "Forbidden"),
+			@ApiResponse(responseCode = "404", description = "Not Found") })
+	@GetMapping(value = "/resources/linkedentities/webservices", produces = { "application/json" })
+	ResponseEntity<LinkedResponse> searchLinkedWebservices(
+			@Parameter(in = ParameterIn.QUERY, description = "The instance ID", schema = @Schema()) @RequestParam(value = "instance_id", required = false) String id,
+			@Parameter(in = ParameterIn.QUERY, description = "Parameter names", schema = @Schema()) @RequestParam(value = "params", required = true) String params);
 
+	@Operation(summary = "linked parameters", description = "returns all the output parameters available for a distribution that are linked to something", tags = {
+			"Resources Service" })
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ParametersResponse.class))),
+			@ApiResponse(responseCode = "204", description = "No content."),
+			@ApiResponse(responseCode = "301", description = "Moved Permanently."),
+			@ApiResponse(responseCode = "400", description = "Bad request."),
+			@ApiResponse(responseCode = "401", description = "Access token is missing or invalid"),
+			@ApiResponse(responseCode = "403", description = "Forbidden"),
+			@ApiResponse(responseCode = "404", description = "Not Found") })
+	@GetMapping(value = "/resources/linkedentities/parameters/{instance_id}", produces = { "application/json" })
+	ResponseEntity<ParametersResponse> searchLinkedParameters(
+			@Parameter(in = ParameterIn.PATH, description = "The instance ID", required = true, schema = @Schema()) @PathVariable("instance_id") String id);
 }
-
