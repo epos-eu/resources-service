@@ -28,21 +28,21 @@ public class LinkedEntityWebserviceSearch {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LinkedEntityWebserviceSearch.class);
 	private static final String API_PATH_DETAILS = EnvironmentVariables.API_CONTEXT + "/resources/details/";
 
-	public static LinkedResponse generate(String id, Set<String> params) {
+	public static LinkedResponse generate(String id, Map<String, String> params) {
 		LOGGER.info("Generating discovery items with exclusion id {} and params {}", id, params);
 		var results = generateDiscoveryItems(params);
 		results.removeIf(d -> d.getId().equals(id));
 		return new LinkedResponse(results);
 	}
 
-	public static LinkedResponse generate(Set<String> params) {
+	public static LinkedResponse generate(Map<String, String> params) {
 		LOGGER.info("Generating discovery items with params {}", params);
 		return new LinkedResponse(generateDiscoveryItems(params));
 	}
 
 	// filter all the distributions keeping only the ones that have all the mappings
 	// in the params
-	private static Set<DiscoveryItem> generateDiscoveryItems(Set<String> params) {
+	private static Set<DiscoveryItem> generateDiscoveryItems(Map<String, String> params) {
 		var db = DatabaseConnections.getInstance();
 		var distributions = db.getDistributionList();
 		LOGGER.debug("Retrieved {} distributions from the database.", distributions.size());
@@ -70,7 +70,7 @@ public class LinkedEntityWebserviceSearch {
 
 	// returns true if the distribution contains all the mappings in the params
 	private static boolean isDistributionValid(Distribution distribution, Map<String, Operation> operations,
-			Map<String, Mapping> mappings, Set<String> params) {
+			Map<String, Mapping> mappings, Map<String, String> params) {
 
 		var supportedOps = distribution.getSupportedOperation();
 		if (supportedOps == null || supportedOps.isEmpty()) {
@@ -92,10 +92,21 @@ public class LinkedEntityWebserviceSearch {
 		// compute mapping properties for the operation
 		Set<String> mappingProps = operation.getMapping().stream()
 				.map(linkedMapping -> mappings.get(linkedMapping.getInstanceId()))
-				.filter(mapping -> mapping != null)
+				.filter(mapping -> 
+			mapping != null && 
+			// readonly is true but the default value is the same used by the param 
+			(Boolean.parseBoolean(mapping.getReadOnlyValue()) && mapping.getDefaultValue() != null && mapping.getDefaultValue().equals(params.getOrDefault(mapping.getProperty(), ""))) ||
+			// or readonly is false and the value for this property is valid (part of the enum)
+			(!Boolean.parseBoolean(mapping.getReadOnlyValue()) && 
+				mapping.getParamValue() != null && 
+				mapping.getParamValue().isEmpty() && 
+				mapping.getParamValue().contains(params.getOrDefault(mapping.getProperty(), ""))) ||
+			// or readonly is false
+			!Boolean.parseBoolean(mapping.getReadOnlyValue())
+		)
 				.map(Mapping::getProperty)
 				.collect(Collectors.toSet());
-		boolean valid = mappingProps.containsAll(params);
+		boolean valid = mappingProps.containsAll(params.keySet());
 		if (!valid) {
 			LOGGER.debug("Distribution {} skipped: mapping properties {} do not contain all required params {}.",
 					distribution.getInstanceId(), mappingProps, params);

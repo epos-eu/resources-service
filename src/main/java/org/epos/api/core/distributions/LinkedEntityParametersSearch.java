@@ -6,8 +6,11 @@ import java.util.stream.Collectors;
 import org.epos.api.beans.Parameter;
 import org.epos.api.beans.ParametersResponse;
 import org.epos.api.routines.DatabaseConnections;
+import org.epos.eposdatamodel.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import commonapis.LinkedEntityAPI;
 
 public class LinkedEntityParametersSearch {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LinkedEntityParametersSearch.class);
@@ -30,24 +33,24 @@ public class LinkedEntityParametersSearch {
 		LOGGER.debug("Found distribution {} with supported operations.", id);
 
 		// assuming only one operation for a distribution
-		String operationId = distribution.getSupportedOperation().get(0).getInstanceId();
-		LOGGER.debug("Using operation id {} for distribution {}.", operationId, id);
-
-		// find the operation
-		var operation = db.getOperationList().stream()
-				.filter(op -> op.getInstanceId().equals(operationId))
-				.findFirst()
-				.orElse(null);
+		Operation operation = null;
+		try {
+			operation = (Operation) LinkedEntityAPI
+					.retrieveFromLinkedEntity(distribution.getSupportedOperation().get(0));
+		} catch (Exception e) {
+			LOGGER.error("Error while retreiving operation from linked entity");
+		}
+		LOGGER.debug("Using operation id {} for distribution {}.", operation.getInstanceId(), id);
 
 		if (operation == null || operation.getPayload() == null || operation.getPayload().isEmpty()) {
-			LOGGER.warn("Operation {} not found or has no payload for distribution {}.", operationId, id);
+			LOGGER.warn("Operation {} not found or has no payload for distribution {}.", operation.getInstanceId(), id);
 			return null;
 		}
-		LOGGER.debug("Operation {} found with payload.", operationId);
+		LOGGER.debug("Operation {} found with payload.", operation.getInstanceId());
 
 		// assuming only one payload for an operation
 		String payloadId = operation.getPayload().get(0).getInstanceId();
-		LOGGER.debug("Using payload id {} for operation {}.", payloadId, operationId);
+		LOGGER.debug("Using payload id {} for operation {}.", payloadId, operation.getInstanceId());
 
 		// find the payload
 		var payload = db.getPayloads().stream()
@@ -56,7 +59,8 @@ public class LinkedEntityParametersSearch {
 				.orElse(null);
 
 		if (payload == null || payload.getOutputMapping() == null) {
-			LOGGER.warn("Payload {} not found or has no output mapping for operation {}.", payloadId, operationId);
+			LOGGER.warn("Payload {} not found or has no output mapping for operation {}.", payloadId,
+					operation.getInstanceId());
 			return null;
 		}
 		LOGGER.debug("Payload {} found with output mappings.", payloadId);

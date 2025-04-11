@@ -322,11 +322,14 @@ public class DistributionDetailsGenerationJPA {
 			}
 		}
 
-		List<String> categoryList = dp.getCategory().parallelStream()
-				.map(linkedEntity -> (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
-				.map(Category::getUid)
-				.filter(uid -> uid.contains("category:"))
-				.collect(Collectors.toList());
+		List<String> categoryList = new ArrayList<String>();
+		if (dp.getCategory() != null) {
+			categoryList = dp.getCategory().parallelStream()
+					.map(linkedEntity -> (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
+					.map(Category::getUid)
+					.filter(uid -> uid.contains("category:"))
+					.collect(Collectors.toList());
+		}
 
 		discoveryList.add(new DiscoveryItem.DiscoveryItemBuilder(distributionSelected.getInstanceId(),
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getInstanceId(),

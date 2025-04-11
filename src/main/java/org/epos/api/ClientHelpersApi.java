@@ -5,8 +5,6 @@
  */
 package org.epos.api;
 
-import java.util.Set;
-
 import javax.validation.Valid;
 
 import org.epos.api.beans.Distribution;
@@ -185,7 +183,7 @@ public interface ClientHelpersApi {
 	@GetMapping(value = "/resources/linkedentities/webservices", produces = { "application/json" })
 	ResponseEntity<LinkedResponse> searchLinkedWebservices(
 			@Parameter(in = ParameterIn.QUERY, description = "The instance ID", schema = @Schema()) @RequestParam(value = "instance_id", required = false) String id,
-			@Parameter(in = ParameterIn.QUERY, description = "Parameter names", schema = @Schema()) @RequestParam(value = "params", required = true) Set<String> params);
+			@Parameter(in = ParameterIn.QUERY, description = "Parameter names", schema = @Schema()) @RequestParam(value = "params", required = true) String params);
 
 	@Operation(summary = "linked parameters", description = "returns all the output parameters available for a distribution that are linked to something", tags = {
 			"Resources Service" })

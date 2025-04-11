@@ -501,11 +501,14 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 	}
 
 	@Override
-	public ResponseEntity<LinkedResponse> searchLinkedWebservices(String id, Set<String> params) {
+	public ResponseEntity<LinkedResponse> searchLinkedWebservices(String id, String paramsString) {
 		// validate the parameters
-		if (params == null || params.isEmpty()) {
+		if (paramsString == null || paramsString.isEmpty()) {
 			return ResponseEntity.badRequest().build();
 		}
+
+		// the paramString comes as a json so we have to convert it
+		Map<String, String> params = Utils.gson.fromJson(paramsString, Map.class);
 
 		LinkedResponse response = null;
 		if (id != null && id != "") {
