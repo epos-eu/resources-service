@@ -52,7 +52,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		this.objectMapper = objectMapper;
 		this.request = request;
 	}
-	
+
 	/**
 	 * 
 	 * 
@@ -65,217 +65,230 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		return (User) request.getSession().getAttribute("user");
 	}
 
-	public ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The distribution ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id,
-    		@Parameter(in = ParameterIn.QUERY, description = "extended payload" ,schema=@Schema()) @Valid @RequestParam(value = "extended", required = false) Boolean extended){
+	public ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(
+			@Parameter(in = ParameterIn.PATH, description = "The distribution ID", required = true, schema = @Schema()) @PathVariable("instance_id") String id,
+			@Parameter(in = ParameterIn.QUERY, description = "extended payload", schema = @Schema()) @Valid @RequestParam(value = "extended", required = false) Boolean extended) {
 
-		if(id==null) {
+		if (id == null) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		
-		if(extended==null) {
+
+		if (extended == null) {
 			extended = false;
 		}
 
 		try {
-			id=java.net.URLDecoder.decode(id, StandardCharsets.UTF_8.name());
+			id = java.net.URLDecoder.decode(id, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "id: "+ id, e); 
+			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "id: " + id, e);
 			Distribution errorResponse = new Distribution(e.getLocalizedMessage());
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
-		
-		Map<String,Object> requestParams = new HashMap<>();
+
+		Map<String, Object> requestParams = new HashMap<>();
 		requestParams.put("id", id);
 		requestParams.put("extended", extended);
 
 		return standardRequest("DETAILS", requestParams, null);
 	}
 
-	public ResponseEntity<SearchResponse> searchUsingGet(@Parameter(in = ParameterIn.QUERY, description = "q" ,schema=@Schema()) @Valid @RequestParam(value = "q", required = false) String q, 
-			@Parameter(in = ParameterIn.QUERY, description = "startDate" ,schema=@Schema()) @Valid @RequestParam(value = "startDate", required = false) String startDate,
-			@Parameter(in = ParameterIn.QUERY, description = "endDate" ,schema=@Schema()) @Valid @RequestParam(value = "endDate", required = false) String endDate, 
-			@Parameter(in = ParameterIn.QUERY, description = "bbox" ,schema=@Schema()) @Valid @RequestParam(value = "bbox", required = false) String bbox, 
-			@Parameter(in = ParameterIn.QUERY, description = "keywords" ,schema=@Schema()) @Valid @RequestParam(value = "keywords", required = false) String keywords, 
-			@Parameter(in = ParameterIn.QUERY, description = "sciencedomains" ,schema=@Schema()) @Valid @RequestParam(value = "sciencedomains", required = false) String sciencedomains,
-			@Parameter(in = ParameterIn.QUERY, description = "servicetypes" ,schema=@Schema()) @Valid @RequestParam(value = "servicetypes", required = false) String servicetypes,
-			@Parameter(in = ParameterIn.QUERY, description = "organisations" ,schema=@Schema()) @Valid @RequestParam(value = "organisations", required = false) String organisations,
-			@Parameter(in = ParameterIn.QUERY, description = "facetstype {categories, dataproviders, serviceproviders}" ,schema=@Schema(allowableValues = {"categories", "dataproviders", "serviceproviders"})) @Valid @RequestParam(value = "facetstype", required = false) String facetsType,
-			@Parameter(in = ParameterIn.QUERY, description = "facets" ,schema=@Schema()) @Valid @RequestParam(value = "facets", required = false) Boolean facets,
-			@Parameter(in = ParameterIn.QUERY, description = "versioningStatus" ,schema=@Schema()) @Valid @RequestParam(value = "versioningStatus", required = false) String versioningStatus) {
+	public ResponseEntity<SearchResponse> searchUsingGet(
+			@Parameter(in = ParameterIn.QUERY, description = "q", schema = @Schema()) @Valid @RequestParam(value = "q", required = false) String q,
+			@Parameter(in = ParameterIn.QUERY, description = "startDate", schema = @Schema()) @Valid @RequestParam(value = "startDate", required = false) String startDate,
+			@Parameter(in = ParameterIn.QUERY, description = "endDate", schema = @Schema()) @Valid @RequestParam(value = "endDate", required = false) String endDate,
+			@Parameter(in = ParameterIn.QUERY, description = "bbox", schema = @Schema()) @Valid @RequestParam(value = "bbox", required = false) String bbox,
+			@Parameter(in = ParameterIn.QUERY, description = "keywords", schema = @Schema()) @Valid @RequestParam(value = "keywords", required = false) String keywords,
+			@Parameter(in = ParameterIn.QUERY, description = "sciencedomains", schema = @Schema()) @Valid @RequestParam(value = "sciencedomains", required = false) String sciencedomains,
+			@Parameter(in = ParameterIn.QUERY, description = "servicetypes", schema = @Schema()) @Valid @RequestParam(value = "servicetypes", required = false) String servicetypes,
+			@Parameter(in = ParameterIn.QUERY, description = "organisations", schema = @Schema()) @Valid @RequestParam(value = "organisations", required = false) String organisations,
+			@Parameter(in = ParameterIn.QUERY, description = "facetstype {categories, dataproviders, serviceproviders}", schema = @Schema(allowableValues = {
+					"categories", "dataproviders",
+					"serviceproviders" })) @Valid @RequestParam(value = "facetstype", required = false) String facetsType,
+			@Parameter(in = ParameterIn.QUERY, description = "facets", schema = @Schema()) @Valid @RequestParam(value = "facets", required = false) Boolean facets,
+			@Parameter(in = ParameterIn.QUERY, description = "versioningStatus", schema = @Schema()) @Valid @RequestParam(value = "versioningStatus", required = false) String versioningStatus) {
 
-		Map<String,Object> requestParameters = new HashMap<>();
+		Map<String, Object> requestParameters = new HashMap<>();
 		User user = getUserFromSession();
 
-		if(!StringUtils.isBlank(q)) {
+		if (!StringUtils.isBlank(q)) {
 			try {
 				q = java.net.URLDecoder.decode(q, StandardCharsets.UTF_8.name());
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "q: "+ q, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "q: " + q, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("q", q);
 		}
-		if(!StringUtils.isBlank(startDate)) {
+		if (!StringUtils.isBlank(startDate)) {
 			try {
 				startDate = java.net.URLDecoder.decode(startDate, StandardCharsets.UTF_8.name());
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "startDate: "+ startDate, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "startDate: " + startDate, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			try {
-				String date = Utils.convertDateUsingPattern(startDate, Utils.EPOSINTERNALFORMAT, Utils.EPOSINTERNALFORMAT);
-				if(date==null){
-					SearchResponse errorResponse = new SearchResponse("Encountered an error parsing or managing the following DateTime: "+startDate);
+				String date = Utils.convertDateUsingPattern(startDate, Utils.EPOSINTERNALFORMAT,
+						Utils.EPOSINTERNALFORMAT);
+				if (date == null) {
+					SearchResponse errorResponse = new SearchResponse(
+							"Encountered an error parsing or managing the following DateTime: " + startDate);
 					return ResponseEntity.badRequest().body(errorResponse);
-				}else {
+				} else {
 					requestParameters.put("schema:startDate", date);
 				}
 			} catch (IllegalArgumentException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "startDate: "+ startDate, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "startDate: " + startDate, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 		}
-		if(!StringUtils.isBlank(endDate)) {
+		if (!StringUtils.isBlank(endDate)) {
 			try {
 				endDate = java.net.URLDecoder.decode(endDate, StandardCharsets.UTF_8.name());
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "endDate: "+ endDate, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "endDate: " + endDate, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			try {
-				String date = Utils.convertDateUsingPattern(endDate, Utils.EPOSINTERNALFORMAT, Utils.EPOSINTERNALFORMAT);
-				if(date==null){
-					SearchResponse errorResponse = new SearchResponse("Encountered an error parsing or managing the following DateTime: "+endDate);
+				String date = Utils.convertDateUsingPattern(endDate, Utils.EPOSINTERNALFORMAT,
+						Utils.EPOSINTERNALFORMAT);
+				if (date == null) {
+					SearchResponse errorResponse = new SearchResponse(
+							"Encountered an error parsing or managing the following DateTime: " + endDate);
 					return ResponseEntity.badRequest().body(errorResponse);
-				}else {
+				} else {
 					requestParameters.put("schema:endDate", date);
 				}
 			} catch (IllegalArgumentException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "endDate: "+ endDate, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "endDate: " + endDate, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 		}
-		if(!StringUtils.isBlank(bbox)){
+		if (!StringUtils.isBlank(bbox)) {
 			try {
 				bbox = java.net.URLDecoder.decode(bbox, StandardCharsets.UTF_8.name());
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "bbox: "+ bbox, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "bbox: " + bbox, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			try {
 				String[] bboxSplit = bbox.split(",");
-				requestParameters.put("epos:northernmostLatitude",bboxSplit[0]);
-				requestParameters.put("epos:easternmostLongitude",bboxSplit[1]);
-				requestParameters.put("epos:southernmostLatitude",bboxSplit[2]);
-				requestParameters.put("epos:westernmostLongitude",bboxSplit[3]);
+				requestParameters.put("epos:northernmostLatitude", bboxSplit[0]);
+				requestParameters.put("epos:easternmostLongitude", bboxSplit[1]);
+				requestParameters.put("epos:southernmostLatitude", bboxSplit[2]);
+				requestParameters.put("epos:westernmostLongitude", bboxSplit[3]);
 			} catch (ArrayIndexOutOfBoundsException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "bbox: "+ bbox, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "bbox: " + bbox, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 		}
-		if(!StringUtils.isBlank(keywords)) {
+		if (!StringUtils.isBlank(keywords)) {
 			try {
-				keywords=java.net.URLDecoder.decode(keywords, StandardCharsets.UTF_8.name());
+				keywords = java.net.URLDecoder.decode(keywords, StandardCharsets.UTF_8.name());
 				keywords = keywords.replace(" ", "");
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "keywords: "+ keywords, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "keywords: " + keywords, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("keywords", keywords);
 		}
-		if(!StringUtils.isBlank(sciencedomains)) {
+		if (!StringUtils.isBlank(sciencedomains)) {
 			try {
-				sciencedomains=java.net.URLDecoder.decode(sciencedomains, StandardCharsets.UTF_8.name());
+				sciencedomains = java.net.URLDecoder.decode(sciencedomains, StandardCharsets.UTF_8.name());
 				sciencedomains = sciencedomains.replace(" ", "");
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "sciencedomains: "+ sciencedomains, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "sciencedomains: " + sciencedomains, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("sciencedomains", sciencedomains);
 		}
-		if(!StringUtils.isBlank(servicetypes)) {
+		if (!StringUtils.isBlank(servicetypes)) {
 			try {
-				servicetypes=java.net.URLDecoder.decode(servicetypes, StandardCharsets.UTF_8.name());
+				servicetypes = java.net.URLDecoder.decode(servicetypes, StandardCharsets.UTF_8.name());
 				servicetypes = servicetypes.replace(" ", "");
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "servicetypes: "+ servicetypes, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "servicetypes: " + servicetypes, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("servicetypes", servicetypes);
 		}
-		if(!StringUtils.isBlank(organisations)) {
+		if (!StringUtils.isBlank(organisations)) {
 			try {
-				organisations=java.net.URLDecoder.decode(organisations, StandardCharsets.UTF_8.name());
+				organisations = java.net.URLDecoder.decode(organisations, StandardCharsets.UTF_8.name());
 				organisations = organisations.replace(" ", "");
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "organisations: "+ organisations, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "organisations: " + organisations, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("organisations", organisations);
 		}
 
+		if (facets == null)
+			requestParameters.put("facets", System.getenv("FACETS_DEFAULT"));
+		else
+			requestParameters.put("facets", Boolean.toString(facets));
 
-		if(facets==null) requestParameters.put("facets", System.getenv("FACETS_DEFAULT"));
-		else requestParameters.put("facets", Boolean.toString(facets));
-
-		if(facetsType==null) requestParameters.put("facetstype", System.getenv("FACETS_TYPE_DEFAULT"));
+		if (facetsType == null)
+			requestParameters.put("facetstype", System.getenv("FACETS_TYPE_DEFAULT"));
 		else {
 			try {
-				facetsType=java.net.URLDecoder.decode(facetsType, StandardCharsets.UTF_8.name());
+				facetsType = java.net.URLDecoder.decode(facetsType, StandardCharsets.UTF_8.name());
 				facetsType = facetsType.replace(" ", "");
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "facetsType: "+ facetsType, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "facetsType: " + facetsType, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
-			if(!(facetsType.equals("categories") || facetsType.equals("dataproviders") || facetsType.equals("serviceproviders"))) {
-				SearchResponse errorResponse = new SearchResponse("The facets type is not a valid type, supported types: categories, dataproviders, serviceproviders]");
+			if (!(facetsType.equals("categories") || facetsType.equals("dataproviders")
+					|| facetsType.equals("serviceproviders"))) {
+				SearchResponse errorResponse = new SearchResponse(
+						"The facets type is not a valid type, supported types: categories, dataproviders, serviceproviders]");
 				return ResponseEntity.badRequest().body(errorResponse);
 
 			}
 			requestParameters.put("facetstype", facetsType);
 		}
 
-		if(!StringUtils.isBlank(versioningStatus)) {
+		if (!StringUtils.isBlank(versioningStatus)) {
 			try {
 				versioningStatus = java.net.URLDecoder.decode(versioningStatus, StandardCharsets.UTF_8.name());
 				versioningStatus = versioningStatus.replace(" ", "").toUpperCase();
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "versioningStatus: "+ versioningStatus, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "versioningStatus: " + versioningStatus, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("versioningStatus", versioningStatus);
 		}
 
-		if(!StringUtils.isBlank(startDate)) {
-			if(Utils.convertDateUsingPattern(startDate, Utils.EPOSINTERNALFORMAT, Utils.EPOSINTERNALFORMAT)==null) {
-				SearchResponse errorResponse = new SearchResponse("Encountered an error parsing or managing the following DateTime: "+startDate);
+		if (!StringUtils.isBlank(startDate)) {
+			if (Utils.convertDateUsingPattern(startDate, Utils.EPOSINTERNALFORMAT, Utils.EPOSINTERNALFORMAT) == null) {
+				SearchResponse errorResponse = new SearchResponse(
+						"Encountered an error parsing or managing the following DateTime: " + startDate);
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 		}
-		if(!StringUtils.isBlank(endDate)) {
-			if(Utils.convertDateUsingPattern(endDate, Utils.EPOSINTERNALFORMAT, Utils.EPOSINTERNALFORMAT)==null){
-				SearchResponse errorResponse = new SearchResponse("Encountered an error parsing or managing the following DateTime: "+endDate);
+		if (!StringUtils.isBlank(endDate)) {
+			if (Utils.convertDateUsingPattern(endDate, Utils.EPOSINTERNALFORMAT, Utils.EPOSINTERNALFORMAT) == null) {
+				SearchResponse errorResponse = new SearchResponse(
+						"Encountered an error parsing or managing the following DateTime: " + endDate);
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 		}
 
 		return standardRequest("SEARCH", requestParameters, user);
 	}
-	
-	
+
 	/**
 	 * 
 	 * 
@@ -286,37 +299,38 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 
 	@Override
 	public ResponseEntity<Object> facilityDiscoveryGetUsingGET(String id, String equipmenttypes, String format) {
-		if(id==null) {
+		if (id == null) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		if(format==null) format="json/plain";
+		if (format == null)
+			format = "json/plain";
 
-		Map<String,Object> requestParameters = new HashMap<>();
-		
+		Map<String, Object> requestParameters = new HashMap<>();
+
 		try {
-			id=java.net.URLDecoder.decode(id, StandardCharsets.UTF_8.name());
+			id = java.net.URLDecoder.decode(id, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "id: "+ id, e); 
+			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "id: " + id, e);
 			Distribution errorResponse = new Distribution(e.getLocalizedMessage());
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
 		requestParameters.put("id", id);
-		
-		if(equipmenttypes!=null) {
+
+		if (equipmenttypes != null) {
 			try {
-				equipmenttypes=java.net.URLDecoder.decode(equipmenttypes, StandardCharsets.UTF_8.name());
+				equipmenttypes = java.net.URLDecoder.decode(equipmenttypes, StandardCharsets.UTF_8.name());
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "equipmenttypes: "+ equipmenttypes, e); 
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "equipmenttypes: " + equipmenttypes, e);
 				Distribution errorResponse = new Distribution(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("equipmenttypes", equipmenttypes);
 		}
-		
+
 		format = format.replaceAll(" ", "+");
 		System.out.println(format);
-		
-		if(format.equals("json/plain") || format.equals("application/epos.geo+json"))
+
+		if (format.equals("json/plain") || format.equals("application/epos.geo+json"))
 			requestParameters.put("format", format);
 		else {
 			requestParameters.put("format", "json/plain");
@@ -329,110 +343,112 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 	public ResponseEntity<SearchResponse> facilitySearchUsingGet(@Valid String q, @Valid String bbox,
 			@Valid String keywords, @Valid String facilitytypes, @Valid String equipmenttypes,
 			@Valid String organisations, @Valid String facetsType, @Valid Boolean facets) {
-		Map<String,Object> requestParameters = new HashMap<>();
+		Map<String, Object> requestParameters = new HashMap<>();
 
-		if(!StringUtils.isBlank(q)) {
+		if (!StringUtils.isBlank(q)) {
 			try {
 				q = java.net.URLDecoder.decode(q, StandardCharsets.UTF_8.name());
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "q: "+ q, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "q: " + q, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("q", q);
 		}
-		
-		if(!StringUtils.isBlank(bbox)){
+
+		if (!StringUtils.isBlank(bbox)) {
 			try {
 				bbox = java.net.URLDecoder.decode(bbox, StandardCharsets.UTF_8.name());
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "bbox: "+ bbox, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "bbox: " + bbox, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			try {
 				String[] bboxSplit = bbox.split(",");
-				requestParameters.put("epos:northernmostLatitude",bboxSplit[0]);
-				requestParameters.put("epos:easternmostLongitude",bboxSplit[1]);
-				requestParameters.put("epos:southernmostLatitude",bboxSplit[2]);
-				requestParameters.put("epos:westernmostLongitude",bboxSplit[3]);
+				requestParameters.put("epos:northernmostLatitude", bboxSplit[0]);
+				requestParameters.put("epos:easternmostLongitude", bboxSplit[1]);
+				requestParameters.put("epos:southernmostLatitude", bboxSplit[2]);
+				requestParameters.put("epos:westernmostLongitude", bboxSplit[3]);
 			} catch (ArrayIndexOutOfBoundsException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "bbox: "+ bbox, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "bbox: " + bbox, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 		}
-		if(!StringUtils.isBlank(keywords)) {
+		if (!StringUtils.isBlank(keywords)) {
 			try {
-				keywords=java.net.URLDecoder.decode(keywords, StandardCharsets.UTF_8.name());
+				keywords = java.net.URLDecoder.decode(keywords, StandardCharsets.UTF_8.name());
 				keywords = keywords.replace(" ", "");
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "keywords: "+ keywords, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "keywords: " + keywords, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("keywords", keywords);
 		}
-		if(!StringUtils.isBlank(facilitytypes)) {
+		if (!StringUtils.isBlank(facilitytypes)) {
 			try {
-				facilitytypes=java.net.URLDecoder.decode(facilitytypes, StandardCharsets.UTF_8.name());
+				facilitytypes = java.net.URLDecoder.decode(facilitytypes, StandardCharsets.UTF_8.name());
 				facilitytypes = facilitytypes.replace(" ", "");
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "facilitytypes: "+ facilitytypes, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "facilitytypes: " + facilitytypes, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("facilitytypes", facilitytypes);
 		}
-		if(!StringUtils.isBlank(equipmenttypes)) {
+		if (!StringUtils.isBlank(equipmenttypes)) {
 			try {
-				equipmenttypes=java.net.URLDecoder.decode(equipmenttypes, StandardCharsets.UTF_8.name());
+				equipmenttypes = java.net.URLDecoder.decode(equipmenttypes, StandardCharsets.UTF_8.name());
 				equipmenttypes = equipmenttypes.replace(" ", "");
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "equipmenttypes: "+ equipmenttypes, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "equipmenttypes: " + equipmenttypes, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("equipmenttypes", equipmenttypes);
 		}
-		if(!StringUtils.isBlank(organisations)) {
+		if (!StringUtils.isBlank(organisations)) {
 			try {
-				organisations=java.net.URLDecoder.decode(organisations, StandardCharsets.UTF_8.name());
+				organisations = java.net.URLDecoder.decode(organisations, StandardCharsets.UTF_8.name());
 				organisations = organisations.replace(" ", "");
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "organisations: "+ organisations, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "organisations: " + organisations, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("organisations", organisations);
 		}
 
+		if (facets == null)
+			requestParameters.put("facets", System.getenv("FACETS_DEFAULT"));
+		else
+			requestParameters.put("facets", Boolean.toString(facets));
 
-		if(facets==null) requestParameters.put("facets", System.getenv("FACETS_DEFAULT"));
-		else requestParameters.put("facets", Boolean.toString(facets));
-
-		if(facetsType==null) requestParameters.put("facetstype", System.getenv("FACETS_TYPE_DEFAULT"));
+		if (facetsType == null)
+			requestParameters.put("facetstype", System.getenv("FACETS_TYPE_DEFAULT"));
 		else {
 			try {
-				facetsType=java.net.URLDecoder.decode(facetsType, StandardCharsets.UTF_8.name());
+				facetsType = java.net.URLDecoder.decode(facetsType, StandardCharsets.UTF_8.name());
 				facetsType = facetsType.replace(" ", "");
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "facetsType: "+ facetsType, e);
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "facetsType: " + facetsType, e);
 				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
-			if(!(facetsType.equals("categories") || facetsType.equals("facilityproviders"))) {
-				SearchResponse errorResponse = new SearchResponse("The facets type is not a valid type, supported types: [categories, facilityproviders]");
+			if (!(facetsType.equals("categories") || facetsType.equals("facilityproviders"))) {
+				SearchResponse errorResponse = new SearchResponse(
+						"The facets type is not a valid type, supported types: [categories, facilityproviders]");
 				return ResponseEntity.badRequest().body(errorResponse);
 
 			}
 			requestParameters.put("facetstype", facetsType);
 		}
 
-
 		return standardRequest("FACILITYSEARCH", requestParameters, null);
 	}
-	
+
 	/**
 	 * 
 	 * 
@@ -442,37 +458,40 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 	 */
 
 	@Override
-	public ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(String id, String facilityid, String format, String params) {
-		if(id==null) id="all";
-		if(format==null) format="json/plain";
-		
-		Map<String,Object> requestParameters = new HashMap<>();
+	public ResponseEntity<Object> equipmentsDiscoveryGetUsingGET(String id, String facilityid, String format,
+			String params) {
+		if (id == null)
+			id = "all";
+		if (format == null)
+			format = "json/plain";
+
+		Map<String, Object> requestParameters = new HashMap<>();
 
 		try {
-			id=java.net.URLDecoder.decode(id, StandardCharsets.UTF_8.name());
+			id = java.net.URLDecoder.decode(id, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "id: "+ id, e); 
+			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "id: " + id, e);
 			Distribution errorResponse = new Distribution(e.getLocalizedMessage());
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
 		requestParameters.put("id", id);
-		
-		if(facilityid!=null) {
+
+		if (facilityid != null) {
 			try {
-				facilityid=java.net.URLDecoder.decode(facilityid, StandardCharsets.UTF_8.name());
+				facilityid = java.net.URLDecoder.decode(facilityid, StandardCharsets.UTF_8.name());
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "facilityid: "+ facilityid, e); 
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "facilityid: " + facilityid, e);
 				Distribution errorResponse = new Distribution(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("facilityid", facilityid);
 		}
-		
-		if(params!=null) {
+
+		if (params != null) {
 			try {
-				params=java.net.URLDecoder.decode(params, StandardCharsets.UTF_8.name());
+				params = java.net.URLDecoder.decode(params, StandardCharsets.UTF_8.name());
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "params: "+ params, e); 
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "params: " + params, e);
 				Distribution errorResponse = new Distribution(e.getLocalizedMessage());
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
@@ -480,17 +499,17 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		}
 
 		try {
-			format=java.net.URLDecoder.decode(format, StandardCharsets.UTF_8.name());
+			format = java.net.URLDecoder.decode(format, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "format: "+ format, e); 
+			LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "format: " + format, e);
 			Distribution errorResponse = new Distribution(e.getLocalizedMessage());
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
 
 		format = format.replaceAll(" ", "+");
 		System.out.println(format);
-		
-		if(format.equals("json/plain") || format.equals("application/epos.geo+json"))
+
+		if (format.equals("json/plain") || format.equals("application/epos.geo+json"))
 			requestParameters.put("format", format);
 		else {
 			Distribution errorResponse = new Distribution("No valid format");
@@ -509,6 +528,10 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 
 		// the paramString comes as a json so we have to convert it
 		Map<String, String> params = Utils.gson.fromJson(paramsString, Map.class);
+
+		if (params.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
 
 		LinkedResponse response = null;
 		if (id != null && id != "") {
