@@ -1,20 +1,19 @@
 package org.epos.api.beans;
 
-
 import java.util.List;
 import java.util.Objects;
 
 public class Plugin {
 
-	private String operationId;
+	private String distributionId;
 	private List<Relations> relations;
 
-	public String getOperationId() {
-		return operationId;
+	public String getDistributionId() {
+		return distributionId;
 	}
 
-	public void setOperationId(String operationId) {
-		this.operationId = operationId;
+	public void setDistributionId(String distributionId) {
+		this.distributionId = distributionId;
 	}
 
 	public List<Relations> getRelations() {
@@ -27,20 +26,21 @@ public class Plugin {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Plugin)) return false;
+		if (!(o instanceof Plugin))
+			return false;
 		Plugin plugin = (Plugin) o;
-		return Objects.equals(operationId, plugin.operationId) && Objects.equals(relations, plugin.relations);
+		return Objects.equals(distributionId, plugin.distributionId) && Objects.equals(relations, plugin.relations);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(operationId, relations);
+		return Objects.hash(distributionId, relations);
 	}
 
 	@Override
 	public String toString() {
 		return "Plugin{" +
-				"operationId='" + operationId + '\'' +
+				"distributionId='" + distributionId + '\'' +
 				", relations=" + relations +
 				'}';
 	}
@@ -49,7 +49,6 @@ public class Plugin {
 		private String pluginId;
 		private String inputFormat;
 		private String outputFormat;
-
 
 		public String getPluginId() {
 			return pluginId;
@@ -77,9 +76,11 @@ public class Plugin {
 
 		@Override
 		public boolean equals(Object o) {
-			if (!(o instanceof Relations)) return false;
+			if (!(o instanceof Relations))
+				return false;
 			Relations relations = (Relations) o;
-			return Objects.equals(pluginId, relations.pluginId) && Objects.equals(inputFormat, relations.inputFormat) && Objects.equals(outputFormat, relations.outputFormat);
+			return Objects.equals(pluginId, relations.pluginId) && Objects.equals(inputFormat, relations.inputFormat)
+					&& Objects.equals(outputFormat, relations.outputFormat);
 		}
 
 		@Override

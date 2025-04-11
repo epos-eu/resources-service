@@ -2,7 +2,6 @@ package org.epos.api.routines;
 
 import static abstractapis.AbstractAPI.retrieveAPI;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +26,8 @@ import org.epos.eposdatamodel.Location;
 import org.epos.eposdatamodel.Mapping;
 import org.epos.eposdatamodel.Operation;
 import org.epos.eposdatamodel.Organization;
+import org.epos.eposdatamodel.OutputMapping;
+import org.epos.eposdatamodel.Payload;
 import org.epos.eposdatamodel.PeriodOfTime;
 import org.epos.eposdatamodel.SoftwareApplication;
 import org.epos.eposdatamodel.WebService;
@@ -58,11 +59,14 @@ public class DatabaseConnections {
 	private List<Mapping> mappingList;
 	private List<Equipment> equipmentList;
 	private List<Facility> facilityList;
+	private List<OutputMapping> outputMappingsList;
+	private List<Payload> payloadsList;
 
-	private List<Plugin> plugins;
+	// distributionId -> list of relations with plugins
+	private Map<String, List<Plugin.Relations>> plugins;
 	private RpcRouter router;
 
-	private int maxDbConnections = 15;
+	private int maxDbConnections = 17;
 	private static DatabaseConnections connections;
 	private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -145,7 +149,14 @@ public class DatabaseConnections {
 		CompletableFuture<List<Equipment>> tempEquipmentListFuture = CompletableFuture
 				.supplyAsync(() -> retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll(), executor);
 
-		CompletableFuture<List<Plugin>> tempPluginsFuture = CompletableFuture.supplyAsync(() -> retreivePlugins(),
+		CompletableFuture<List<OutputMapping>> tempOutputMappingListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.OUTPUTMAPPING.name()).retrieveAll(), executor);
+
+		CompletableFuture<List<Payload>> tempPayloadListFuture = CompletableFuture
+				.supplyAsync(() -> retrieveAPI(EntityNames.PAYLOAD.name()).retrieveAll(), executor);
+
+		CompletableFuture<Map<String, List<Plugin.Relations>>> tempPluginsFuture = CompletableFuture.supplyAsync(
+				() -> retreivePlugins(),
 				executor);
 
 		// join the futures together
@@ -165,6 +176,8 @@ public class DatabaseConnections {
 				tempMappingListFuture,
 				tempFacilityListFuture,
 				tempEquipmentListFuture,
+				tempOutputMappingListFuture,
+				tempPayloadListFuture,
 				tempPluginsFuture);
 
 		// block until all done
@@ -186,7 +199,9 @@ public class DatabaseConnections {
 		List<Mapping> tempMappingList = tempMappingListFuture.join();
 		List<Facility> tempFacilityList = tempFacilityListFuture.join();
 		List<Equipment> tempEquipmentList = tempEquipmentListFuture.join();
-		List<Plugin> tempPlugins = tempPluginsFuture.join();
+		List<OutputMapping> tempOutputMappingList = tempOutputMappingListFuture.join();
+		List<Payload> tempPayloadList = tempPayloadListFuture.join();
+		Map<String, List<Plugin.Relations>> tempPlugins = tempPluginsFuture.join();
 
 		lock.writeLock().lock();
 
@@ -207,6 +222,8 @@ public class DatabaseConnections {
 			mappingList = tempMappingList;
 			facilityList = tempFacilityList;
 			equipmentList = tempEquipmentList;
+			outputMappingsList = tempOutputMappingList;
+			payloadsList = tempPayloadList;
 			plugins = tempPlugins;
 
 			// free the executor's resources
@@ -363,7 +380,25 @@ public class DatabaseConnections {
 		}
 	}
 
-	public List<Plugin> getPlugins() {
+	public List<OutputMapping> getOutputMappings() {
+		lock.readLock().lock();
+		try {
+			return outputMappingsList;
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+
+	public List<Payload> getPayloads() {
+		lock.readLock().lock();
+		try {
+			return payloadsList;
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+
+	public Map<String, List<Plugin.Relations>> getPlugins() {
 		lock.readLock().lock();
 		try {
 			return plugins;
@@ -392,7 +427,8 @@ public class DatabaseConnections {
 		return response;
 	}
 
-	private List<Plugin> retreivePlugins() {
+	private Map<String, List<Plugin.Relations>> retreivePlugins() {
+		var result = new HashMap<String, List<Plugin.Relations>>();
 		try {
 			Map<String, Object> params = new HashMap<>();
 			params.put("plugins", "all");
@@ -401,13 +437,16 @@ public class DatabaseConnections {
 					Actor.getInstance(BuiltInActorType.CONVERTER),
 					params);
 			if (conversionResponse != null && conversionResponse.getPayloadAsPlainText().isPresent()) {
-				return Arrays
+				var plugins = Arrays
 						.stream(Utils.gson.fromJson(conversionResponse.getPayloadAsPlainText().get(), Plugin[].class))
 						.collect(Collectors.toList());
+				for (Plugin plugin : plugins) {
+					result.putIfAbsent(plugin.getDistributionId(), plugin.getRelations());
+				}
 			}
 		} catch (Exception e) {
 			System.err.println("[CONNECTION ERROR] Error getting respoonse from router: " + e.toString());
 		}
-		return new ArrayList<Plugin>();
+		return result;
 	}
 }
