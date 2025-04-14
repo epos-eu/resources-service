@@ -92,20 +92,34 @@ public class LinkedEntityWebserviceSearch {
 		// compute mapping properties for the operation
 		Set<String> mappingProps = operation.getMapping().stream()
 				.map(linkedMapping -> mappings.get(linkedMapping.getInstanceId()))
-				.filter(mapping -> 
-			mapping != null && 
-			// readonly is true but the default value is the same used by the param 
-			(Boolean.parseBoolean(mapping.getReadOnlyValue()) && mapping.getDefaultValue() != null && mapping.getDefaultValue().equals(params.getOrDefault(mapping.getProperty(), ""))) ||
-			// or readonly is false and the value for this property is valid (part of the enum)
-			(!Boolean.parseBoolean(mapping.getReadOnlyValue()) && 
-				mapping.getParamValue() != null && 
-				mapping.getParamValue().isEmpty() && 
-				mapping.getParamValue().contains(params.getOrDefault(mapping.getProperty(), ""))) ||
-			// or readonly is false
-			!Boolean.parseBoolean(mapping.getReadOnlyValue())
-		)
+				.filter(mapping -> {
+					// skip null mappings
+					if (mapping == null)
+						return false;
+
+					// get the value for this mapping from the parameters
+					String paramValue = params.getOrDefault(mapping.getProperty(), "");
+
+					// readonly is true but the default value is the same used by the param
+					if (Boolean.parseBoolean(mapping.getReadOnlyValue()))
+						return mapping.getDefaultValue() != null && mapping.getDefaultValue().equals(paramValue);
+
+					// here is not readonly
+
+					// whether or not this mapping is an enum
+					boolean isEnum = mapping.getParamValue() != null && !mapping.getParamValue().isEmpty();
+
+					// if it's not an enum, it's valid
+					if (!isEnum) {
+						return true;
+					}
+
+					// if this mapping is an enum check that the value is valid
+					return mapping.getParamValue().contains(paramValue);
+				})
 				.map(Mapping::getProperty)
 				.collect(Collectors.toSet());
+
 		boolean valid = mappingProps.containsAll(params.keySet());
 		if (!valid) {
 			LOGGER.debug("Distribution {} skipped: mapping properties {} do not contain all required params {}.",
