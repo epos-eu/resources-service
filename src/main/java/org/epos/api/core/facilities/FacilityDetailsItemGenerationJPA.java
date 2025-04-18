@@ -185,8 +185,8 @@ public class FacilityDetailsItemGenerationJPA {
 							.label("GEOJSON")
 							.type(AvailableFormatType.CONVERTED)
 							.build()))
-					.setFacilityProvider(facetsDataProviders)
-					.setCategories(categoryList.isEmpty() ? null : categoryList)
+					.facilityProvider(facetsDataProviders)
+					.categories(categoryList.isEmpty() ? null : categoryList)
 					.build());
 
 			FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList);

@@ -335,16 +335,16 @@ public class DistributionDetailsGenerationJPA {
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getInstanceId(),
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getInstanceId()+"?extended=true")
 				.uid(distribution.getUid())
-				.setMetaId(distribution.getMetaId())
+				.metaId(distribution.getMetaId())
 				.title(distribution.getTitle()!=null?String.join(";",distribution.getTitle()):null)
 				.description(distribution.getDescription()!=null? String.join(";",distribution.getDescription()):null)
 				.availableFormats(AvailableFormatsGeneration.generate(distributionSelected))
-				.setSha256id(DigestUtils.sha256Hex(distribution.getUid()))
-				.setDataprovider(facetsDataProviders)
-				.setServiceProvider(facetsServiceProviders)
-				.setCategories(categoryList.isEmpty()? null : categoryList)
-				.setVersioningStatus(distribution.getVersioningStatus().name())
-				.setEditorId(distribution.getEditorId())
+				.sha256id(DigestUtils.sha256Hex(distribution.getUid()))
+				.dataProvider(facetsDataProviders)
+				.serviceProvider(facetsServiceProviders)
+				.categories(categoryList.isEmpty()? null : categoryList)
+				.versioningStatus(distribution.getVersioningStatus().name())
+				.editorId(distribution.getEditorId())
 				.build());
 		
 		FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList);

@@ -138,12 +138,12 @@ public class LinkedEntityWebserviceSearch {
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.getInstanceId(),
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.getInstanceId() + "?extended=true")
 				.uid(distribution.getUid())
-				.setMetaId(distribution.getMetaId())
+				.metaId(distribution.getMetaId())
 				.title(distribution.getTitle() != null ? String.join(";", distribution.getTitle()) : null)
 				.description(
 						distribution.getDescription() != null ? String.join(";", distribution.getDescription()) : null)
 				.availableFormats(availableFormats)
-				.setVersioningStatus(distribution.getStatus().name())
+				.versioningStatus(distribution.getStatus().name())
 				.build();
 
 		if (EnvironmentVariables.MONITORING != null && EnvironmentVariables.MONITORING.equals("true")) {

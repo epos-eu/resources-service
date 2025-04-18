@@ -91,7 +91,7 @@ public class FacilitySearchGenerationJPA {
 					.uid(facility.getUid())
 					.title(facility.getTitle())
 					.description(facility.getDescription())
-					.setSha256id(DigestUtils.sha256Hex(facility.getUid()))
+					.sha256id(DigestUtils.sha256Hex(facility.getUid()))
 					.availableFormats(List.of(new AvailableFormat.AvailableFormatBuilder()
 							.originalFormat("application/epos.geo+json")
 							.format("application/epos.geo+json")
@@ -99,8 +99,8 @@ public class FacilitySearchGenerationJPA {
 							.label("GEOJSON")
 							.type(AvailableFormatType.CONVERTED)
 							.build()))
-					.setFacilityProvider(facetsFacilityProviders)
-					.setCategories(categoryList.isEmpty() ? null : categoryList)
+					.facilityProvider(facetsFacilityProviders)
+					.categories(categoryList.isEmpty() ? null : categoryList)
 					.build();
 
 			keywords.addAll(Arrays.stream(Optional.ofNullable(facility.getKeywords()).orElse("").split(",\t")).map(String::toLowerCase).map(String::trim).collect(Collectors.toList()));

@@ -431,16 +431,16 @@ public class DistributionDetailsExtendedGenerationJPA {
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getInstanceId(),
 				EnvironmentVariables.API_HOST + API_PATH_DETAILS + distributionSelected.getInstanceId()+"?extended=true")
 				.uid(distribution.getUid())
-				.setMetaId(distribution.getMetaId())
+				.metaId(distribution.getMetaId())
 				.title(distribution.getTitle()!=null?String.join(";",distribution.getTitle()):null)
 				.description(distribution.getDescription()!=null? String.join(";",distribution.getDescription()):null)
 				.availableFormats(AvailableFormatsGeneration.generate(distributionSelected))
-				.setSha256id(DigestUtils.sha256Hex(distribution.getUid()))
-				.setDataprovider(facetsDataProviders)
-				.setVersioningStatus(distribution.getVersioningStatus())
-				.setServiceProvider(facetsServiceProviders)
-				.setCategories(categoryList.isEmpty()? null : categoryList)
-				.setEditorId(distribution.getEditorId())
+				.sha256id(DigestUtils.sha256Hex(distribution.getUid()))
+				.dataProvider(facetsDataProviders)
+				.versioningStatus(distribution.getVersioningStatus())
+				.serviceProvider(facetsServiceProviders)
+				.categories(categoryList.isEmpty()? null : categoryList)
+				.editorId(distribution.getEditorId())
 				.build());
 
 		FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList);

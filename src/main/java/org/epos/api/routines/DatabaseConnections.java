@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.epos.api.beans.Plugin;
@@ -30,6 +31,7 @@ import org.epos.eposdatamodel.OutputMapping;
 import org.epos.eposdatamodel.Payload;
 import org.epos.eposdatamodel.PeriodOfTime;
 import org.epos.eposdatamodel.SoftwareApplication;
+import org.epos.eposdatamodel.User;
 import org.epos.eposdatamodel.WebService;
 import org.epos.handler.dbapi.service.EntityManagerService;
 import org.epos.router_framework.RpcRouter;
@@ -42,6 +44,7 @@ import org.epos.router_framework.domain.Response;
 import org.epos.router_framework.types.ServiceType;
 
 import metadataapis.EntityNames;
+import usermanagementapis.UserGroupManagementAPI;
 
 public class DatabaseConnections {
 	private List<DataProduct> dataproducts;
@@ -61,12 +64,13 @@ public class DatabaseConnections {
 	private List<Facility> facilityList;
 	private List<OutputMapping> outputMappingsList;
 	private List<Payload> payloadsList;
+	private Map<String, User> usersMap;
 
 	// distributionId -> list of relations with plugins
 	private Map<String, List<Plugin.Relations>> plugins;
 	private RpcRouter router;
 
-	private int maxDbConnections = 17;
+	private int maxDbConnections = 18;
 	private static DatabaseConnections connections;
 	private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -155,9 +159,11 @@ public class DatabaseConnections {
 		CompletableFuture<List<Payload>> tempPayloadListFuture = CompletableFuture
 				.supplyAsync(() -> retrieveAPI(EntityNames.PAYLOAD.name()).retrieveAll(), executor);
 
+		CompletableFuture<List<User>> tempUserListFuture = CompletableFuture
+				.supplyAsync(() -> UserGroupManagementAPI.retrieveAllUsers(), executor);
+
 		CompletableFuture<Map<String, List<Plugin.Relations>>> tempPluginsFuture = CompletableFuture.supplyAsync(
-				() -> retreivePlugins(),
-				executor);
+				() -> retreivePlugins(), executor);
 
 		// join the futures together
 		CompletableFuture<Void> allFutures = CompletableFuture.allOf(
@@ -178,12 +184,13 @@ public class DatabaseConnections {
 				tempEquipmentListFuture,
 				tempOutputMappingListFuture,
 				tempPayloadListFuture,
+				tempUserListFuture,
 				tempPluginsFuture);
 
 		// block until all done
 		allFutures.join();
 
-		// retreive the results of the queries
+		// retrieve the results of the queries
 		List<DataProduct> tempDataproducts = tempDataproductsFuture.join();
 		List<SoftwareApplication> tempSoftwareApplications = tempSoftwareApplicationsFuture.join();
 		List<Organization> tempOrganizationList = tempOrganizationListFuture.join();
@@ -201,7 +208,17 @@ public class DatabaseConnections {
 		List<Equipment> tempEquipmentList = tempEquipmentListFuture.join();
 		List<OutputMapping> tempOutputMappingList = tempOutputMappingListFuture.join();
 		List<Payload> tempPayloadList = tempPayloadListFuture.join();
+		List<User> tempUserList = tempUserListFuture.join();
 		Map<String, List<Plugin.Relations>> tempPlugins = tempPluginsFuture.join();
+
+		// convert the list to a map <id, object> for faster retrieval, outside the lock
+		Map<String, User> tempUsersMap;
+		if (tempUserList != null) {
+			tempUsersMap = tempUserList.stream()
+					.collect(Collectors.toMap(User::getAuthIdentifier, Function.identity()));
+		} else {
+			tempUsersMap = new HashMap<String, User>();
+		}
 
 		lock.writeLock().lock();
 
@@ -224,6 +241,7 @@ public class DatabaseConnections {
 			equipmentList = tempEquipmentList;
 			outputMappingsList = tempOutputMappingList;
 			payloadsList = tempPayloadList;
+			usersMap = tempUsersMap;
 			plugins = tempPlugins;
 
 			// free the executor's resources
@@ -393,6 +411,15 @@ public class DatabaseConnections {
 		lock.readLock().lock();
 		try {
 			return payloadsList;
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+
+	public Map<String, User> getUsers() {
+		lock.readLock().lock();
+		try {
+			return usersMap;
 		} finally {
 			lock.readLock().unlock();
 		}

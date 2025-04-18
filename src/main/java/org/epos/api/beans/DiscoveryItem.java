@@ -1,6 +1,7 @@
 package org.epos.api.beans;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -26,6 +27,8 @@ public class DiscoveryItem implements Serializable {
 	private String statusTimestamp;
 	private List<AvailableFormat> availableFormats;
 	private String editorId;
+	private String editorFullName;
+	private LocalDateTime changeDate;
 
 	public DiscoveryItem() {
 	}
@@ -48,6 +51,8 @@ public class DiscoveryItem implements Serializable {
 		this.statusTimestamp = builder.statusTimestamp;
 		this.availableFormats = builder.availableFormats;
 		this.editorId = builder.editorId;
+		this.editorFullName = builder.editorFullName;
+		this.changeDate = builder.changeDate;
 	}
 
 	public String getHref() {
@@ -179,11 +184,27 @@ public class DiscoveryItem implements Serializable {
 	}
 
 	public String getEditorId() {
-		return this.editorId;
+		return editorId;
 	}
 
 	public void setEditorId(String editorId) {
 		this.editorId = editorId;
+	}
+
+	public String getEditorFullName() {
+		return editorFullName;
+	}
+
+	public void setEditorFullName(String editorFullName) {
+		this.editorFullName = editorFullName;
+	}
+
+	public LocalDateTime getChangeDate() {
+		return this.changeDate;
+	}
+
+	public void setChangeDate(LocalDateTime changeDate) {
+		this.changeDate = changeDate;
 	}
 
 	public static class DiscoveryItemBuilder {
@@ -193,11 +214,11 @@ public class DiscoveryItem implements Serializable {
 		private String id;
 		private String uid;
 		private String metaId;
-		private transient String sha256id;
-		private transient Set<String> dataprovider;
-		private transient Set<String> serviceprovider;
-		private transient Set<String> facilityprovider;
-		private transient List<String> categories;
+		private String sha256id;
+		private Set<String> dataprovider;
+		private Set<String> serviceprovider;
+		private Set<String> facilityprovider;
+		private List<String> categories;
 		private String title;
 		private String description;
 		private int status = 0;
@@ -205,6 +226,8 @@ public class DiscoveryItem implements Serializable {
 		private String statusTimestamp;
 		private List<AvailableFormat> availableFormats;
 		private String editorId;
+		private String editorFullName;
+		private LocalDateTime changeDate;
 
 		public DiscoveryItemBuilder(String id, String href, String hrefExtended) {
 			this.id = id;
@@ -217,32 +240,32 @@ public class DiscoveryItem implements Serializable {
 			return this;
 		}
 
-		public DiscoveryItemBuilder setMetaId(String metaId) {
+		public DiscoveryItemBuilder metaId(String metaId) {
 			this.metaId = metaId;
 			return this;
 		}
 
-		public DiscoveryItemBuilder setSha256id(String sha256id) {
+		public DiscoveryItemBuilder sha256id(String sha256id) {
 			this.sha256id = sha256id;
 			return this;
 		}
 
-		public DiscoveryItemBuilder setDataprovider(Set<String> facetsDataProviders) {
+		public DiscoveryItemBuilder dataProvider(Set<String> facetsDataProviders) {
 			this.dataprovider = facetsDataProviders;
 			return this;
 		}
 
-		public DiscoveryItemBuilder setServiceProvider(Set<String> serviceprovider) {
+		public DiscoveryItemBuilder serviceProvider(Set<String> serviceprovider) {
 			this.serviceprovider = serviceprovider;
 			return this;
 		}
 
-		public DiscoveryItemBuilder setFacilityProvider(Set<String> facilityprovider) {
+		public DiscoveryItemBuilder facilityProvider(Set<String> facilityprovider) {
 			this.facilityprovider = facilityprovider;
 			return this;
 		}
 
-		public DiscoveryItemBuilder setCategories(List<String> categories) {
+		public DiscoveryItemBuilder categories(List<String> categories) {
 			this.categories = categories;
 			return this;
 		}
@@ -257,17 +280,17 @@ public class DiscoveryItem implements Serializable {
 			return this;
 		}
 
-		public DiscoveryItemBuilder setStatus(int status) {
+		public DiscoveryItemBuilder status(int status) {
 			this.status = status;
 			return this;
 		}
 
-		public DiscoveryItemBuilder setVersioningStatus(String versioningStatus) {
+		public DiscoveryItemBuilder versioningStatus(String versioningStatus) {
 			this.versioningStatus = versioningStatus;
 			return this;
 		}
 
-		public DiscoveryItemBuilder setStatusTimestamp(String statusTimestamp) {
+		public DiscoveryItemBuilder statusTimestamp(String statusTimestamp) {
 			this.statusTimestamp = statusTimestamp;
 			return this;
 		}
@@ -277,8 +300,18 @@ public class DiscoveryItem implements Serializable {
 			return this;
 		}
 
-		public DiscoveryItemBuilder setEditorId(String editorId) {
+		public DiscoveryItemBuilder editorId(String editorId) {
 			this.editorId = editorId;
+			return this;
+		}
+
+		public DiscoveryItemBuilder editorFullName(String editorFullName) {
+			this.editorFullName = editorFullName;
+			return this;
+		}
+
+		public DiscoveryItemBuilder changeDate(LocalDateTime changeDate) {
+			this.changeDate = changeDate;
 			return this;
 		}
 
@@ -300,7 +333,10 @@ public class DiscoveryItem implements Serializable {
 				title,
 				uid,
 				metaId,
-				editorId);
+				editorId,
+				versioningStatus,
+				editorFullName,
+				changeDate);
 	}
 
 	@Override
@@ -317,13 +353,15 @@ public class DiscoveryItem implements Serializable {
 				&& Objects.equals(href, other.href)
 				&& Objects.equals(hrefExtended, other.hrefExtended)
 				&& Objects.equals(id, other.id)
-				&& status == other.status
+				&& Objects.equals(status, other.status)
 				&& Objects.equals(statusTimestamp, other.statusTimestamp)
 				&& Objects.equals(versioningStatus, other.versioningStatus)
 				&& Objects.equals(title, other.title)
 				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(metaId, other.metaId)
-				&& Objects.equals(editorId, other.editorId);
+				&& Objects.equals(editorId, other.editorId)
+				&& Objects.equals(editorFullName, other.editorFullName)
+				&& Objects.equals(changeDate, other.changeDate);
 	}
 
 	@Override
