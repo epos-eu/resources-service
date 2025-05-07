@@ -40,7 +40,7 @@ public class Distribution implements Serializable {
 	private SpatialInfo spatial;
 	private TemporalCoverage temporalCoverage;
 	private List<String> scienceDomain;
-	private String hasQualityAnnotation;
+	private String qualityAssurance;
 	private List<AvailableFormat> availableFormats;
 	private List<AvailableContactPoints> availableContactPoints;
 	private StatusType versioningStatus;
@@ -439,12 +439,12 @@ public class Distribution implements Serializable {
 		this.serviceType = serviceType;
 	}
 
-	public String getHasQualityAnnotation() {
-		return hasQualityAnnotation;
+	public String getQualityAssurance() {
+		return qualityAssurance;
 	}
 
-	public void setHasQualityAnnotation(String hasQualityAnnotation) {
-		this.hasQualityAnnotation = hasQualityAnnotation;
+	public void setQualityAssurance(String qualityAssurance) {
+		this.qualityAssurance = qualityAssurance;
 	}
 
 	public StatusType getVersioningStatus() {
@@ -487,7 +487,7 @@ public class Distribution implements Serializable {
 				spatial,
 				temporalCoverage,
 				scienceDomain,
-				hasQualityAnnotation,
+				qualityAssurance,
 				availableFormats,
 				availableContactPoints,
 				versioningStatus,
@@ -532,7 +532,7 @@ public class Distribution implements Serializable {
 				Objects.equals(spatial, that.spatial) &&
 				Objects.equals(temporalCoverage, that.temporalCoverage) &&
 				Objects.equals(scienceDomain, that.scienceDomain) &&
-				Objects.equals(hasQualityAnnotation, that.hasQualityAnnotation) &&
+				Objects.equals(qualityAssurance, that.qualityAssurance) &&
 				Objects.equals(availableFormats, that.availableFormats) &&
 				Objects.equals(availableContactPoints, that.availableContactPoints) &&
 				Objects.equals(versioningStatus, that.versioningStatus) &&
@@ -557,7 +557,7 @@ public class Distribution implements Serializable {
 				+ ", license=" + license + ", downloadURL=" + downloadURL + ", keywords=" + keywords + ", dataProvider="
 				+ dataProvider + ", frequencyUpdate=" + frequencyUpdate + ", internalID=" + internalID + ", DOI=" + DOI
 				+ ", spatial=" + spatial + ", temporalCoverage=" + temporalCoverage + ", scienceDomain=" + scienceDomain
-				+ ", hasQualityAnnotation=" + hasQualityAnnotation + ", availableFormats=" + availableFormats
+				+ ", hasQualityAnnotation=" + qualityAssurance + ", availableFormats=" + availableFormats
 				+ ", availableContactPoints=" + availableContactPoints + ", serviceName=" + serviceName
 				+ ", serviceDescription=" + serviceDescription + ", serviceProvider=" + serviceProvider
 				+ ", serviceSpatial=" + serviceSpatial + ", serviceTemporalCoverage=" + serviceTemporalCoverage

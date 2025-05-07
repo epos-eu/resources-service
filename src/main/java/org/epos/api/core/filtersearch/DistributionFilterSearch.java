@@ -233,8 +233,11 @@ public class DistributionFilterSearch {
 			List<String> organisations = Arrays.asList(parameters.get("organisations").toString().split(","));
 
 			HashSet<DataProduct> tempDatasetList = new HashSet<>();
-			datasetList.forEach(ds -> {
+			for (DataProduct ds: datasetList) {
 				List<Organization> organizations = new ArrayList<>();
+				if (ds.getPublisher() == null) {
+					continue;
+				}
 				for(LinkedEntity linkedEntity : ds.getPublisher()){
 					Optional<Organization> provider = DatabaseConnections.getInstance().getOrganizationList().stream().filter(organization -> organization.getInstanceId().equals(linkedEntity.getInstanceId())).findFirst();
                     provider.ifPresent(organizations::add);
@@ -244,7 +247,7 @@ public class DistributionFilterSearch {
 				List<Organization> organisationList = new ArrayList<>();
 				for (LinkedEntity distribution : ds.getDistribution()) {
 					Optional<Distribution> distribution1 = DatabaseConnections.getInstance().getDistributionList().stream().filter(distribution2 -> distribution2.getInstanceId().equals(distribution.getInstanceId())).findFirst();
-					if(distribution1.isPresent()){
+					if(distribution1.isPresent() && distribution1.get().getAccessService() != null){
 						for (LinkedEntity accessService : distribution1.get().getAccessService()) {
 							Optional<WebService> ws = DatabaseConnections.getInstance().getWebServiceList().stream().filter(webService1 -> webService1.getInstanceId().equals(accessService.getInstanceId())).findFirst();
 							if(ws.isPresent()){
@@ -274,7 +277,7 @@ public class DistributionFilterSearch {
 					tempDatasetList.add(ds);
 				}
 
-			});
+			}
 			datasetList = new ArrayList<>(tempDatasetList);
 		}
 		return datasetList;

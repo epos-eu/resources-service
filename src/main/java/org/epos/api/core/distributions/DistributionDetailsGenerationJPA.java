@@ -202,7 +202,7 @@ public class DistributionDetailsGenerationJPA {
 							.collect(Collectors.toList()));
 		}
 
-		distribution.setHasQualityAnnotation(dp.getHasQualityAnnotation());
+		distribution.setQualityAssurance(dp.getQualityAssurance());
 
 		// WEBSERVICE INFO
 		if (ws != null) {
