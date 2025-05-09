@@ -169,9 +169,9 @@ For more information on the EPOS infrastructure and related services, visit the 
 
 ---
 
-[1]: https://epos-eu.github.io/EPOS-DCAT-AP/v3/?utm_source=chatgpt.com "EPOS-DCAT-AP - Version 3.0"
-[2]: https://epos-eu.github.io/epos-open-source/?utm_source=chatgpt.com "EPOS Platform Open Source"
-[3]: https://pmc.ncbi.nlm.nih.gov/articles/PMC10632364/?utm_source=chatgpt.com "The EPOS multi-disciplinary Data Portal for integrated access to ..."
-[4]: https://www.researchgate.net/figure/IS-EPOS-platform-services-implementation-based-on-the-InSilicoLab-framework_fig3_312523822?utm_source=chatgpt.com "-IS-EPOS platform services implementation based on the InSilicoLab ..."
-[5]: https://www.researchgate.net/figure/EPOS-Functional-Architecture_fig1_266268820?utm_source=chatgpt.com "EPOS Functional Architecture | Download Scientific Diagram"
-[6]: https://www.researchgate.net/figure/Main-elements-of-the-EPOS-Architecture-NRIs-TCS-and-ICS-ICS-C-ICS-D-form-the-EPOS_fig1_360272120?utm_source=chatgpt.com "Main elements of the EPOS Architecture: NRIs, TCS and ICS (ICS-C ..."
+[1]: https://epos-eu.github.io/EPOS-DCAT-AP/v3/ "EPOS-DCAT-AP - Version 3.0"
+[2]: https://epos-eu.github.io/epos-open-source/ "EPOS Platform Open Source"
+[3]: https://pmc.ncbi.nlm.nih.gov/articles/PMC10632364/ "The EPOS multi-disciplinary Data Portal for integrated access to ..."
+[4]: https://www.researchgate.net/figure/IS-EPOS-platform-services-implementation-based-on-the-InSilicoLab-framework_fig3_312523822 "-IS-EPOS platform services implementation based on the InSilicoLab ..."
+[5]: https://www.researchgate.net/figure/EPOS-Functional-Architecture_fig1_266268820 "EPOS Functional Architecture | Download Scientific Diagram"
+[6]: https://www.researchgate.net/figure/Main-elements-of-the-EPOS-Architecture-NRIs-TCS-and-ICS-ICS-C-ICS-D-form-the-EPOS_fig1_360272120 "Main elements of the EPOS Architecture: NRIs, TCS and ICS (ICS-C ..."
