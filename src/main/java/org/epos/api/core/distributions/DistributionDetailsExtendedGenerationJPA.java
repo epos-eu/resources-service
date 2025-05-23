@@ -227,7 +227,6 @@ public class DistributionDetailsExtendedGenerationJPA {
 					.collect(Collectors.toList()));
 		}
 
-		dataproduct.setHasQualityAnnotation(dp.getHasQualityAnnotation());
 		dataproduct.setAccessRights(dp.getAccessRight());
 
 		dp.getProvenance().forEach(instance ->{
