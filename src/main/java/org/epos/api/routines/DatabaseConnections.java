@@ -101,8 +101,6 @@ public class DatabaseConnections {
 	}
 
 	public void syncDatabaseConnections() {
-		if (EntityManagerService.getInstance() != null)
-			EntityManagerService.getInstance().getCache().evictAll();
 
 		// one thread for each query
 		ExecutorService executor = Executors.newFixedThreadPool(maxDbConnections);
