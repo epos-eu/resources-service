@@ -23,6 +23,7 @@ import org.epos.api.core.DataServiceProviderGeneration;
 import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.core.ZabbixExecutor;
 import org.epos.api.core.filtersearch.DistributionFilterSearch;
+import org.epos.api.facets.Facets;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.Node;
 import org.epos.api.routines.DatabaseConnections;
@@ -254,7 +255,7 @@ public class DistributionSearchGenerationJPA {
 		if (parameters.containsKey("facets") && parameters.get("facets").toString().equals("true")) {
 			switch (parameters.get("facetstype").toString()) {
 				case "categories":
-					results.addChild(FacetsGeneration.generateResponseUsingCategories(discoveryMap).getFacets());
+					results.addChild(FacetsGeneration.generateResponseUsingCategories(discoveryMap, Facets.Type.DATA).getFacets());
 					break;
 				case "dataproviders":
 					results.addChild(FacetsGeneration.generateResponseUsingDataproviders(discoveryMap).getFacets());
