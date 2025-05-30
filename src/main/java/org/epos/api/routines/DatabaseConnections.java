@@ -2,6 +2,7 @@ package org.epos.api.routines;
 
 import static abstractapis.AbstractAPI.retrieveAPI;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.epos.api.beans.Plugin;
@@ -33,7 +35,6 @@ import org.epos.eposdatamodel.PeriodOfTime;
 import org.epos.eposdatamodel.SoftwareApplication;
 import org.epos.eposdatamodel.User;
 import org.epos.eposdatamodel.WebService;
-import org.epos.handler.dbapi.service.EntityManagerService;
 import org.epos.router_framework.RpcRouter;
 import org.epos.router_framework.RpcRouterBuilder;
 import org.epos.router_framework.domain.Actor;
@@ -42,11 +43,15 @@ import org.epos.router_framework.domain.Request;
 import org.epos.router_framework.domain.RequestBuilder;
 import org.epos.router_framework.domain.Response;
 import org.epos.router_framework.types.ServiceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import metadataapis.EntityNames;
 import usermanagementapis.UserGroupManagementAPI;
 
 public class DatabaseConnections {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseConnections.class);
+
 	private List<DataProduct> dataproducts;
 	private List<SoftwareApplication> softwareApplications;
 	private List<Organization> organizationList;
@@ -73,6 +78,7 @@ public class DatabaseConnections {
 	private int maxDbConnections = 18;
 	private static DatabaseConnections connections;
 	private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	private static int currentErrors = 0;
 
 	private DatabaseConnections() {
 		try {
@@ -87,17 +93,39 @@ public class DatabaseConnections {
 					System.getenv("BROKER_VHOST"),
 					System.getenv("BROKER_USERNAME"),
 					System.getenv("BROKER_PASSWORD"));
-			System.out.println("[CONNECTION] Router initialized");
+			LOGGER.info("[CONNECTION] Router initialized");
 		} catch (Exception e) {
-			System.err.println("[CONNECTION ERROR] Error while initializing router. Stack:\n" + e.toString());
+			LOGGER.error("[CONNECTION ERROR] Error while initializing router", e);
 		}
 
 		try {
 			int connPoolMaxSize = Integer.parseInt(System.getenv("CONNECTION_POOL_MAX_SIZE"));
 			this.maxDbConnections = Math.min(connPoolMaxSize, this.maxDbConnections);
 		} catch (NumberFormatException e) {
-			System.err.println("Error while parsing env variable CONNECTION_POOL_MAX_SIZE: " + e.toString());
+			LOGGER.error("Error while parsing env variable CONNECTION_POOL_MAX_SIZE", e);
 		}
+	}
+
+	// create a safe future handling possible null values and exceptions
+	private <T> CompletableFuture<T> createSafeFuture(
+			Supplier<T> supplier,
+			T defaultValue,
+			String operationName,
+			ExecutorService executor) {
+		return CompletableFuture.supplyAsync(() -> {
+			try {
+				T result = supplier.get();
+				if (result == null) {
+					currentErrors++;
+					return defaultValue;
+				}
+				return result;
+			} catch (Exception e) {
+				LOGGER.error("[CONNECTION ERROR] Error in {}", operationName, e);
+				currentErrors++;
+				return defaultValue;
+			}
+		}, executor);
 	}
 
 	public void syncDatabaseConnections() {
@@ -106,62 +134,119 @@ public class DatabaseConnections {
 		ExecutorService executor = Executors.newFixedThreadPool(maxDbConnections);
 
 		// wrap each query in a future
-		CompletableFuture<List<DataProduct>> tempDataproductsFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll(), executor);
+		CompletableFuture<List<DataProduct>> tempDataproductsFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI DATAPRODUCT",
+				executor);
 
-		CompletableFuture<List<SoftwareApplication>> tempSoftwareApplicationsFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll(), executor);
+		CompletableFuture<List<SoftwareApplication>> tempSoftwareApplicationsFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI SOFTWAREAPPLICATION",
+				executor);
 
-		CompletableFuture<List<Organization>> tempOrganizationListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll(), executor);
+		CompletableFuture<List<Organization>> tempOrganizationListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI ORGANIZATION",
+				executor);
 
-		CompletableFuture<List<Category>> tempCategoryListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll(), executor);
+		CompletableFuture<List<Category>> tempCategoryListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI CATEGORY",
+				executor);
 
-		CompletableFuture<List<CategoryScheme>> tempCategorySchemeListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.CATEGORYSCHEME.name()).retrieveAll(), executor);
+		CompletableFuture<List<CategoryScheme>> tempCategorySchemeListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.CATEGORYSCHEME.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI CATEGORYSCHEME",
+				executor);
 
-		CompletableFuture<List<Distribution>> tempDistributionListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll(), executor);
+		CompletableFuture<List<Distribution>> tempDistributionListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI DISTRIBUTION",
+				executor);
 
-		CompletableFuture<List<Operation>> tempOperationListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.OPERATION.name()).retrieveAll(), executor);
+		CompletableFuture<List<Operation>> tempOperationListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.OPERATION.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI OPERATION",
+				executor);
 
-		CompletableFuture<List<WebService>> tempWebServiceListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.WEBSERVICE.name()).retrieveAll(), executor);
+		CompletableFuture<List<WebService>> tempWebServiceListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.WEBSERVICE.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI WEBSERVICE",
+				executor);
 
-		CompletableFuture<List<Address>> tempAddressListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.ADDRESS.name()).retrieveAll(), executor);
+		CompletableFuture<List<Address>> tempAddressListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.ADDRESS.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI ADDRESS",
+				executor);
 
-		CompletableFuture<List<Location>> tempLocationListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.LOCATION.name()).retrieveAll(), executor);
+		CompletableFuture<List<Location>> tempLocationListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.LOCATION.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI LOCATION",
+				executor);
 
-		CompletableFuture<List<PeriodOfTime>> tempPeriodOfTimeListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.PERIODOFTIME.name()).retrieveAll(), executor);
+		CompletableFuture<List<PeriodOfTime>> tempPeriodOfTimeListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.PERIODOFTIME.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI PERIODOFTIME",
+				executor);
 
-		CompletableFuture<List<Identifier>> tempIdentifierListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.IDENTIFIER.name()).retrieveAll(), executor);
+		CompletableFuture<List<Identifier>> tempIdentifierListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.IDENTIFIER.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI IDENTIFIER",
+				executor);
 
-		CompletableFuture<List<Mapping>> tempMappingListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.MAPPING.name()).retrieveAll(), executor);
+		CompletableFuture<List<Mapping>> tempMappingListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.MAPPING.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI MAPPING",
+				executor);
 
-		CompletableFuture<List<Facility>> tempFacilityListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.FACILITY.name()).retrieveAll(), executor);
+		CompletableFuture<List<Facility>> tempFacilityListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.FACILITY.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI FACILITY",
+				executor);
 
-		CompletableFuture<List<Equipment>> tempEquipmentListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll(), executor);
+		CompletableFuture<List<Equipment>> tempEquipmentListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI EQUIPMENT",
+				executor);
 
-		CompletableFuture<List<OutputMapping>> tempOutputMappingListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.OUTPUTMAPPING.name()).retrieveAll(), executor);
+		CompletableFuture<List<OutputMapping>> tempOutputMappingListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.OUTPUTMAPPING.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI OUTPUTMAPPING",
+				executor);
 
-		CompletableFuture<List<Payload>> tempPayloadListFuture = CompletableFuture
-				.supplyAsync(() -> retrieveAPI(EntityNames.PAYLOAD.name()).retrieveAll(), executor);
+		CompletableFuture<List<Payload>> tempPayloadListFuture = createSafeFuture(
+				() -> retrieveAPI(EntityNames.PAYLOAD.name()).retrieveAll(),
+				new ArrayList<>(),
+				"retrieveAPI PAYLOAD",
+				executor);
 
-		CompletableFuture<List<User>> tempUserListFuture = CompletableFuture
-				.supplyAsync(() -> UserGroupManagementAPI.retrieveAllUsers(), executor);
+		CompletableFuture<List<User>> tempUserListFuture = createSafeFuture(
+				() -> UserGroupManagementAPI.retrieveAllUsers(),
+				new ArrayList<>(),
+				"UserGroupManagementAPI.retrieveAllUsers",
+				executor);
 
-		CompletableFuture<Map<String, List<Plugin.Relations>>> tempPluginsFuture = CompletableFuture.supplyAsync(
-				() -> retreivePlugins(), executor);
+		CompletableFuture<Map<String, List<Plugin.Relations>>> tempPluginsFuture = createSafeFuture(
+				() -> retrievePlugins(),
+				new HashMap<>(),
+				"retrievePlugins",
+				executor);
 
 		// join the futures together
 		CompletableFuture<Void> allFutures = CompletableFuture.allOf(
@@ -209,14 +294,8 @@ public class DatabaseConnections {
 		List<User> tempUserList = tempUserListFuture.join();
 		Map<String, List<Plugin.Relations>> tempPlugins = tempPluginsFuture.join();
 
-		// convert the list to a map <id, object> for faster retrieval, outside the lock
-		Map<String, User> tempUsersMap;
-		if (tempUserList != null) {
-			tempUsersMap = tempUserList.stream()
-					.collect(Collectors.toMap(User::getAuthIdentifier, Function.identity()));
-		} else {
-			tempUsersMap = new HashMap<String, User>();
-		}
+		// convert the list to a map <id, object> for faster retrieval, with null safety
+		Map<String, User> tempUsersMap = createSafeUserMap(tempUserList);
 
 		lock.writeLock().lock();
 
@@ -247,6 +326,28 @@ public class DatabaseConnections {
 		} finally {
 			lock.writeLock().unlock();
 		}
+
+		if (currentErrors >= maxDbConnections) {
+			LOGGER.error("Too many errors while syncing the cache ({}), exiting...", currentErrors);
+			System.exit(1);
+		}
+	}
+
+	private Map<String, User> createSafeUserMap(List<User> userList) {
+		if (userList == null || userList.isEmpty()) {
+			return new HashMap<>();
+		}
+
+		return userList.stream()
+				.filter(user -> user != null && user.getAuthIdentifier() != null)
+				.collect(Collectors.toMap(
+						User::getAuthIdentifier,
+						Function.identity(),
+						(existing, replacement) -> {
+							LOGGER.warn("[WARNING] Duplicate user auth identifier found, keeping existing: {}",
+									existing.getAuthIdentifier());
+							return existing;
+						}));
 	}
 
 	public static DatabaseConnections getInstance() {
@@ -262,171 +363,85 @@ public class DatabaseConnections {
 	}
 
 	public List<DataProduct> getDataproducts() {
-		lock.readLock().lock();
-		try {
-			return dataproducts;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(dataproducts);
 	}
 
 	public List<SoftwareApplication> getSoftwareApplications() {
-		lock.readLock().lock();
-		try {
-			return softwareApplications;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(softwareApplications);
 	}
 
 	public List<Organization> getOrganizationList() {
-		lock.readLock().lock();
-		try {
-			return organizationList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(organizationList);
 	}
 
 	public List<Category> getCategoryList() {
-		lock.readLock().lock();
-		try {
-			return categoryList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(categoryList);
 	}
 
 	public List<CategoryScheme> getCategorySchemesList() {
-		lock.readLock().lock();
-		try {
-			return categorySchemesList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(categorySchemesList);
 	}
 
 	public List<Distribution> getDistributionList() {
-		lock.readLock().lock();
-		try {
-			return distributionList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(distributionList);
 	}
 
 	public List<Operation> getOperationList() {
-		lock.readLock().lock();
-		try {
-			return operationList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(operationList);
 	}
 
 	public List<WebService> getWebServiceList() {
-		lock.readLock().lock();
-		try {
-			return webServiceList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(webServiceList);
 	}
 
 	public List<Address> getAddressList() {
-		lock.readLock().lock();
-		try {
-			return addressList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(addressList);
 	}
 
 	public List<Location> getLocationList() {
-		lock.readLock().lock();
-		try {
-			return locationList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(locationList);
 	}
 
 	public List<PeriodOfTime> getPeriodOfTimeList() {
-		lock.readLock().lock();
-		try {
-			return periodOfTimeList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(periodOfTimeList);
 	}
 
 	public List<Identifier> getIdentifierList() {
-		lock.readLock().lock();
-		try {
-			return identifierList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(identifierList);
 	}
 
 	public List<Mapping> getMappingList() {
-		lock.readLock().lock();
-		try {
-			return mappingList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(mappingList);
 	}
 
 	public List<Facility> getFacilityList() {
-		lock.readLock().lock();
-		try {
-			return facilityList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(facilityList);
 	}
 
 	public List<Equipment> getEquipmentList() {
-		lock.readLock().lock();
-		try {
-			return equipmentList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(equipmentList);
 	}
 
 	public List<OutputMapping> getOutputMappings() {
-		lock.readLock().lock();
-		try {
-			return outputMappingsList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(outputMappingsList);
 	}
 
 	public List<Payload> getPayloads() {
-		lock.readLock().lock();
-		try {
-			return payloadsList;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(payloadsList);
 	}
 
 	public Map<String, User> getUsers() {
-		lock.readLock().lock();
-		try {
-			return usersMap;
-		} finally {
-			lock.readLock().unlock();
-		}
+		return safeRead(usersMap);
 	}
 
 	public Map<String, List<Plugin.Relations>> getPlugins() {
+		return safeRead(plugins);
+	}
+
+	private <T> T safeRead(T value) {
 		lock.readLock().lock();
 		try {
-			return plugins;
+			return value;
 		} finally {
 			lock.readLock().unlock();
 		}
@@ -452,7 +467,7 @@ public class DatabaseConnections {
 		return response;
 	}
 
-	private Map<String, List<Plugin.Relations>> retreivePlugins() {
+	private Map<String, List<Plugin.Relations>> retrievePlugins() {
 		var result = new HashMap<String, List<Plugin.Relations>>();
 		try {
 			Map<String, Object> params = new HashMap<>();
@@ -470,7 +485,7 @@ public class DatabaseConnections {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("[CONNECTION ERROR] Error getting respoonse from router: " + e.toString());
+			LOGGER.error("[CONNECTION ERROR] Error getting response from router", e);
 		}
 		return result;
 	}
