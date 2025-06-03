@@ -99,8 +99,8 @@ public class FacilityDetailsItemGenerationJPA {
 					.stream()
 					.filter(cat -> cat.getUid().equals(facilitySelected.getType())).collect(Collectors.toList());
 
-
-			facility.setType(type.get(0).getName());
+			if(type!=null && !type.isEmpty())
+				facility.setType(type.get(0).getName());
 
 
 			if (facilitySelected.getSpatialExtent() != null) {
