@@ -135,7 +135,6 @@ public class DatabaseConnections {
 		// one thread for each query
 		ExecutorService executor = Executors.newFixedThreadPool(maxDbConnections);
 
-		EntityManagerService.getInstance().getCache().evictAll();
 		// wrap each query in a future
 		CompletableFuture<List<DataProduct>> tempDataproductsFuture = createSafeFuture(
 				() -> retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll(),
