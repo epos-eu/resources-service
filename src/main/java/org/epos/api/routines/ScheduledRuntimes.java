@@ -5,6 +5,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
@@ -89,13 +90,13 @@ public class ScheduledRuntimes {
 	public void facetsUpdater() {
 		LOGGER.info("[Scheduled Task - Facets] Updating facets information");
 
-		JsonObject facetsFromDatabase;
 		try {
-			facetsFromDatabase = Facets.getInstance().generateFacetsFromDatabase();
-			Facets.getInstance().setFacetsFromDatabase(facetsFromDatabase);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			LOGGER.error(e.getLocalizedMessage());
+			var dataFacets = Facets.getInstance().generateFacetsFromDatabase(Facets.Type.DATA);
+			var facilityFacets = Facets.getInstance().generateFacetsFromDatabase(Facets.Type.FACILITY);
+			Facets.getInstance().setFacetsFromDatabase(dataFacets, Facets.Type.DATA);
+			Facets.getInstance().setFacetsFromDatabase(facilityFacets, Facets.Type.FACILITY);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		LOGGER.info("[Scheduled Task - Facets] Facets successfully updated");
 	}

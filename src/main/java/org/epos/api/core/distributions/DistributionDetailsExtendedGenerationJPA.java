@@ -27,6 +27,7 @@ import org.epos.api.core.AvailableFormatsGeneration;
 import org.epos.api.core.DataServiceProviderGeneration;
 import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.enums.ProviderType;
+import org.epos.api.facets.Facets;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.FacetsNodeTree;
 import org.epos.eposdatamodel.Category;
@@ -442,7 +443,7 @@ public class DistributionDetailsExtendedGenerationJPA {
 				.editorId(distribution.getEditorId())
 				.build());
 
-		FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList);
+		FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList, Facets.Type.DATA);
 		categories.getNodes().forEach(node -> node.setDistributions(null));
 		distribution.setCategories(categories.getFacets());
 

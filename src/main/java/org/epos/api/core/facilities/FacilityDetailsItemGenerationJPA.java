@@ -1,20 +1,26 @@
 package org.epos.api.core.facilities;
 
-import abstractapis.AbstractAPI;
-import commonapis.LinkedEntityAPI;
-import metadataapis.EntityNames;
-import model.StatusType;
-import org.apache.logging.log4j.util.Strings;
-import org.epos.api.beans.DiscoveryItem.DiscoveryItemBuilder;
-import org.epos.api.core.DataServiceProviderGeneration;
-import org.epos.api.core.EnvironmentVariables;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.epos.api.beans.AvailableFormat;
-import org.epos.api.beans.DataServiceProvider;
 import org.epos.api.beans.DiscoveryItem;
+import org.epos.api.beans.DiscoveryItem.DiscoveryItemBuilder;
 import org.epos.api.beans.Facility;
 import org.epos.api.beans.ServiceParameter;
 import org.epos.api.beans.SpatialInformation;
+import org.epos.api.core.DataServiceProviderGeneration;
+import org.epos.api.core.EnvironmentVariables;
+import org.epos.api.core.distributions.DistributionDetailsGenerationJPA;
 import org.epos.api.enums.AvailableFormatType;
+import org.epos.api.facets.Facets;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.FacetsNodeTree;
 import org.epos.api.routines.DatabaseConnections;
@@ -32,8 +38,9 @@ import org.epos.library.objects.LinkObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import abstractapis.AbstractAPI;
+import commonapis.LinkedEntityAPI;
+import metadataapis.EntityNames;
 
 public class FacilityDetailsItemGenerationJPA {
 
@@ -48,6 +55,11 @@ public class FacilityDetailsItemGenerationJPA {
 		LOGGER.info("Parameters {}", parameters);
 
 		org.epos.eposdatamodel.Facility facilitySelected = (org.epos.eposdatamodel.Facility) AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieve(parameters.get("id").toString());
+		// maybe the details is for a service from the data panel
+		if (facilitySelected == null) {
+			LOGGER.info("Given id is not of a facility, checking if it's a distribution");
+			return DistributionDetailsGenerationJPA.generate(parameters);
+		}
 		List<Organization> organizationForOwners  = DatabaseConnections.getInstance().getOrganizationList();
 		List<Category> categoriesFromDB = DatabaseConnections.getInstance().getCategoryList();
 
@@ -189,7 +201,7 @@ public class FacilityDetailsItemGenerationJPA {
 					.categories(categoryList.isEmpty() ? null : categoryList)
 					.build());
 
-			FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList);
+			FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList, Facets.Type.DATA);
 			categories.getNodes().forEach(node -> node.setDistributions(null));
 			facility.setCategories(categories.getFacets());
 

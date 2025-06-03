@@ -16,10 +16,10 @@ public class FacetsNodeTree {
 		this.nodes = new ArrayList<Node>();
 	}
 
-	public FacetsNodeTree(Boolean fromDatabase) {
+	public FacetsNodeTree(Boolean fromDatabase, Facets.Type type) {
 		try {
 			if(fromDatabase) {
-				this.facets = Utils.gson.fromJson(Facets.getInstance().getFacetsFromDatabase(), Node.class);
+				this.facets = Utils.gson.fromJson(Facets.getInstance().getFacetsFromDatabase(type), Node.class);
 				nodes = returnAllNodes(facets);
 			}else {
 				this.facets = Utils.gson.fromJson(Facets.getInstance().getFacetsStatic(), Node.class);
@@ -65,22 +65,23 @@ public class FacetsNodeTree {
 		this.nodes = nodes;
 	}
 
-	public Node removeEmptyLeafs(Node root) {
-		if(root.getChildren()!=null) {
-			for(int i = 0; i<root.getChildren().size(); i++) {
-				Node child = removeEmptyLeafs(root.getChildren().get(i));
-				if(child == null) {
+	public Node removeEmptyLeaves(Node root) {
+		if (root.getChildren() != null) {
+			for (int i = 0; i < root.getChildren().size(); i++) {
+				Node child = removeEmptyLeaves(root.getChildren().get(i));
+				if (child == null) {
 					root.getChildren().remove(i);
 					i--;
-				}
-				else if(child.getChildren()==null && root.getDistributions()==null && child.getDistributions().isEmpty()) {
+				} else if (child.getChildren() == null && root.getDistributions() == null
+						&& child.getDistributions().isEmpty()) {
 					root.getChildren().remove(i);
 					i--;
 				}
 			}
 		}
 
-		if((root.getChildren()==null || root.getChildren().isEmpty()) && (root.getDistributions()==null || root.getDistributions().isEmpty()))
+		if ((root.getChildren() == null || root.getChildren().isEmpty())
+				&& (root.getDistributions() == null || root.getDistributions().isEmpty()))
 			return null;
 
 		return root;
