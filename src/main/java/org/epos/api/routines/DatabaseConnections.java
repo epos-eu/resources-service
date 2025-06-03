@@ -15,6 +15,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import dao.EposDataModelDAO;
 import org.epos.api.beans.Plugin;
 import org.epos.api.utility.Utils;
 import org.epos.eposdatamodel.Address;
@@ -35,6 +36,7 @@ import org.epos.eposdatamodel.PeriodOfTime;
 import org.epos.eposdatamodel.SoftwareApplication;
 import org.epos.eposdatamodel.User;
 import org.epos.eposdatamodel.WebService;
+import org.epos.handler.dbapi.service.EntityManagerService;
 import org.epos.router_framework.RpcRouter;
 import org.epos.router_framework.RpcRouterBuilder;
 import org.epos.router_framework.domain.Actor;
@@ -133,6 +135,7 @@ public class DatabaseConnections {
 		// one thread for each query
 		ExecutorService executor = Executors.newFixedThreadPool(maxDbConnections);
 
+		EntityManagerService.getInstance().getCache().evictAll();
 		// wrap each query in a future
 		CompletableFuture<List<DataProduct>> tempDataproductsFuture = createSafeFuture(
 				() -> retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll(),
