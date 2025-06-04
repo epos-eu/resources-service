@@ -123,9 +123,11 @@ public class FacilityDetailsItemGenerationJPA {
 
 
 			facility.setDataProvider(DataServiceProviderGeneration.getProviders(new ArrayList<Organization>(organizationsEntityIds)));
-			facilitySelected.getPageURL().forEach(page->{
-				facility.getPage().add(page);
-			});
+			if(facilitySelected.getPageURL()!=null) {
+				facilitySelected.getPageURL().forEach(page -> {
+					facility.getPage().add(page);
+				});
+			}
 
 			Set<Category> equipmentTypes = new HashSet<>();
 
