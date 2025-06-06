@@ -8,6 +8,7 @@ import java.util.Date;
 
 import javax.annotation.PostConstruct;
 
+import dao.EposDataModelDAO;
 import org.apache.commons.lang3.StringUtils;
 import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.core.ZabbixExecutor;
@@ -105,6 +106,7 @@ public class ScheduledRuntimes {
 	@Async
 	public void connectionsUpdater() {
 		LOGGER.info("[Scheduled Task - Resources] Updating resources information");
+		EposDataModelDAO.clearAllCaches();
         DatabaseConnections.getInstance().syncDatabaseConnections();
         LOGGER.info("[Scheduled Task - Resources] Resources successfully updated");
 	}
