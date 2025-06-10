@@ -17,7 +17,7 @@ package org.epos.api;
  ******************************************************************************/
 
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.epos.api.core.MonitoringGeneration;

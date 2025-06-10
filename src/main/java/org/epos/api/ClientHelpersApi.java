@@ -5,7 +5,7 @@
  */
 package org.epos.api;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.epos.api.beans.Distribution;
 import org.epos.api.beans.Facility;
@@ -30,7 +30,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-10-11T14:51:06.469Z[GMT]")
+@jakarta.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-10-11T14:51:06.469Z[GMT]")
 @Validated
 public interface ClientHelpersApi {
 

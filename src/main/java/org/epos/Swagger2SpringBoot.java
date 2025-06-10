@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
 @EnableScheduling
@@ -47,7 +47,7 @@ public class Swagger2SpringBoot implements CommandLineRunner {
 	}
 
 	@Configuration
-	static class CustomDateConfig extends WebMvcConfigurerAdapter {
+	static class CustomDateConfig implements WebMvcConfigurer {
 		@Override
 		public void addFormatters(FormatterRegistry registry) {
 			registry.addConverter(new LocalDateConverter("yyyy-MM-dd"));
