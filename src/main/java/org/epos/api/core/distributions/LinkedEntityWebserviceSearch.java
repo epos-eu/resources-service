@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import abstractapis.AbstractAPI;
+import metadataapis.EntityNames;
 import org.epos.api.beans.AvailableFormat;
 import org.epos.api.beans.DiscoveryItem;
 import org.epos.api.beans.DiscoveryItem.DiscoveryItemBuilder;
@@ -44,16 +46,16 @@ public class LinkedEntityWebserviceSearch {
 	// in the params
 	private static Set<DiscoveryItem> generateDiscoveryItems(Map<String, String> params) {
 		var db = DatabaseConnections.getInstance();
-		var distributions = db.getDistributionList();
+		var distributions = (List<Distribution>) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll();
 		LOGGER.debug("Retrieved {} distributions from the database.", distributions.size());
 
 		// build the mappings and operations maps
-		Map<String, Mapping> mappings = db.getMappingList().stream()
+		Map<String, Mapping> mappings = ((List<Mapping>) AbstractAPI.retrieveAPI(EntityNames.MAPPING.name()).retrieveAll()).stream()
 				.collect(Collectors.toMap(
 						Mapping::getInstanceId,
 						Function.identity(),
 						(existing, replacement) -> existing));
-		Map<String, Operation> operations = db.getOperationList().stream()
+		Map<String, Operation> operations = ((List<Operation>) AbstractAPI.retrieveAPI(EntityNames.OPERATION.name()).retrieveAll()).stream()
 				.collect(Collectors.toMap(
 						Operation::getInstanceId,
 						Function.identity(),

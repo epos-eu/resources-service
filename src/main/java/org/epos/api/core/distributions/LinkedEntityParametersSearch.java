@@ -1,12 +1,15 @@
 package org.epos.api.core.distributions;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
+import abstractapis.AbstractAPI;
+import metadataapis.EntityNames;
 import org.epos.api.beans.Parameter;
 import org.epos.api.beans.ParametersResponse;
 import org.epos.api.routines.DatabaseConnections;
-import org.epos.eposdatamodel.Operation;
+import org.epos.eposdatamodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,13 +20,9 @@ public class LinkedEntityParametersSearch {
 
 	public static ParametersResponse generate(String id) {
 		LOGGER.info("Starting parameter search for distribution id: {}", id);
-		var db = DatabaseConnections.getInstance();
 
 		// find the distribution
-		var distribution = db.getDistributionList().stream()
-				.filter(d -> d.getInstanceId().equals(id))
-				.findFirst()
-				.orElse(null);
+		var distribution = (Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(id);
 
 		if (distribution == null || distribution.getSupportedOperation() == null
 				|| distribution.getSupportedOperation().isEmpty()) {
@@ -53,10 +52,7 @@ public class LinkedEntityParametersSearch {
 		LOGGER.debug("Using payload id {} for operation {}.", payloadId, operation.getInstanceId());
 
 		// find the payload
-		var payload = db.getPayloads().stream()
-				.filter(p -> p.getInstanceId().equals(payloadId))
-				.findFirst()
-				.orElse(null);
+		var payload =  (Payload) AbstractAPI.retrieveAPI(EntityNames.PAYLOAD.name()).retrieve(payloadId);
 
 		if (payload == null || payload.getOutputMapping() == null) {
 			LOGGER.warn("Payload {} not found or has no output mapping for operation {}.", payloadId,
@@ -73,7 +69,7 @@ public class LinkedEntityParametersSearch {
 		LOGGER.debug("Relevant mapping ids: {}", relevantMappingIds);
 
 		// create the parameters only for the relevant mappings
-		db.getOutputMappings().stream()
+		((List<OutputMapping>) AbstractAPI.retrieveAPI(EntityNames.OUTPUTMAPPING.name()).retrieveAll()).stream()
 				.filter(mapping -> relevantMappingIds.contains(mapping.getInstanceId()))
 				.forEach(mapping -> {
 					parameters.add(new Parameter(mapping.getOutputProperty(), mapping.getOutputVariable()));

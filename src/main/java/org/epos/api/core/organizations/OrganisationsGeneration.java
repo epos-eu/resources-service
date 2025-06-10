@@ -31,12 +31,12 @@ public class OrganisationsGeneration {
 		List<Organization> organisations;
 
 		if(parameters.containsKey("id")) {
-			organisations = DatabaseConnections.getInstance().getOrganizationList().stream().filter(organization -> organization.getInstanceId().equals(parameters.get("id").toString())).collect(Collectors.toList());
+			organisations = List.of((Organization) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieve(parameters.get("id").toString()));
 		}else {
-			organisations = DatabaseConnections.getInstance().getOrganizationList();
+			organisations = (List<Organization>) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll();
 			
 			if(parameters.containsKey("type")) {
-				List<Distribution> distributions = DatabaseConnections.getInstance().getDistributionList();
+				List<Distribution> distributions = (List<Distribution>) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll();
 
 				List<Organization> tempOrganizationList;
 
@@ -46,12 +46,12 @@ public class OrganisationsGeneration {
 					if(parameters.get("type").toString().toLowerCase().contains("dataproviders")) {
 						if(distribution.getDataProduct()!=null){
 							for (LinkedEntity dataproduct : distribution.getDataProduct()) {
-								Optional<DataProduct> dataProduct = DatabaseConnections.getInstance().getDataproducts().stream().filter(dataProduct1 -> dataProduct1.getInstanceId().equals(dataproduct.getInstanceId())).findFirst();
-								if(dataProduct.isPresent()){
-									if(dataProduct.get().getPublisher()!=null)
-										dataProduct.get().getPublisher().forEach(publisher -> {
-											Optional<Organization> organization = DatabaseConnections.getInstance().getOrganizationList().stream().filter(organization1 -> organization1.getInstanceId().equals(publisher.getInstanceId())).findFirst();
-                                            organization.ifPresent(organizationsEntityIds::add);
+								DataProduct dataProduct = (DataProduct) LinkedEntityAPI.retrieveFromLinkedEntity(dataproduct);
+								if(Objects.nonNull(dataProduct)){
+									if(dataProduct.getPublisher()!=null)
+										dataProduct.getPublisher().forEach(publisher -> {
+											Organization organization = (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(publisher);
+											organizationsEntityIds.add(organization);
 										});
 								}
 							}
@@ -60,11 +60,11 @@ public class OrganisationsGeneration {
 					if(parameters.get("type").toString().toLowerCase().contains("serviceproviders") && distribution.getAccessService()!=null) {
 						if(distribution.getAccessService()!=null){
 							for (LinkedEntity webservice : distribution.getAccessService()) {
-								Optional<WebService> webService = DatabaseConnections.getInstance().getWebServiceList().stream().filter(webService1 -> webService1.getInstanceId().equals(webservice.getInstanceId())).findFirst();
-								if(webService.isPresent()){
-									if(webService.get().getProvider()!=null){
-										Optional<Organization> organization = DatabaseConnections.getInstance().getOrganizationList().stream().filter(organization1 -> organization1.getInstanceId().equals(webService.get().getProvider().getInstanceId())).findFirst();
-										organization.ifPresent(organizationsEntityIds::add);
+								WebService webService = (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(webservice);
+								if(Objects.nonNull(webService)){
+									if(webService.getProvider()!=null){
+										Organization organization = (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(webService.getProvider());
+										organizationsEntityIds.add(organization);
 									}
 								}
 							}
@@ -107,8 +107,8 @@ public class OrganisationsGeneration {
 				List<Organization> tempOrganizationList = new ArrayList<>();
 				for(Organization e : organisations) {
 					if(e.getAddress()!=null){
-						Optional<Address> address = DatabaseConnections.getInstance().getAddressList().stream().filter(address1 -> address1.getInstanceId().equals(e.getAddress().getInstanceId())).findFirst();
-						if(address.isPresent() && address.get().getCountry().equals(parameters.get("country"))){
+						Address address = (Address) LinkedEntityAPI.retrieveFromLinkedEntity(e.getAddress());
+						if(Objects.nonNull(address) && address.getCountry().equals(parameters.get("country"))){
 							tempOrganizationList.add(e);
 						}
 					}
@@ -124,9 +124,9 @@ public class OrganisationsGeneration {
 				String legalName = String.join(";", singleOrganization.getLegalName());
 				Address address = null;
 				if(singleOrganization.getAddress()!=null) {
-					Optional<Address> addressOptional = DatabaseConnections.getInstance().getAddressList().stream().filter(address1 -> address1.getInstanceId().equals(singleOrganization.getAddress().getInstanceId())).findFirst();
-					if(addressOptional.isPresent()){
-						address = addressOptional.get();
+					Address addressOptional = (Address) LinkedEntityAPI.retrieveFromLinkedEntity(singleOrganization.getAddress());
+					if(Objects.nonNull(addressOptional)){
+						address = addressOptional;
 					}
 				}
 				OrganizationBean ob = new OrganizationBean(singleOrganization.getInstanceId(), singleOrganization.getLogo(), singleOrganization.getURL(), legalName,address!=null? address.getCountry() : null);

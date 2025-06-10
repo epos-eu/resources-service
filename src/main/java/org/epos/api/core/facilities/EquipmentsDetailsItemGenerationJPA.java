@@ -35,17 +35,17 @@ public class EquipmentsDetailsItemGenerationJPA {
 		if(parameters.containsKey("facilityid")) {
 			facilitySelectedList = List.of((Facility)AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieve(parameters.get("id").toString()));
 		}else {
-			facilitySelectedList = DatabaseConnections.getInstance().getFacilityList();
+			facilitySelectedList = (List<Facility>) AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieveAll();
 		}
 
-		List<Category> categoriesFromDB = DatabaseConnections.getInstance().getCategoryList();
+		List<Category> categoriesFromDB = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll();
 
 		List<Equipment> equipmentList = null;
 
 		if(parameters.containsKey("id") && !parameters.get("id").equals("all")) {
 			equipmentList = List.of( (org.epos.eposdatamodel.Equipment) AbstractAPI.retrieveAPI(EntityNames.EQUIPMENT.name()).retrieve(parameters.get("id").toString()));
 		}else {
-			equipmentList = DatabaseConnections.getInstance().getEquipmentList();
+			equipmentList = (List<Equipment>) AbstractAPI.retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll();
 		}
 
 		if(parameters.containsKey("params")) {

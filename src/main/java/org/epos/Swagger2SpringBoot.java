@@ -1,6 +1,7 @@
 package org.epos;
 
 
+import dao.DAOMonitor;
 import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.core.ZabbixExecutor;
 import org.epos.api.facets.Facets;
@@ -35,6 +36,7 @@ public class Swagger2SpringBoot implements CommandLineRunner {
 		}
 		LOGGER.info("[Facets enabled]"); 
 		Facets.getInstance();
+		DAOMonitor.initialize();
 		if(EnvironmentVariables.MONITORING.equals("true")) LOGGER.info("[Monitoring enabled]");
 		else System.out.println("[Monitoring disabled]");
 		if(EnvironmentVariables.MONITORING.equals("true")) {

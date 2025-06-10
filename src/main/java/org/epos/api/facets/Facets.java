@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import abstractapis.AbstractAPI;
+import metadataapis.EntityNames;
 import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.Category;
 import org.epos.eposdatamodel.CategoryScheme;
 import org.epos.eposdatamodel.LinkedEntity;
+import org.epos.eposdatamodel.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +42,8 @@ public class Facets {
 		JsonArray domainsFacets = new JsonArray();
 		JsonObject facetsObject = new JsonObject();
 
-		List<CategoryScheme> schemes = DatabaseConnections.getInstance().getCategorySchemesList();
-		List<Category> categories = DatabaseConnections.getInstance().getCategoryList();
+		List<CategoryScheme> schemes = (List<CategoryScheme>) AbstractAPI.retrieveAPI(EntityNames.CATEGORYSCHEME.name()).retrieveAll();
+		List<Category> categories = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll();
 
 		List<CategoryScheme> categorySchemesList = schemes.stream()
 				.filter(e -> e.getUid().contains("category:"))

@@ -1,9 +1,11 @@
 package org.epos.api.core;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import abstractapis.AbstractAPI;
+import commonapis.LinkedEntityAPI;
+import metadataapis.EntityNames;
 import org.epos.api.beans.AvailableFormat;
 import org.epos.api.beans.AvailableFormatConverted;
 import org.epos.api.beans.Plugin;
@@ -21,6 +23,12 @@ public class AvailableFormatsGeneration {
 	private static final String API_FORMAT = "?format=";
 	private static final String API_INPUT_FORMAT = "inputFormat=";
 	private static final String API_PLUGIN_ID = "pluginId=";
+
+	private static Map<String, List<AvailableFormat>> formats;
+
+	public static Map<String, List<AvailableFormat>> getFormats() {
+		return formats;
+	}
 
 	// Helper method to avoid repetitive creation of AvailableFormat objects
 	private static AvailableFormat buildAvailableFormat(String originalFormat, String format, String href, String label,
@@ -47,6 +55,23 @@ public class AvailableFormatsGeneration {
 				.build();
 	}
 
+	public static Map<String, List<AvailableFormat>> generate(List<Distribution> distributions) {;
+		formats = new HashMap<>();
+		distributions.forEach(distribution -> {
+			formats.put(distribution.getInstanceId(), generate(distribution));
+		});
+		return formats;
+	}
+
+	public static Map<String, List<AvailableFormat>> generate() {
+		List<Distribution> distributions = (List<Distribution>) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll();
+		formats = new HashMap<>();
+		distributions.forEach(distribution -> {
+			formats.put(distribution.getInstanceId(), generate(distribution));
+		});
+		return formats;
+	}
+
 	public static List<AvailableFormat> generate(Distribution distribution) {
 		List<AvailableFormat> formats = new ArrayList<>();
 
@@ -65,28 +90,15 @@ public class AvailableFormatsGeneration {
 			return formats;
 
 		// WEBSERVICE
-		List<Operation> operationList = DatabaseConnections.getInstance()
-				.getOperationList().stream()
-				.filter(item -> distribution.getSupportedOperation().stream()
-						.map(LinkedEntity::getInstanceId)
-						.collect(Collectors.toList())
-						.contains(item.getInstanceId()))
-				.collect(Collectors.toList());
-		for (Operation operation : operationList) {
-			// Skip this operation if it is null
-			if (operation == null)
-				continue;
+		Operation operation = (Operation) LinkedEntityAPI.retrieveFromLinkedEntity(distribution.getSupportedOperation().get(0));
+		if(Objects.nonNull(operation)){
 
 			boolean isOgcFormat = false;
 
+
 			if (operation.getMapping() != null) {
-				List<Mapping> mappings = DatabaseConnections.getInstance()
-						.getMappingList().stream()
-						.filter(item -> operation.getMapping().stream()
-								.map(LinkedEntity::getInstanceId)
-								.collect(Collectors.toList())
-								.contains(item.getInstanceId()))
-						.collect(Collectors.toList());
+				List<String> maps = operation.getMapping().stream().map(LinkedEntity::getInstanceId).collect(Collectors.toList());
+				List<Mapping> mappings = (List<Mapping>) AbstractAPI.retrieveAPI(EntityNames.MAPPING.name()).retrieveBunch(maps);
 				for (Mapping map : mappings) {
 					if (map != null && map.getProperty() != null && map.getProperty().contains("encodingFormat")) {
 						for (String pv : map.getParamValue()) {

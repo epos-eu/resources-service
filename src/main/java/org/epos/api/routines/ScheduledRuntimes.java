@@ -6,10 +6,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import dao.DAOMonitor;
 import jakarta.annotation.PostConstruct;
 
 import dao.EposDataModelDAO;
 import org.apache.commons.lang3.StringUtils;
+import org.epos.api.core.AvailableFormatsGeneration;
 import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.core.ZabbixExecutor;
 import org.epos.api.facets.Facets;
@@ -106,8 +108,10 @@ public class ScheduledRuntimes {
 	@Async
 	public void connectionsUpdater() {
 		LOGGER.info("[Scheduled Task - Resources] Updating resources information");
-		EposDataModelDAO.clearAllCaches();
+		//EposDataModelDAO.clearAllCaches();
+		LOGGER.info(DAOMonitor.generatePerformanceReport());
         DatabaseConnections.getInstance().syncDatabaseConnections();
+		//AvailableFormatsGeneration.generate();
         LOGGER.info("[Scheduled Task - Resources] Resources successfully updated");
 	}
 

@@ -11,6 +11,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import abstractapis.AbstractAPI;
+import commonapis.LinkedEntityAPI;
+import metadataapis.EntityNames;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.epos.api.beans.AvailableFormat;
 import org.epos.api.beans.DataServiceProvider;
@@ -27,12 +30,7 @@ import org.epos.api.facets.Facets;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.Node;
 import org.epos.api.routines.DatabaseConnections;
-import org.epos.eposdatamodel.Category;
-import org.epos.eposdatamodel.DataProduct;
-import org.epos.eposdatamodel.Distribution;
-import org.epos.eposdatamodel.Organization;
-import org.epos.eposdatamodel.User;
-import org.epos.eposdatamodel.WebService;
+import org.epos.eposdatamodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,8 +61,11 @@ public class DistributionSearchGenerationJPA {
 		}
 
 		List<DataProduct> dataproducts = new ArrayList<>();
+		Map<String, User> userMap = DatabaseConnections.retrieveUserMap();
+		//Map<String, List<AvailableFormat>> formats = AvailableFormatsGeneration.getFormats();
 
-		for (DataProduct dataProduct : DatabaseConnections.getInstance().getDataproducts()) {
+		//for (DataProduct dataProduct : DatabaseConnections.getInstance().getDataproducts()) {
+		for (DataProduct dataProduct : (List<DataProduct>) AbstractAPI.retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll()){
 			if (dataProduct != null) {
 				if (versions.contains(StatusType.PUBLISHED) && dataProduct.getStatus().equals(StatusType.PUBLISHED)) {
 					dataproducts.add(dataProduct);
@@ -84,8 +85,7 @@ public class DistributionSearchGenerationJPA {
 			}
 		}
 
-		List<Organization> organizationList = DatabaseConnections.getInstance().getOrganizationList();
-		List<Category> categoryList1 = DatabaseConnections.getInstance().getCategoryList();
+		//List<Category> categoryList1 = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll();
 
 		LOGGER.info("Apply filter using input parameters: {}", parameters.toString());
 		// Apply filtering
@@ -107,15 +107,12 @@ public class DistributionSearchGenerationJPA {
 			// DATA PRODUCT
 			if (dataproduct.getCategory() != null) {
 				for (var linkedEntity : dataproduct.getCategory()) {
-					Optional<Category> category = categoryList1.stream()
-							.filter(categoryFromList -> categoryFromList.getInstanceId()
-									.equals(linkedEntity.getInstanceId()))
-							.findFirst();
-					if (category.isPresent()) {
-						if (category.get().getUid().contains("category:"))
-							categoryList.add(category.get().getUid());
+					Category category = (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity);
+					if (Objects.nonNull(category)) {
+						if (category.getUid().contains("category:"))
+							categoryList.add(category.getUid());
 						else {
-							scienceDomains.add(category.get());
+							scienceDomains.add(category);
 						}
 					}
 				}
@@ -123,15 +120,12 @@ public class DistributionSearchGenerationJPA {
 
 			if (dataproduct.getPublisher() != null) {
 				for (var linkedEntity : dataproduct.getPublisher()) {
-					Optional<Organization> organization = organizationList.stream()
-							.filter(organizationFromList -> organizationFromList.getInstanceId()
-									.equals(linkedEntity.getInstanceId()))
-							.findFirst();
-					if (organization.isPresent()) {
-						if (organization.get().getLegalName() != null) {
-							facetsDataProviders.add(String.join(",", organization.get().getLegalName()));
+					Organization organization = (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity);
+					if (Objects.nonNull(organization)) {
+						if (organization.getLegalName() != null) {
+							facetsDataProviders.add(String.join(",", organization.getLegalName()));
 						}
-						organizationsEntityIds.add(organization.get());
+						organizationsEntityIds.add(organization);
 					}
 				}
 			}
@@ -148,70 +142,57 @@ public class DistributionSearchGenerationJPA {
 			}
 
 			for (var linkedEntity : dataproduct.getDistribution()) {
-				Optional<Distribution> distribution = DatabaseConnections.getInstance().getDistributionList().stream()
-						.filter(distributionFromList -> distributionFromList.getInstanceId()
-								.equals(linkedEntity.getInstanceId()))
-						.findFirst();
-
-				if (distribution.isEmpty()) {
+				Distribution distribution = (Distribution) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity);
+				if (Objects.isNull(distribution)) {
 					continue;
 				}
 
 				Set<String> facetsServiceProviders = new HashSet<>();
 
 				// AVAILABLE FORMATS
-				List<AvailableFormat> availableFormats = AvailableFormatsGeneration.generate(distribution.get());
+				List<AvailableFormat> availableFormats = AvailableFormatsGeneration.generate(distribution);//formats.get(distribution.getInstanceId());//AvailableFormatsGeneration.generate(distribution);
 
-				if (distribution.get().getAccessService() != null) {
-					distribution.get().getAccessService().forEach(linkedEntity1 -> {
-						Optional<WebService> webService = DatabaseConnections.getInstance().getWebServiceList()
-								.stream().filter(webserviceFromList -> webserviceFromList.getInstanceId()
-										.equals(linkedEntity1.getInstanceId()))
-								.findFirst();
-						if (webService.isPresent()) {
-							if (webService.get().getProvider() != null) {
-								Optional<Organization> organization = organizationList.stream()
-										.filter(organizationFromList -> organizationFromList.getInstanceId()
-												.equals(webService.get().getProvider().getInstanceId()))
-										.findFirst();
-								if (organization.isPresent()) {
-									if (organization.get().getLegalName() != null)
+				if (distribution.getAccessService() != null) {
+					distribution.getAccessService().forEach(linkedEntity1 -> {
+						WebService webService = (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity1);
+						if (Objects.nonNull(webService)) {
+							if (webService.getProvider() != null) {
+								Organization organization = (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(webService.getProvider());
+								if (Objects.nonNull(organization)) {
+									if (organization.getLegalName() != null)
 										facetsServiceProviders
-												.add(String.join(",", organization.get().getLegalName()));
-									organizationsEntityIds.add(organization.get());
+												.add(String.join(",", organization.getLegalName()));
+									organizationsEntityIds.add(organization);
 								}
 							}
 
 							// Service Types
-							if (webService.get().getCategory() != null) {
-								webService.get().getCategory()
+							if (webService.getCategory() != null) {
+								webService.getCategory()
 										.forEach(linkedEntity2 -> {
-											Optional<Category> category = categoryList1.stream()
-													.filter(categoryFromList -> categoryFromList.getInstanceId()
-															.equals(linkedEntity2.getInstanceId()))
-													.findFirst();
-											category.ifPresent(serviceTypes::add);
+											Category category = (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity2);
+											if(Objects.nonNull(category)) serviceTypes.add(category);
 										});
 							}
 						}
 					});
 				}
 
-				DiscoveryItemBuilder discoveryItemBuilder = new DiscoveryItemBuilder(distribution.get().getInstanceId(),
-						EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.get().getInstanceId(),
-						EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.get().getInstanceId()
+				DiscoveryItemBuilder discoveryItemBuilder = new DiscoveryItemBuilder(distribution.getInstanceId(),
+						EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.getInstanceId(),
+						EnvironmentVariables.API_HOST + API_PATH_DETAILS + distribution.getInstanceId()
 								+ "?extended=true")
-						.uid(distribution.get().getUid())
-						.metaId(distribution.get().getMetaId())
-						.title(distribution.get().getTitle() != null
-								? String.join(";", distribution.get().getTitle())
+						.uid(distribution.getUid())
+						.metaId(distribution.getMetaId())
+						.title(distribution.getTitle() != null
+								? String.join(";", distribution.getTitle())
 								: null)
-						.description(distribution.get().getDescription() != null
-								? String.join(";", distribution.get().getDescription())
+						.description(distribution.getDescription() != null
+								? String.join(";", distribution.getDescription())
 								: null)
 						.availableFormats(availableFormats)
-						.sha256id(distribution.get().getUid() != null
-								? DigestUtils.sha256Hex(distribution.get().getUid())
+						.sha256id(distribution.getUid() != null
+								? DigestUtils.sha256Hex(distribution.getUid())
 								: "")
 						.dataProvider(facetsDataProviders)
 						.serviceProvider(facetsServiceProviders)
@@ -221,18 +202,18 @@ public class DistributionSearchGenerationJPA {
 
 				// if the user is part of the backoffice & it is a query for the versions
 				if (isBackofficeUser && parameters.containsKey("versioningStatus")) {
-					var editorId = distribution.get().getEditorId();
+					var editorId = distribution.getEditorId();
 					// if the editor is the ingestor
 					if (editorId.equals("ingestor")) {
 						discoveryItemBuilder.editorFullName("Ingestor");
 					} else { // if the editor is an user
-						var editor = DatabaseConnections.getInstance().getUsers().get(distribution.get().getEditorId());
+						var editor = userMap.get(distribution.getEditorId());
 						if (editor != null) { // unlikely but technically possible
 							discoveryItemBuilder.editorFullName(editor.getFirstName() + " " + editor.getLastName());
 						}
 					}
 					discoveryItemBuilder.editorId(editorId)
-							.changeDate(distribution.get().getChangeTimestamp())
+							.changeDate(distribution.getChangeTimestamp())
 							.versioningStatus(dataproduct.getStatus().name());
 				}
 

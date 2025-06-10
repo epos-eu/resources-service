@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import abstractapis.AbstractAPI;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.epos.api.beans.AvailableFormat;
 import org.epos.api.beans.DataServiceProvider;
@@ -58,9 +59,10 @@ public class FacilitySearchGenerationJPA {
 
 		long startTime = System.currentTimeMillis();
 
-		List<Facility> facilities = DatabaseConnections.getInstance().getFacilityList();
-		List<Organization> organizationForOwners = DatabaseConnections.getInstance().getOrganizationList();
-		List<Category> categoriesFromDB = DatabaseConnections.getInstance().getCategoryList();
+		List<Facility> facilities = (List<Facility>) AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieveAll();
+		List<Equipment> equipments = (List<Equipment>) AbstractAPI.retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll();
+		List<Organization> organizationForOwners = (List<Organization>) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll();
+		List<Category> categoriesFromDB = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll();
 
 		LOGGER.info("Apply filter using input parameters: " + parameters.toString());
 		// TODO for facility
@@ -74,7 +76,7 @@ public class FacilitySearchGenerationJPA {
 		Set<Category> facilityTypes = new HashSet<>();
 		Set<Category> equipmentTypes = new HashSet<>();
 
-		List<DataProduct> dataProducts = DatabaseConnections.getInstance().getDataproducts().stream()
+		List<DataProduct> dataProducts = ((List<DataProduct>) AbstractAPI.retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll()).stream()
 				.filter(d -> d.getStatus().equals(StatusType.PUBLISHED))
 				.collect(Collectors.toList());
 
@@ -96,30 +98,32 @@ public class FacilitySearchGenerationJPA {
 				// if it is a facility category
 				// get the distributions and add them to the discovery list
 				for (var le : dataProduct.getDistribution()) {
-					Optional<Distribution> distribution = DatabaseConnections.getInstance()
-							.getDistributionList().stream()
-							.filter(dist -> dist.getInstanceId().equals(le.getInstanceId()))
-							.findFirst();
-					if (distribution.isEmpty()) {
+					Distribution distribution = (Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(linkedEntity.getInstanceId());
+
+//					Optional<Distribution> distribution = DatabaseConnections.getInstance()
+//							.getDistributionList().stream()
+//							.filter(dist -> dist.getInstanceId().equals(le.getInstanceId()))
+//							.findFirst();
+					if (Objects.isNull(distribution)) {
 						continue;
 					}
 
 					DiscoveryItem discoveryItem = new DiscoveryItemBuilder(
-							distribution.get().getInstanceId(),
+							distribution.getInstanceId(),
 							EnvironmentVariables.API_HOST + API_PATH_DETAILS
-									+ distribution.get().getInstanceId(),
+									+ distribution.getInstanceId(),
 							EnvironmentVariables.API_HOST + API_PATH_DETAILS
-									+ distribution.get().getInstanceId()
+									+ distribution.getInstanceId()
 									+ "?extended=true")
-							.uid(distribution.get().getUid())
-							.metaId(distribution.get().getMetaId())
-							.title(distribution.get().getTitle() != null
-									? String.join(";", distribution.get().getTitle())
+							.uid(distribution.getUid())
+							.metaId(distribution.getMetaId())
+							.title(distribution.getTitle() != null
+									? String.join(";", distribution.getTitle())
 									: null)
-							.description(distribution.get().getDescription() != null
-									? String.join(";", distribution.get().getDescription())
+							.description(distribution.getDescription() != null
+									? String.join(";", distribution.getDescription())
 									: null)
-							.availableFormats(AvailableFormatsGeneration.generate(distribution.get()))
+							.availableFormats(AvailableFormatsGeneration.generate(distribution))
 							// .dataProvider(facetsDataProviders)
 							// .serviceProvider(facetsServiceProviders)
 							.categories(Arrays.asList(category.get().getUid()))
@@ -179,7 +183,7 @@ public class FacilitySearchGenerationJPA {
 					.forEach(facilityTypes::add);
 
 			// Equipment types
-			for (Equipment equipment : DatabaseConnections.getInstance().getEquipmentList()) {
+			for (Equipment equipment : equipments) {
 				if (equipment.getIsPartOf() == null) {
 					continue;
 				}

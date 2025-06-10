@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import abstractapis.AbstractAPI;
+import metadataapis.EntityNames;
 import org.epos.api.beans.DataServiceProvider;
 import org.epos.api.core.DataServiceProviderGeneration;
 import org.epos.api.routines.DatabaseConnections;
@@ -54,8 +56,8 @@ public class DistributionFilterSearch {
 				if (Objects.nonNull(dataproduct.getCategory()) && !dataproduct.getCategory().isEmpty()){
 					List<String> scienceDomainOfDataproduct = new ArrayList<>();
 					for(LinkedEntity item : dataproduct.getCategory()){
-						Optional<Category> category = DatabaseConnections.getInstance().getCategoryList().stream().filter(obj -> obj.getInstanceId().equals(item.getInstanceId())).findFirst();
-                        category.ifPresent(value -> scienceDomainOfDataproduct.add(value.getName()));
+						Category category = (Category) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieve(item.getInstanceId());
+						if(Objects.nonNull(category)) scienceDomainOfDataproduct.add(category.getName());
 					}
 
 					if(!Collections.disjoint(scienceDomainOfDataproduct, scienceDomainsParameters)){
@@ -76,16 +78,18 @@ public class DistributionFilterSearch {
 
 			datasetList.forEach(dataproduct -> {
 				for (LinkedEntity distribution : dataproduct.getDistribution()) {
-					Optional<Distribution> distribution1 = DatabaseConnections.getInstance().getDistributionList().stream().filter(obj -> obj.getInstanceId().equals(distribution.getInstanceId())).findFirst();
-					if(distribution1.isPresent()){
-						for (LinkedEntity accessService : distribution1.get().getAccessService()) {
-							Optional<WebService> webservice = DatabaseConnections.getInstance().getWebServiceList().stream().filter(obj -> obj.getInstanceId().equals(accessService.getInstanceId())).findFirst();
-							if(webservice.isPresent()){
-								if (Objects.nonNull(webservice.get().getCategory()) && !webservice.get().getCategory().isEmpty()){
+					Distribution distribution1 =  (Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(distribution.getInstanceId());
+					if(Objects.nonNull(distribution1)){
+						for (LinkedEntity accessService : distribution1.getAccessService()) {
+							WebService webservice = (WebService) AbstractAPI.retrieveAPI(EntityNames.WEBSERVICE.name()).retrieve(accessService.getInstanceId());
+							if(Objects.nonNull(webservice)){
+								if (Objects.nonNull(webservice.getCategory()) && !webservice.getCategory().isEmpty()){
 									List<String> serviceTypesOfWebservice = new ArrayList<>();
-									for(LinkedEntity item : dataproduct.getCategory()){
-										Optional<Category> category = DatabaseConnections.getInstance().getCategoryList().stream().filter(obj -> obj.getInstanceId().equals(item.getInstanceId())).findFirst();
-										category.ifPresent(value -> serviceTypesOfWebservice.add(value.getName()));
+									List<Category> categories = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveBunch(dataproduct.getCategory().stream().map(LinkedEntity::getInstanceId).collect(Collectors.toList()));
+									for(Category item : categories){
+										//Optional<Category> category = DatabaseConnections.getInstance().getCategoryList().stream().filter(obj -> obj.getInstanceId().equals(item.getInstanceId())).findFirst();
+										//category.ifPresent(value -> serviceTypesOfWebservice.add(value.getName()));
+										serviceTypesOfWebservice.add(item.getName());
 									}
 									if(!Collections.disjoint(serviceTypesOfWebservice, serviceTypesParameters)){
 										tempDatasetList.add(dataproduct);
@@ -128,32 +132,32 @@ public class DistributionFilterSearch {
 
 					//iterate over every distribution related to the dataproduct taken into account
 					for (LinkedEntity distribution : ds.getDistribution()) {
-						Optional<Distribution> distribution1 = DatabaseConnections.getInstance().getDistributionList().stream().filter(obj -> obj.getInstanceId().equals(distribution.getInstanceId())).findFirst();
+						Distribution distribution1 = (Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(distribution.getInstanceId());
 
 						// if no distribution was found, skip it
-						if (!distribution1.isPresent())
+						if (Objects.isNull(distribution1))
 							continue;
 						// if the distribution does not have an accessService, skip it
-						if (distribution1.get().getAccessService() == null)
+						if (Objects.isNull(distribution1.getAccessService()))
 							continue;
 
-						for (LinkedEntity accessService : distribution1.get().getAccessService()) {
-							Optional<WebService> ws = DatabaseConnections.getInstance().getWebServiceList().stream().filter(obj -> obj.getInstanceId().equals(accessService.getInstanceId())).findFirst();
+						for (LinkedEntity accessService : distribution1.getAccessService()) {
+							WebService ws = (WebService) AbstractAPI.retrieveAPI(EntityNames.WEBSERVICE.name()).retrieve(accessService.getInstanceId());
 
 							// if this distribution does not have a spatial extent, don't add it
-							if (!ws.isPresent() || ws.get().getSpatialExtent() == null)
+							if (Objects.isNull(ws) || Objects.isNull(ws.getSpatialExtent()))
 								continue;
 
-							for (LinkedEntity wsSpatialLe : ws.get().getSpatialExtent()) {
-								Optional<Location> wsSpatial = DatabaseConnections.getInstance().getLocationList().stream().filter(obj -> obj.getInstanceId().equals(wsSpatialLe.getInstanceId())).findFirst();
+							for (LinkedEntity wsSpatialLe : ws.getSpatialExtent()) {
+								Location wsSpatial = (Location) AbstractAPI.retrieveAPI(EntityNames.LOCATION.name()).retrieve(wsSpatialLe.getInstanceId());
 
 								// if not present, skip it
-								if (!wsSpatial.isPresent())
+								if (Objects.isNull(wsSpatial))
 									continue;
 
 								try {
 									// parse the spatial of the webservice
-									Geometry dsGeometry = reader.read(wsSpatial.get().getLocation());
+									Geometry dsGeometry = reader.read(wsSpatial.getLocation());
 									// if the dataproduct hasn't been selected yet and the spatial of the webservice
 									// intersect with the bbox, the dataproduct is selected.
 									if (!uidSet.contains(ds.getMetaId()) && inputGeometry.intersects(dsGeometry)) {
@@ -172,11 +176,11 @@ public class DistributionFilterSearch {
 					//same operation done before for the webservice's spatial but now for the dataprodut spatial
 					if(ds.getSpatialExtent() != null){
 						for (LinkedEntity wsSpatialLe : ds.getSpatialExtent()) {
-							Optional<Location> wsSpatial = DatabaseConnections.getInstance().getLocationList().stream().filter(obj -> obj.getInstanceId().equals(wsSpatialLe.getInstanceId())).findFirst();
-							if(wsSpatial.isPresent()){
+							Location wsSpatial = (Location) AbstractAPI.retrieveAPI(EntityNames.LOCATION.name()).retrieve(wsSpatialLe.getInstanceId());
+							if(Objects.nonNull(wsSpatial)){
 								try {
 									//parse the spatial of the webservice
-									Geometry dsGeometry = reader.read(wsSpatial.get().getLocation());
+									Geometry dsGeometry = reader.read(wsSpatial.getLocation());
 									//if the dataproduct hasn't been selected yet and the spatial of the webservice
 									//intersect with the bbox, the dataproduct is selected.
 									if (!uidSet.contains(ds.getMetaId()) && inputGeometry.intersects(dsGeometry)) {
@@ -212,11 +216,11 @@ public class DistributionFilterSearch {
 			datasetList.forEach(ds -> {
 				if(ds.getTemporalExtent()!=null){
 					for(LinkedEntity linkedEntity : ds.getTemporalExtent()){
-						Optional<PeriodOfTime> dsTemporalItem = DatabaseConnections.getInstance().getPeriodOfTimeList().stream().filter(obj -> obj.getInstanceId().equals(linkedEntity.getInstanceId())).findFirst();
-						if(dsTemporalItem.isPresent()){
-							if((dsTemporalItem.get().getStartDate() == null || temporal.getEndDate() == null || dsTemporalItem.get().getStartDate().isBefore(temporal.getEndDate()))
-									&& (temporal.getStartDate() == null || dsTemporalItem.get().getEndDate() == null || temporal.getStartDate().isBefore(dsTemporalItem.get().getEndDate()))
-									&& (dsTemporalItem.get().getStartDate() == null || dsTemporalItem.get().getEndDate() == null || dsTemporalItem.get().getStartDate().isBefore(dsTemporalItem.get().getEndDate()))
+						PeriodOfTime dsTemporalItem = (PeriodOfTime) AbstractAPI.retrieveAPI(EntityNames.PERIODOFTIME.name()).retrieve(linkedEntity.getInstanceId());
+						if(Objects.nonNull(dsTemporalItem)){
+							if((dsTemporalItem.getStartDate() == null || temporal.getEndDate() == null || dsTemporalItem.getStartDate().isBefore(temporal.getEndDate()))
+									&& (temporal.getStartDate() == null || dsTemporalItem.getEndDate() == null || temporal.getStartDate().isBefore(dsTemporalItem.getEndDate()))
+									&& (dsTemporalItem.getStartDate() == null || dsTemporalItem.getEndDate() == null || dsTemporalItem.getStartDate().isBefore(dsTemporalItem.getEndDate()))
 									&& (temporal.getStartDate() == null || temporal.getEndDate() == null || temporal.getStartDate().isBefore(temporal.getEndDate())))
 								tempDatasetList.add(ds);
 						}
@@ -239,20 +243,20 @@ public class DistributionFilterSearch {
 					continue;
 				}
 				for(LinkedEntity linkedEntity : ds.getPublisher()){
-					Optional<Organization> provider = DatabaseConnections.getInstance().getOrganizationList().stream().filter(organization -> organization.getInstanceId().equals(linkedEntity.getInstanceId())).findFirst();
-                    provider.ifPresent(organizations::add);
+					Organization provider = (Organization) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieve(linkedEntity.getInstanceId());
+                    if(Objects.nonNull(provider)) organizations.add(provider);
 				}
 				List<DataServiceProvider> providers = new ArrayList<DataServiceProvider>(DataServiceProviderGeneration.getProviders(organizations));
 
 				List<Organization> organisationList = new ArrayList<>();
 				for (LinkedEntity distribution : ds.getDistribution()) {
-					Optional<Distribution> distribution1 = DatabaseConnections.getInstance().getDistributionList().stream().filter(distribution2 -> distribution2.getInstanceId().equals(distribution.getInstanceId())).findFirst();
-					if(distribution1.isPresent() && distribution1.get().getAccessService() != null){
-						for (LinkedEntity accessService : distribution1.get().getAccessService()) {
-							Optional<WebService> ws = DatabaseConnections.getInstance().getWebServiceList().stream().filter(webService1 -> webService1.getInstanceId().equals(accessService.getInstanceId())).findFirst();
-							if(ws.isPresent()){
-								Optional<Organization> organization = DatabaseConnections.getInstance().getOrganizationList().stream().filter(organization1 -> organization1.getInstanceId().equals(ws.get().getProvider().getInstanceId())).findFirst();
-                                organization.ifPresent(organisationList::add);
+					Distribution distribution1 = (Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(distribution.getInstanceId());
+					if(Objects.nonNull(distribution1) && distribution1.getAccessService() != null){
+						for (LinkedEntity accessService : distribution1.getAccessService()) {
+							WebService ws = (WebService) AbstractAPI.retrieveAPI(EntityNames.WEBSERVICE.name()).retrieve(accessService.getInstanceId());
+							if(Objects.nonNull(ws)){
+								Organization organization = (Organization) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieve(ws.getProvider().getInstanceId());
+								if(Objects.nonNull(organization)) organisationList.add(organization);
 							}
 						}
 					}
@@ -330,12 +334,12 @@ public class DistributionFilterSearch {
 				//identifier
 				if (edmDataproduct.getIdentifier()!=null && !edmDataproduct.getIdentifier().isEmpty()) {
 					for (LinkedEntity linkedEntity : edmDataproduct.getIdentifier()) {
-						Optional<Identifier> edmIdentifier = DatabaseConnections.getInstance().getIdentifierList().stream().filter(identifier -> identifier.getInstanceId().equals(linkedEntity.getInstanceId())).findFirst();
-						if(edmIdentifier.isPresent()){
+						Identifier edmIdentifier = (Identifier) AbstractAPI.retrieveAPI(EntityNames.IDENTIFIER.name()).retrieve(linkedEntity.getInstanceId());
+						if(Objects.nonNull(edmIdentifier)){
 							for (String q : qSMap.keySet()) {
-								if (edmIdentifier.get().getIdentifier().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
-								if (edmIdentifier.get().getType().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
-								if ((edmIdentifier.get().getType().toLowerCase()+edmIdentifier.get().getIdentifier().toLowerCase()).contains(q)) qSMap.put(q, Boolean.TRUE);
+								if (edmIdentifier.getIdentifier().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
+								if (edmIdentifier.getType().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
+								if ((edmIdentifier.getType().toLowerCase()+edmIdentifier.getIdentifier().toLowerCase()).contains(q)) qSMap.put(q, Boolean.TRUE);
 							}
 						}
 					}
@@ -344,11 +348,11 @@ public class DistributionFilterSearch {
 
 				if (edmDataproduct.getDistribution() != null && !edmDataproduct.getDistribution().isEmpty()) {
 					for (LinkedEntity edmDistributionLe : edmDataproduct.getDistribution()) {
-						Optional<Distribution> edmDistribution = DatabaseConnections.getInstance().getDistributionList().stream().filter(distribution2 -> distribution2.getInstanceId().equals(edmDistributionLe.getInstanceId())).findFirst();
-						if(edmDistribution.isPresent()){
+						Distribution edmDistribution = (Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(edmDistributionLe.getInstanceId());
+						if(Objects.nonNull(edmDistribution)){
 							//distribution title
-							if (edmDistribution.get().getTitle() != null) {
-								edmDistribution.get().getTitle()
+							if (edmDistribution.getTitle() != null) {
+								edmDistribution.getTitle()
 										.forEach(title ->
 										{
 											for (String q : qSMap.keySet()) {
@@ -359,15 +363,15 @@ public class DistributionFilterSearch {
 										});
 							}
 
-							if(Objects.nonNull(edmDistribution.get().getUid())){
+							if(Objects.nonNull(edmDistribution.getUid())){
 								for (String q : qSMap.keySet()) {
-									if (edmDistribution.get().getUid().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
+									if (edmDistribution.getUid().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
 								}
 							}
 
 							//distribution description
-							if (edmDistribution.get().getDescription() != null) {
-								edmDistribution.get().getDescription()
+							if (edmDistribution.getDescription() != null) {
+								edmDistribution.getDescription()
 										.forEach(description ->
 												{
 													for (String q : qSMap.keySet()) {
@@ -380,37 +384,36 @@ public class DistributionFilterSearch {
 							}
 
 							//webservice
-							if (edmDistribution.get().getAccessService() != null) {
-								for(LinkedEntity accessService : edmDistribution.get().getAccessService()){
-									Optional<WebService> edmWebservice = DatabaseConnections.getInstance().getWebServiceList().stream().filter(webService1 -> webService1.getInstanceId().equals(accessService.getInstanceId())).findFirst();
-									if(edmWebservice.isPresent()){
+							if (edmDistribution.getAccessService() != null) {
+								for(LinkedEntity accessService : edmDistribution.getAccessService()){
+									WebService edmWebservice = (WebService) AbstractAPI.retrieveAPI(EntityNames.WEBSERVICE.name()).retrieve(accessService.getInstanceId());
+									if(Objects.nonNull(edmWebservice)){
 
-										if(Objects.nonNull(edmWebservice.get().getUid())){
+										if(Objects.nonNull(edmWebservice.getUid())){
 											for (String q : qSMap.keySet()) {
-												if (edmWebservice.get().getUid().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
+												if (edmWebservice.getUid().toLowerCase().contains(q)) qSMap.put(q, Boolean.TRUE);
 											}
 										}
-
 										//webservice title
-										if (edmWebservice.get().getName() != null) {
+										if (edmWebservice.getName() != null) {
 											for (String q : qSMap.keySet()) {
-												if (edmWebservice.get().getName().toLowerCase().contains(q)) {
+												if (edmWebservice.getName().toLowerCase().contains(q)) {
 													qSMap.put(q, Boolean.TRUE);
 												}
 											}
 										}
 
 										//webservice description
-										if (edmWebservice.get().getDescription() != null) {
+										if (edmWebservice.getDescription() != null) {
 											for (String q : qSMap.keySet()) {
-												if (edmWebservice.get().getDescription().toLowerCase().contains(q)) {
+												if (edmWebservice.getDescription().toLowerCase().contains(q)) {
 													qSMap.put(q, Boolean.TRUE);
 												}
 											}
 										}
 
-										if(Objects.nonNull(edmWebservice.get().getKeywords())){
-											List<String> webserviceKeywords = Arrays.stream(edmWebservice.get().getKeywords().split(","))
+										if(Objects.nonNull(edmWebservice.getKeywords())){
+											List<String> webserviceKeywords = Arrays.stream(edmWebservice.getKeywords().split(","))
 													.map(String::toLowerCase)
 													.map(String::trim)
 													.collect(Collectors.toList());

@@ -1,15 +1,21 @@
 package org.epos.api.core;
 
 import java.util.*;
+
+import abstractapis.AbstractAPI;
+import metadataapis.EntityNames;
 import org.epos.api.beans.DataServiceProvider;
 import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.Address;
+import org.epos.eposdatamodel.Category;
 import org.epos.eposdatamodel.LinkedEntity;
 import org.epos.eposdatamodel.Organization;
 
 public class DataServiceProviderGeneration {
 
 	public static List<DataServiceProvider> getProviders(List<Organization> organizations) {
+
+		List<Organization> organizationList = (List<Organization>) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll();
 
 		List<DataServiceProvider> organizationStructure = new ArrayList<>();
 		for (Organization org : organizations) {
@@ -23,7 +29,7 @@ public class DataServiceProviderGeneration {
 					mainOrganizationLegalName = String.join(".", org.getLegalName());
 
 					if (org.getMemberOf() == null) {
-						DatabaseConnections.getInstance().getOrganizationList().stream().filter(organization -> organization.getMemberOf() != null)
+						organizationList.stream().filter(organization -> organization.getMemberOf() != null)
 								.forEach(organization1 -> {
 									Optional<LinkedEntity> resultEntities = organization1.getMemberOf().stream()
 											.filter(linkedEntity -> linkedEntity.getInstanceId().equals(org.getInstanceId()))
@@ -39,8 +45,8 @@ public class DataServiceProviderGeneration {
 											relatedDataprovider.setInstanceid(organization1.getInstanceId());
 											relatedDataprovider.setMetaid(organization1.getInstanceId());
 											if (organization1.getAddress() != null) {
-												Optional<Address> address = DatabaseConnections.getInstance().getAddressList().stream().filter(address1 -> address1.getInstanceId().equals(organization1.getAddress().getInstanceId())).findFirst();
-												address.ifPresent(value -> relatedDataprovider.setCountry(value.getCountry()));
+												Address address = (Address) AbstractAPI.retrieveAPI(EntityNames.ADDRESS.name()).retrieve(organization1.getAddress().getInstanceId());
+												if(Objects.nonNull(address) && Objects.nonNull(address.getCountry())) relatedDataprovider.setCountry(address.getCountry());
 											}
 											relatedOrganizations.add(relatedDataprovider);
 										}
@@ -57,8 +63,8 @@ public class DataServiceProviderGeneration {
 					dataServiceProvider.setInstanceid(org.getInstanceId());
 					dataServiceProvider.setMetaid(org.getInstanceId());
 					if (org.getAddress() != null) {
-						Optional<Address> address = DatabaseConnections.getInstance().getAddressList().stream().filter(address1 -> address1.getInstanceId().equals(org.getAddress().getInstanceId())).findFirst();
-						address.ifPresent(value -> dataServiceProvider.setCountry(value.getCountry()));
+						Address address = (Address) AbstractAPI.retrieveAPI(EntityNames.ADDRESS.name()).retrieve(org.getAddress().getInstanceId());
+						if(Objects.nonNull(address) && Objects.nonNull(address.getCountry())) dataServiceProvider.setCountry(address.getCountry());
 					}
 					organizationStructure.add(dataServiceProvider);
 				}

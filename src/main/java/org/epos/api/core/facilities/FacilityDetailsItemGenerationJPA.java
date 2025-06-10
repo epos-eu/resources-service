@@ -24,10 +24,7 @@ import org.epos.api.facets.Facets;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.FacetsNodeTree;
 import org.epos.api.routines.DatabaseConnections;
-import org.epos.eposdatamodel.Category;
-import org.epos.eposdatamodel.LinkedEntity;
-import org.epos.eposdatamodel.Location;
-import org.epos.eposdatamodel.Organization;
+import org.epos.eposdatamodel.*;
 import org.epos.library.feature.Feature;
 import org.epos.library.feature.FeaturesCollection;
 import org.epos.library.geometries.Geometry;
@@ -60,8 +57,8 @@ public class FacilityDetailsItemGenerationJPA {
 			LOGGER.info("Given id is not of a facility, checking if it's a distribution");
 			return DistributionDetailsGenerationJPA.generate(parameters);
 		}
-		List<Organization> organizationForOwners  = DatabaseConnections.getInstance().getOrganizationList();
-		List<Category> categoriesFromDB = DatabaseConnections.getInstance().getCategoryList();
+		List<Organization> organizationForOwners  = (List<Organization>) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll();
+		List<Category> categoriesFromDB = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll();
 
 		if(parameters.containsKey("format") && parameters.get("format").toString().equals("application/epos.geo+json"))
 			return generateAsGeoJson(facilitySelected, parameters.containsKey("equipmenttypes")? parameters.get("equipmenttypes").toString() : null);
@@ -132,7 +129,7 @@ public class FacilityDetailsItemGenerationJPA {
 			Set<Category> equipmentTypes = new HashSet<>();
 
 			//Equipment types
-			DatabaseConnections.getInstance().getEquipmentList().forEach(equipment -> {
+			((List<Equipment>) AbstractAPI.retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll()).forEach(equipment -> {
 				if(equipment.getIsPartOf()!=null)
 					for(LinkedEntity linkedEntity : equipment.getIsPartOf()){
 						if(linkedEntity.getEntityType().equals(EntityNames.FACILITY.name()) && linkedEntity.getInstanceId().equals(facilitySelected.getInstanceId())){
@@ -213,7 +210,7 @@ public class FacilityDetailsItemGenerationJPA {
 
 	public static FeaturesCollection generateAsGeoJson(org.epos.eposdatamodel.Facility facilitySelected, String equipmenttypes) {
 
-		List<Category> categoriesFromDB = DatabaseConnections.getInstance().getCategoryList();
+		List<Category> categoriesFromDB = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll();
 
 		FeaturesCollection geojson = new FeaturesCollection();
 

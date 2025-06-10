@@ -3,6 +3,7 @@ package org.epos.api.core.filtersearch;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import commonapis.LinkedEntityAPI;
 import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.Address;
 import org.epos.eposdatamodel.Identifier;
@@ -47,12 +48,12 @@ public class OrganizationFilterSearch {
 				
 				if(Objects.nonNull(edmOrganisation.getIdentifier())){
 					for(LinkedEntity identifierLe : edmOrganisation.getIdentifier()) {
-						Optional<Identifier> identifier = DatabaseConnections.getInstance().getIdentifierList().parallelStream().filter(identifierFromList -> identifierFromList.getInstanceId().equals(identifierLe.getInstanceId())).findFirst();
-						if(identifier.isPresent()) {
+						Identifier identifier = (Identifier) LinkedEntityAPI.retrieveFromLinkedEntity(identifierLe);
+						if(Objects.nonNull(identifier)) {
 							for (String q : qSMap.keySet()) {
-								if (identifier.get().getIdentifier().contains(q)) qSMap.put(q, Boolean.TRUE);
-								if (identifier.get().getType().contains(q)) qSMap.put(q, Boolean.TRUE);
-								if ((identifier.get().getType().toLowerCase()+identifier.get().getIdentifier().toLowerCase()).contains(q)) qSMap.put(q, Boolean.TRUE);
+								if (identifier.getIdentifier().contains(q)) qSMap.put(q, Boolean.TRUE);
+								if (identifier.getType().contains(q)) qSMap.put(q, Boolean.TRUE);
+								if ((identifier.getType().toLowerCase()+identifier.getIdentifier().toLowerCase()).contains(q)) qSMap.put(q, Boolean.TRUE);
 							}
 						}
 					}
@@ -88,12 +89,9 @@ public class OrganizationFilterSearch {
 								));
 				for (String q : qSMap.keySet()) {
 					if(edmOrganisation.getAddress()!=null){
-						Optional<Address> address = DatabaseConnections.getInstance().getAddressList().stream().filter(address1 -> address1.getInstanceId().equals(edmOrganisation.getAddress().getInstanceId())).findFirst();
-						address.ifPresent(value -> {
-							if(value.getCountry()!=null && q.equals(value.getCountry().toLowerCase())) {
-								tempOrganizationList.add(edmOrganisation);
-							}
-						});
+						Address address = (Address) LinkedEntityAPI.retrieveFromLinkedEntity(edmOrganisation.getAddress());
+						if(Objects.nonNull(address) && (address.getCountry()!=null || q.equals(address.getCountry().toLowerCase())))
+							tempOrganizationList.add(edmOrganisation);
 					}
 				}
 			}
