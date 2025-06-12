@@ -66,7 +66,7 @@ public class AvailableFormatsGeneration {
 	public static Map<String, List<AvailableFormat>> generate() {
 		List<Distribution> distributions = (List<Distribution>) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll();
 		formats = new HashMap<>();
-		distributions.forEach(distribution -> {
+		distributions.parallelStream().forEach(distribution -> {
 			formats.put(distribution.getInstanceId(), generate(distribution));
 		});
 		return formats;
@@ -97,7 +97,7 @@ public class AvailableFormatsGeneration {
 
 
 			if (operation.getMapping() != null) {
-				List<String> maps = operation.getMapping().stream().map(LinkedEntity::getInstanceId).collect(Collectors.toList());
+				List<String> maps = operation.getMapping().parallelStream().map(LinkedEntity::getInstanceId).collect(Collectors.toList());
 				List<Mapping> mappings = (List<Mapping>) AbstractAPI.retrieveAPI(EntityNames.MAPPING.name()).retrieveBunch(maps);
 				for (Mapping map : mappings) {
 					if (map != null && map.getProperty() != null && map.getProperty().contains("encodingFormat")) {
