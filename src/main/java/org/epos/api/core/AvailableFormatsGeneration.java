@@ -113,7 +113,7 @@ public class AvailableFormatsGeneration {
 											"WMS",
 											AvailableFormatType.ORIGINAL));
 									isOgcFormat = true;
-								} else if (operation.getTemplate().toLowerCase().contains("service=wmts")
+								} /*else if (operation.getTemplate().toLowerCase().contains("service=wmts")
 										|| containsServiceInMappings(mappings, "WMTS", map)) {
 									formats.add(buildAvailableFormat(
 											pv,
@@ -122,7 +122,7 @@ public class AvailableFormatsGeneration {
 											"WMTS",
 											AvailableFormatType.ORIGINAL));
 									isOgcFormat = true;
-								}
+								}*/
 							} else if (pv.equals("json")
 									&& operation.getTemplate()!=null && (operation.getTemplate().toLowerCase().contains("service=wfs")
 											|| containsServiceInMappings(mappings, "WFS", map))) {
