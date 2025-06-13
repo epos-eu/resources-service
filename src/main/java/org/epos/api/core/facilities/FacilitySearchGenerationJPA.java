@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import abstractapis.AbstractAPI;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.epos.api.beans.AvailableFormat;
 import org.epos.api.beans.DataServiceProvider;
@@ -27,7 +26,6 @@ import org.epos.api.enums.AvailableFormatType;
 import org.epos.api.facets.Facets;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.Node;
-import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.Category;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Distribution;
@@ -38,6 +36,7 @@ import org.epos.eposdatamodel.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import abstractapis.AbstractAPI;
 import commonapis.LinkedEntityAPI;
 import metadataapis.EntityNames;
 import model.StatusType;
@@ -98,12 +97,8 @@ public class FacilitySearchGenerationJPA {
 				// if it is a facility category
 				// get the distributions and add them to the discovery list
 				for (var le : dataProduct.getDistribution()) {
-					Distribution distribution = (Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(linkedEntity.getInstanceId());
+					Distribution distribution = (Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(le.getInstanceId());
 
-//					Optional<Distribution> distribution = DatabaseConnections.getInstance()
-//							.getDistributionList().stream()
-//							.filter(dist -> dist.getInstanceId().equals(le.getInstanceId()))
-//							.findFirst();
 					if (Objects.isNull(distribution)) {
 						continue;
 					}
