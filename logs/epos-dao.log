@@ -271,3 +271,387 @@ java.lang.IllegalStateException: The router has not been initialised, therefore 
 2025-06-10 12:55:58 [main] INFO  o.testcontainers.DockerClientFactory - ✔︎ Docker server version should be at least 1.6.0
 2025-06-10 12:55:58 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Creating container for image: epos/metadata-database-deploy-pop-test:latest
 2025-06-10 12:55:58 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Container epos/metadata-database-deploy-pop-test:latest is starting: b9b6b7dd65fa89edefc4a65485a389d18e6f1002f6f521f9922f57e565d0bacc
+2025-06-20 14:34:16 [main] INFO  o.testcontainers.images.PullPolicy - Image pull policy will be performed by: DefaultPullPolicy()
+2025-06-20 14:34:16 [main] INFO  o.t.utility.ImageNameSubstitutor - Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+2025-06-20 14:34:16 [main] INFO  o.testcontainers.DockerClientFactory - Testcontainers version: 1.21.0
+2025-06-20 14:34:16 [main] INFO  o.t.d.DockerClientProviderStrategy - Loaded org.testcontainers.dockerclient.UnixSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+2025-06-20 14:34:17 [main] INFO  o.t.d.DockerClientProviderStrategy - Found Docker environment with local Unix socket (unix:///var/run/docker.sock)
+2025-06-20 14:34:17 [main] INFO  o.testcontainers.DockerClientFactory - Docker host IP address is localhost
+2025-06-20 14:34:17 [main] INFO  o.testcontainers.DockerClientFactory - Connected to docker: 
+  Server Version: 28.2.2
+  API Version: 1.50
+  Operating System: EndeavourOS
+  Total Memory: 63744 MB
+2025-06-20 14:34:17 [main] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling docker image: testcontainers/ryuk:0.11.0. Please be patient; this may take some time but only needs to be done once.
+2025-06-20 14:34:19 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Starting to pull image
+2025-06-20 14:34:19 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling image layers:  0 pending,  0 downloaded,  0 extracted, (0 bytes/0 bytes)
+2025-06-20 14:34:20 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling image layers:  2 pending,  1 downloaded,  0 extracted, (1 MB/? MB)
+2025-06-20 14:34:20 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling image layers:  2 pending,  1 downloaded,  1 extracted, (7 MB/? MB)
+2025-06-20 14:34:20 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling image layers:  2 pending,  1 downloaded,  2 extracted, (7 MB/? MB)
+2025-06-20 14:34:20 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling image layers:  1 pending,  2 downloaded,  2 extracted, (9 MB/? MB)
+2025-06-20 14:34:20 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling image layers:  1 pending,  2 downloaded,  3 extracted, (10 MB/? MB)
+2025-06-20 14:34:20 [main] INFO  tc.testcontainers/ryuk:0.11.0 - Image testcontainers/ryuk:0.11.0 pull took PT2.941717921S
+2025-06-20 14:34:20 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pull complete. 3 layers, pulled in 1s (downloaded 10 MB at 10 MB/s)
+2025-06-20 14:34:20 [main] INFO  tc.testcontainers/ryuk:0.11.0 - Creating container for image: testcontainers/ryuk:0.11.0
+2025-06-20 14:34:20 [main] INFO  tc.testcontainers/ryuk:0.11.0 - Container testcontainers/ryuk:0.11.0 is starting: a89da12de3f42c4eba1656b7a4b5c593c57d701184d6c9b3277e2be931b30220
+2025-06-20 14:34:20 [main] INFO  tc.testcontainers/ryuk:0.11.0 - Container testcontainers/ryuk:0.11.0 started in PT0.249171417S
+2025-06-20 14:34:20 [main] INFO  o.t.utility.RyukResourceReaper - Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+2025-06-20 14:34:20 [main] INFO  o.testcontainers.DockerClientFactory - Checking the system...
+2025-06-20 14:34:20 [main] INFO  o.testcontainers.DockerClientFactory - ✔︎ Docker server version should be at least 1.6.0
+2025-06-20 14:34:20 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Pulling docker image: epos/metadata-database-deploy-pop-test:latest. Please be patient; this may take some time but only needs to be done once.
+2025-06-20 14:34:22 [docker-java-stream-1558317450] INFO  t.epos/metadata-database-deploy-pop-test:latest - Starting to pull image
+2025-06-20 14:34:22 [docker-java-stream-1558317450] INFO  t.epos/metadata-database-deploy-pop-test:latest - Pulling image layers:  0 pending,  0 downloaded,  0 extracted, (0 bytes/0 bytes)
+2025-06-20 14:34:24 [docker-java-stream-1558317450] INFO  t.epos/metadata-database-deploy-pop-test:latest - Pulling image layers: 20 pending,  1 downloaded,  0 extracted, (1 KB/? MB)
+2025-06-20 14:34:24 [docker-java-stream-1558317450] INFO  t.epos/metadata-database-deploy-pop-test:latest - Pulling image layers: 20 pending,  1 downloaded,  1 extracted, (69 KB/? MB)
+2025-06-20 14:34:24 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Image epos/metadata-database-deploy-pop-test:latest pull took PT3.705559186S
+2025-06-20 14:34:24 [docker-java-stream-1558317450] INFO  t.epos/metadata-database-deploy-pop-test:latest - Pull complete. 21 layers, pulled in 1s (downloaded 69 KB at 69 KB/s)
+2025-06-20 14:34:24 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Creating container for image: epos/metadata-database-deploy-pop-test:latest
+2025-06-20 14:34:24 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Container epos/metadata-database-deploy-pop-test:latest is starting: 381bac9478fb6b5e28cc228ca38e0cdf651df1ff1df50f13e10b302344c13f22
+2025-06-20 14:34:31 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Container epos/metadata-database-deploy-pop-test:latest started in PT7.378608303S
+2025-06-20 14:34:31 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Container is started (JDBC URL: jdbc:postgresql://localhost:32769/metadata_catalogue?loggerLevel=OFF)
+2025-06-20 14:34:31 [main] INFO  com.zaxxer.hikari.HikariDataSource - metadata_catalogue - Starting...
+2025-06-20 14:34:32 [main] INFO  com.zaxxer.hikari.pool.HikariPool - metadata_catalogue - Added connection org.postgresql.jdbc.PgConnection@65e21ce3
+2025-06-20 14:34:32 [main] INFO  com.zaxxer.hikari.HikariDataSource - metadata_catalogue - Start completed.
+2025-06-20 14:34:32 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Resources Service Startup] -----------------------------------------------
+2025-06-20 14:34:32 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Updating facets information
+2025-06-20 14:34:32 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Updating resources information
+2025-06-20 14:34:32 [main] INFO  o.e.api.routines.ScheduledRuntimes - === EPOS DAO PERFORMANCE REPORT ===
+Generated: 2025-06-20T14:34:32.5528529
+
+OPERATION STATISTICS:
+
+CACHE STATISTICS:
+  countCacheSize: 0
+  entityCacheSize: 0
+  queryCacheSize: 0
+  countCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+  queryCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+  entityCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+
+RECENT PERFORMANCE TRENDS:
+
+===============================
+2025-06-20 14:34:32 [main] ERROR o.e.api.routines.DatabaseConnections - [CONNECTION ERROR] Error while initializing router
+java.lang.IllegalArgumentException: Values for the following message broker parameters were not specified:
+Host; vHost; username; password
+	at org.epos.router_framework.RouterBase.validateMessageBrokerParams(RouterBase.java:312)
+	at org.epos.router_framework.RouterBase.init(RouterBase.java:88)
+	at org.epos.router_framework.DefaultRpcRouter.init(DefaultRpcRouter.java:80)
+	at org.epos.api.routines.DatabaseConnections.<init>(DatabaseConnections.java:93)
+	at org.epos.api.routines.DatabaseConnections.getInstance(DatabaseConnections.java:363)
+	at org.epos.api.routines.ScheduledRuntimes.connectionsUpdater(ScheduledRuntimes.java:113)
+	at org.epos.api.routines.ScheduledRuntimes.onStartup(ScheduledRuntimes.java:37)
+	at DetailsWebServiceTest.testDetailsWebService(DetailsWebServiceTest.java:20)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:775)
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:479)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:161)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:152)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:91)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:112)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:94)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:87)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:216)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:212)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:137)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:201)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:170)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:94)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:59)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:142)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$1(InterceptingLauncher.java:39)
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25)
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:38)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:194)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:150)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:124)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+2025-06-20 14:34:32 [main] ERROR o.e.api.routines.DatabaseConnections - Error while parsing env variable CONNECTION_POOL_MAX_SIZE
+java.lang.NumberFormatException: Cannot parse null string
+	at java.base/java.lang.Integer.parseInt(Integer.java:624)
+	at java.base/java.lang.Integer.parseInt(Integer.java:778)
+	at org.epos.api.routines.DatabaseConnections.<init>(DatabaseConnections.java:104)
+	at org.epos.api.routines.DatabaseConnections.getInstance(DatabaseConnections.java:363)
+	at org.epos.api.routines.ScheduledRuntimes.connectionsUpdater(ScheduledRuntimes.java:113)
+	at org.epos.api.routines.ScheduledRuntimes.onStartup(ScheduledRuntimes.java:37)
+	at DetailsWebServiceTest.testDetailsWebService(DetailsWebServiceTest.java:20)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:775)
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:479)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:161)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:152)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:91)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:112)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:94)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:87)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:216)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:212)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:137)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:201)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:170)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:94)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:59)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:142)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$1(InterceptingLauncher.java:39)
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25)
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:38)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:194)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:150)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:124)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+2025-06-20 14:34:32 [pool-2-thread-1] ERROR o.e.api.routines.DatabaseConnections - [CONNECTION ERROR] Error getting response from router
+java.lang.IllegalStateException: The router has not been initialised, therefore no requests can be made
+	at org.epos.router_framework.DefaultRpcRouter.makeRequest(DefaultRpcRouter.java:112)
+	at org.epos.api.routines.DatabaseConnections.doRequest(DatabaseConnections.java:468)
+	at org.epos.api.routines.DatabaseConnections.retrievePlugins(DatabaseConnections.java:481)
+	at org.epos.api.routines.DatabaseConnections.lambda$syncDatabaseConnections$1(DatabaseConnections.java:248)
+	at org.epos.api.routines.DatabaseConnections.lambda$createSafeFuture$0(DatabaseConnections.java:119)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-06-20 14:34:32 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Resources successfully updated
+2025-06-20 14:34:32 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Done
+2025-06-20 14:34:32 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Updating monitoring information
+2025-06-20 14:34:32 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Done
+2025-06-20 14:34:32 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Facets] Updating facets information
+2025-06-20 14:34:32 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Facets] Updating facets information
+2025-06-20 14:35:13 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Facets] Facets successfully updated
+2025-06-20 14:35:13 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Facets] Done
+2025-06-20 14:35:13 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Resources Service Startup Completed] -----------------------------------------------
+2025-06-20 14:35:13 [main] INFO  o.e.a.c.d.DistributionDetailsGenerationJPA - Parameters {id=adcd7794-2daf-44be-af55-88273564b8e1}
+2025-06-20 14:35:23 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Creating container for image: epos/metadata-database-deploy-pop-test:latest
+2025-06-20 14:35:23 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Container epos/metadata-database-deploy-pop-test:latest is starting: e46e2363c8ab81ee41cabb4a114fcc31417800036df40c20252e0af50ff28b03
+2025-06-20 14:35:28 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Container epos/metadata-database-deploy-pop-test:latest started in PT4.417480969S
+2025-06-20 14:35:28 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Container is started (JDBC URL: jdbc:postgresql://localhost:32770/metadata_catalogue?loggerLevel=OFF)
+2025-06-20 14:35:28 [main] INFO  com.zaxxer.hikari.HikariDataSource - metadata_catalogue - Starting...
+2025-06-20 14:35:28 [main] INFO  com.zaxxer.hikari.pool.HikariPool - metadata_catalogue - Added connection org.postgresql.jdbc.PgConnection@6d4502ca
+2025-06-20 14:35:28 [main] INFO  com.zaxxer.hikari.HikariDataSource - metadata_catalogue - Start completed.
+2025-06-20 14:35:28 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Resources Service Startup] -----------------------------------------------
+2025-06-20 14:35:28 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Updating facets information
+2025-06-20 14:35:28 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Updating resources information
+2025-06-20 14:35:28 [main] INFO  o.e.api.routines.ScheduledRuntimes - === EPOS DAO PERFORMANCE REPORT ===
+Generated: 2025-06-20T14:35:28.322347509
+
+OPERATION STATISTICS:
+
+CACHE STATISTICS:
+  countCacheSize: 0
+  entityCacheSize: 0
+  queryCacheSize: 0
+  countCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+  queryCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 0.0
+    missCount: 5
+  entityCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 0.0
+    missCount: 1
+
+RECENT PERFORMANCE TRENDS:
+
+===============================
+2025-06-20 14:35:28 [pool-5-thread-1] ERROR o.e.api.routines.DatabaseConnections - [CONNECTION ERROR] Error getting response from router
+java.lang.IllegalStateException: The router has not been initialised, therefore no requests can be made
+	at org.epos.router_framework.DefaultRpcRouter.makeRequest(DefaultRpcRouter.java:112)
+	at org.epos.api.routines.DatabaseConnections.doRequest(DatabaseConnections.java:468)
+	at org.epos.api.routines.DatabaseConnections.retrievePlugins(DatabaseConnections.java:481)
+	at org.epos.api.routines.DatabaseConnections.lambda$syncDatabaseConnections$1(DatabaseConnections.java:248)
+	at org.epos.api.routines.DatabaseConnections.lambda$createSafeFuture$0(DatabaseConnections.java:119)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-06-20 14:35:28 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Resources successfully updated
+2025-06-20 14:35:28 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Done
+2025-06-20 14:35:28 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Updating monitoring information
+2025-06-20 14:35:28 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Done
+2025-06-20 14:35:28 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Facets] Updating facets information
+2025-06-20 14:35:28 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Facets] Updating facets information
+2025-06-20 14:36:08 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Facets] Facets successfully updated
+2025-06-20 14:36:08 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Facets] Done
+2025-06-20 14:36:08 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Resources Service Startup Completed] -----------------------------------------------
+2025-06-20 14:36:08 [main] INFO  o.e.a.c.d.DistributionDetailsGenerationJPA - Parameters {id=d56707f6-fd1d-49a8-9af4-8e68ba6d77a8}
+2025-06-20 14:36:18 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Creating container for image: epos/metadata-database-deploy-pop-test:latest
+2025-06-20 14:36:18 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Container epos/metadata-database-deploy-pop-test:latest is starting: 0034eecd673cdafe5dd7adfa7526d69e089dd274c3e5a67d0818d822f8060227
+2025-06-20 14:36:25 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Container epos/metadata-database-deploy-pop-test:latest started in PT6.364729035S
+2025-06-20 14:36:25 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Container is started (JDBC URL: jdbc:postgresql://localhost:32771/metadata_catalogue?loggerLevel=OFF)
+2025-06-20 14:36:25 [main] INFO  com.zaxxer.hikari.HikariDataSource - metadata_catalogue - Starting...
+2025-06-20 14:36:25 [main] INFO  com.zaxxer.hikari.pool.HikariPool - metadata_catalogue - Added connection org.postgresql.jdbc.PgConnection@311a09b2
+2025-06-20 14:36:25 [main] INFO  com.zaxxer.hikari.HikariDataSource - metadata_catalogue - Start completed.
+2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Resources Service Startup] -----------------------------------------------
+2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Updating facets information
+2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Updating resources information
+2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - === EPOS DAO PERFORMANCE REPORT ===
+Generated: 2025-06-20T14:36:25.230191917
+
+OPERATION STATISTICS:
+
+CACHE STATISTICS:
+  countCacheSize: 0
+  entityCacheSize: 0
+  queryCacheSize: 0
+  countCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+  queryCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 0.0
+    missCount: 10
+  entityCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 0.0
+    missCount: 2
+
+RECENT PERFORMANCE TRENDS:
+
+===============================
+2025-06-20 14:36:25 [pool-6-thread-1] ERROR o.e.api.routines.DatabaseConnections - [CONNECTION ERROR] Error getting response from router
+java.lang.IllegalStateException: The router has not been initialised, therefore no requests can be made
+	at org.epos.router_framework.DefaultRpcRouter.makeRequest(DefaultRpcRouter.java:112)
+	at org.epos.api.routines.DatabaseConnections.doRequest(DatabaseConnections.java:468)
+	at org.epos.api.routines.DatabaseConnections.retrievePlugins(DatabaseConnections.java:481)
+	at org.epos.api.routines.DatabaseConnections.lambda$syncDatabaseConnections$1(DatabaseConnections.java:248)
+	at org.epos.api.routines.DatabaseConnections.lambda$createSafeFuture$0(DatabaseConnections.java:119)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Resources successfully updated
+2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Done
+2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Updating monitoring information
+2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Done
+2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Facets] Updating facets information
+2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Facets] Updating facets information
