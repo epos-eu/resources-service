@@ -92,6 +92,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 
 	public ResponseEntity<SearchResponse> searchUsingGet(
 			@Parameter(in = ParameterIn.QUERY, description = "q", schema = @Schema()) @Valid @RequestParam(value = "q", required = false) String q,
+			@Parameter(in = ParameterIn.QUERY, description = "essential X variable" ,schema=@Schema()) @Valid @RequestParam(value = "exv", required = false) String exv,
 			@Parameter(in = ParameterIn.QUERY, description = "startDate", schema = @Schema()) @Valid @RequestParam(value = "startDate", required = false) String startDate,
 			@Parameter(in = ParameterIn.QUERY, description = "endDate", schema = @Schema()) @Valid @RequestParam(value = "endDate", required = false) String endDate,
 			@Parameter(in = ParameterIn.QUERY, description = "bbox", schema = @Schema()) @Valid @RequestParam(value = "bbox", required = false) String bbox,
@@ -117,6 +118,16 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("q", q);
+		}
+		if (!StringUtils.isBlank(exv)) {
+			try {
+				q = java.net.URLDecoder.decode(exv, StandardCharsets.UTF_8.name());
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "exv: " + exv, e);
+				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+			requestParameters.put("exv", exv);
 		}
 		if (!StringUtils.isBlank(startDate)) {
 			try {

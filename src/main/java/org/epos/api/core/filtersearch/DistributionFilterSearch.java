@@ -31,6 +31,7 @@ public class DistributionFilterSearch {
 	private static final String WESTERN_LON  = "epos:westernmostLongitude";
 	private static final String EASTERN_LON  = "epos:easternmostLongitude";
 
+	private static final String PARAMETER__EXV = "exv";
 	private static final String PARAMETER__SCIENCE_DOMAIN = "sciencedomains";
 	private static final String PARAMETER__SERVICE_TYPE = "servicetypes";
 
@@ -44,6 +45,7 @@ public class DistributionFilterSearch {
 		datasetList = filterByBoundingBox(datasetList, parameters);
 		datasetList = filterByScienceDomain(datasetList, parameters);
 		datasetList = filterByServiceType(datasetList, parameters);
+		datasetList = filterByEXV(datasetList, parameters);
 
 		return datasetList;
 	}
@@ -61,6 +63,27 @@ public class DistributionFilterSearch {
 					}
 
 					if(!Collections.disjoint(scienceDomainOfDataproduct, scienceDomainsParameters)){
+						tempDatasetList.add(dataproduct);
+					}
+				}
+			});
+			datasetList = tempDatasetList;
+		}
+		return datasetList;
+	}
+
+	private static List<DataProduct> filterByEXV(List<DataProduct> datasetList, Map<String,Object> parameters) {
+		if(parameters.containsKey(PARAMETER__EXV)) {
+			ArrayList<DataProduct> tempDatasetList = new ArrayList<>();
+			List<String> exvParameters = List.of(parameters.get(PARAMETER__EXV).toString().split(","));
+			datasetList.forEach(dataproduct -> {
+				if (Objects.nonNull(dataproduct.getVariableMeasured()) && !dataproduct.getVariableMeasured().isEmpty()){
+					List<String> exv = new ArrayList<>();
+					for(String item : dataproduct.getVariableMeasured()){
+						if(exvParameters.contains(item)) exv.add(item);
+					}
+
+					if(!Collections.disjoint(exv, exvParameters)){
 						tempDatasetList.add(dataproduct);
 					}
 				}
