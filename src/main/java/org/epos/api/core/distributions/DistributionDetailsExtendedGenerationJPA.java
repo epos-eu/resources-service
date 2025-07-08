@@ -229,12 +229,13 @@ public class DistributionDetailsExtendedGenerationJPA {
 		}
 
 		dataproduct.setAccessRights(dp.getAccessRight());
-
-		dp.getProvenance().forEach(instance ->{
-			HashMap<String,String> prov = new HashMap<String, String>();
-			prov.put("provenance", instance);
-			dataproduct.getProvenance().add(prov);
-		});
+		if(dp.getProvenance()!=null && !dp.getProvenance().isEmpty()) {
+			dp.getProvenance().forEach(instance -> {
+				HashMap<String, String> prov = new HashMap<String, String>();
+				prov.put("provenance", instance);
+				dataproduct.getProvenance().add(prov);
+			});
+		}
 
 		distribution.getRelatedDataProducts().add(dataproduct);
 
