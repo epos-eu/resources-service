@@ -117,4 +117,27 @@ public interface ResourcesApi {
 			@Parameter(in = ParameterIn.QUERY, description = "type of organization, comma separated values from the following list {dataproviders, serviceproviders, facilitiesproviders}" ,schema=@Schema()) @Valid @RequestParam(value = "type", required = false) String type);
 
 
+	@Operation(summary = "exvs operation", description = "exvs endpoint", tags={ "Resources Service" })
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "ok.", content = @Content(mediaType = "*/*", schema = @Schema(implementation = String.class))),
+
+			@ApiResponse(responseCode = "201", description = "Created."),
+
+			@ApiResponse(responseCode = "204", description = "No content."),
+
+			@ApiResponse(responseCode = "301", description = "Moved Permanently."),
+
+			@ApiResponse(responseCode = "400", description = "Bad request."),
+
+			@ApiResponse(responseCode = "401", description = "Access token is missing or invalid"),
+
+			@ApiResponse(responseCode = "403", description = "Forbidden"),
+
+			@ApiResponse(responseCode = "404", description = "Not Found") })
+	@RequestMapping(value = "/resources/exvs",
+			produces = { "*/*" },
+			method = RequestMethod.GET)
+	ResponseEntity<List<String>> exvsUsingGet();
+
+
 }

@@ -1,11 +1,15 @@
 package org.epos.api;
 
 
+import abstractapis.AbstractAPI;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
+import metadataapis.EntityNames;
+import model.StatusType;
 import org.epos.api.beans.OrganizationBean;
+import org.epos.eposdatamodel.DataProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +21,7 @@ import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -260,6 +265,19 @@ public class ResourcesApiController extends ApiController implements ResourcesAp
 		}
 
 		return standardRequest("ORGANISATIONS", requestParams, null);
+	}
+
+	@Override
+	public ResponseEntity<List<String>> exvsUsingGet() {
+		List<String> exvs = new ArrayList<>();
+
+		List<DataProduct> list = AbstractAPI.retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAllWithStatus(StatusType.PUBLISHED);
+
+		for(DataProduct dataProduct : list) {
+			exvs.addAll(dataProduct.getVariableMeasured());
+		}
+
+		return ResponseEntity.ok(exvs);
 	}
 
 }

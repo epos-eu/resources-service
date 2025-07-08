@@ -31,7 +31,7 @@ public class DistributionFilterSearch {
 	private static final String WESTERN_LON  = "epos:westernmostLongitude";
 	private static final String EASTERN_LON  = "epos:easternmostLongitude";
 
-	private static final String PARAMETER__EXV = "exv";
+	private static final String PARAMETER__EXV = "exvs";
 	private static final String PARAMETER__SCIENCE_DOMAIN = "sciencedomains";
 	private static final String PARAMETER__SERVICE_TYPE = "servicetypes";
 

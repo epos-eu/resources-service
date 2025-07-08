@@ -95,6 +95,7 @@ public class DistributionSearchGenerationJPA {
 
 		LOGGER.info("Start for each");
 
+		Set<String> exvs = new HashSet<>();
 		Set<String> keywords = new HashSet<>();
 		Set<Category> scienceDomains = new HashSet<>();
 		Set<Category> serviceTypes = new HashSet<>();
@@ -116,6 +117,10 @@ public class DistributionSearchGenerationJPA {
 						}
 					}
 				}
+			}
+
+			if (dataproduct.getVariableMeasured() != null) {
+				exvs.addAll(dataproduct.getVariableMeasured());
 			}
 
 			if (dataproduct.getPublisher() != null) {
@@ -269,6 +274,19 @@ public class DistributionSearchGenerationJPA {
 			keywordsNodes.addChild(node);
 		});
 
+		List<String> exvCollection = exvs.stream()
+				.filter(Objects::nonNull)
+				.sorted()
+				.collect(Collectors.toList());
+
+		NodeFilters exvNodes = new NodeFilters("exvs");
+
+		exvCollection.forEach(r -> {
+			NodeFilters node = new NodeFilters(r);
+			node.setId(Base64.getEncoder().encodeToString(r.getBytes()));
+			exvNodes.addChild(node);
+		});
+
 		List<DataServiceProvider> collection = DataServiceProviderGeneration
 				.getProviders(new ArrayList<>(organizationsEntityIds));
 
@@ -305,6 +323,7 @@ public class DistributionSearchGenerationJPA {
 		filters.add(organisationsNodes);
 		filters.add(scienceDomainsNodes);
 		filters.add(serviceTypesNodes);
+		filters.add(exvNodes);
 
 		SearchResponse response = new SearchResponse(results, filters);
 

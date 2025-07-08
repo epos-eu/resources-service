@@ -92,7 +92,6 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 
 	public ResponseEntity<SearchResponse> searchUsingGet(
 			@Parameter(in = ParameterIn.QUERY, description = "q", schema = @Schema()) @Valid @RequestParam(value = "q", required = false) String q,
-			@Parameter(in = ParameterIn.QUERY, description = "essential X variable" ,schema=@Schema()) @Valid @RequestParam(value = "exv", required = false) String exv,
 			@Parameter(in = ParameterIn.QUERY, description = "startDate", schema = @Schema()) @Valid @RequestParam(value = "startDate", required = false) String startDate,
 			@Parameter(in = ParameterIn.QUERY, description = "endDate", schema = @Schema()) @Valid @RequestParam(value = "endDate", required = false) String endDate,
 			@Parameter(in = ParameterIn.QUERY, description = "bbox", schema = @Schema()) @Valid @RequestParam(value = "bbox", required = false) String bbox,
@@ -100,6 +99,7 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 			@Parameter(in = ParameterIn.QUERY, description = "sciencedomains", schema = @Schema()) @Valid @RequestParam(value = "sciencedomains", required = false) String sciencedomains,
 			@Parameter(in = ParameterIn.QUERY, description = "servicetypes", schema = @Schema()) @Valid @RequestParam(value = "servicetypes", required = false) String servicetypes,
 			@Parameter(in = ParameterIn.QUERY, description = "organisations", schema = @Schema()) @Valid @RequestParam(value = "organisations", required = false) String organisations,
+			@Parameter(in = ParameterIn.QUERY, description = "essential X variable" ,schema=@Schema()) @Valid @RequestParam(value = "exvs", required = false) String exvs,
 			@Parameter(in = ParameterIn.QUERY, description = "facetstype {categories, dataproviders, serviceproviders}", schema = @Schema(allowableValues = {
 					"categories", "dataproviders",
 					"serviceproviders" })) @Valid @RequestParam(value = "facetstype", required = false) String facetsType,
@@ -118,16 +118,6 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("q", q);
-		}
-		if (!StringUtils.isBlank(exv)) {
-			try {
-				q = java.net.URLDecoder.decode(exv, StandardCharsets.UTF_8.name());
-			} catch (UnsupportedEncodingException e) {
-				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "exv: " + exv, e);
-				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
-				return ResponseEntity.badRequest().body(errorResponse);
-			}
-			requestParameters.put("exv", exv);
 		}
 		if (!StringUtils.isBlank(startDate)) {
 			try {
@@ -207,6 +197,17 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 				return ResponseEntity.badRequest().body(errorResponse);
 			}
 			requestParameters.put("keywords", keywords);
+		}
+		if (!StringUtils.isBlank(exvs)) {
+			try {
+				exvs = java.net.URLDecoder.decode(exvs, StandardCharsets.UTF_8.name());
+				exvs = exvs.replace(" ", "");
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "exvs: " + exvs, e);
+				SearchResponse errorResponse = new SearchResponse(e.getLocalizedMessage());
+				return ResponseEntity.badRequest().body(errorResponse);
+			}
+			requestParameters.put("exvs", exvs);
 		}
 		if (!StringUtils.isBlank(sciencedomains)) {
 			try {

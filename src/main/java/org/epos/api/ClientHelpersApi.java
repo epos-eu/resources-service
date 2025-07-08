@@ -79,7 +79,6 @@ public interface ClientHelpersApi {
 	produces = { "application/json" }, 
 	method = RequestMethod.GET)
 	ResponseEntity<SearchResponse> searchUsingGet(@Parameter(in = ParameterIn.QUERY, description = "q" ,schema=@Schema()) @Valid @RequestParam(value = "q", required = false) String q,
-			@Parameter(in = ParameterIn.QUERY, description = "essential X variable" ,schema=@Schema()) @Valid @RequestParam(value = "exv", required = false) String exv,
 			@Parameter(in = ParameterIn.QUERY, description = "startDate" ,schema=@Schema()) @Valid @RequestParam(value = "startDate", required = false) String startDate,
 			@Parameter(in = ParameterIn.QUERY, description = "endDate" ,schema=@Schema()) @Valid @RequestParam(value = "endDate", required = false) String endDate, 
 			@Parameter(in = ParameterIn.QUERY, description = "bbox" ,schema=@Schema()) @Valid @RequestParam(value = "bbox", required = false) String bbox, 
@@ -87,6 +86,7 @@ public interface ClientHelpersApi {
 			@Parameter(in = ParameterIn.QUERY, description = "sciencedomains" ,schema=@Schema()) @Valid @RequestParam(value = "sciencedomains", required = false) String sciencedomains,
 			@Parameter(in = ParameterIn.QUERY, description = "servicetypes" ,schema=@Schema()) @Valid @RequestParam(value = "servicetypes", required = false) String servicetypes,
 			@Parameter(in = ParameterIn.QUERY, description = "organisations" ,schema=@Schema()) @Valid @RequestParam(value = "organisations", required = false) String organisations,
+			@Parameter(in = ParameterIn.QUERY, description = "essential X variable" ,schema=@Schema()) @Valid @RequestParam(value = "exvs", required = false) String exvs,
 			@Parameter(in = ParameterIn.QUERY, description = "facetstype {categories, dataproviders, serviceproviders}" ,schema=@Schema()) @Valid @RequestParam(value = "facetstype", required = false) String facetsType,
 			@Parameter(in = ParameterIn.QUERY, description = "facets" ,schema=@Schema()) @Valid @RequestParam(value = "facets", required = false) Boolean facets,
 			@Parameter(in = ParameterIn.QUERY, description = "versioningStatus" ,schema=@Schema()) @Valid @RequestParam(value = "versioningStatus", required = false) String versioningStatus);
