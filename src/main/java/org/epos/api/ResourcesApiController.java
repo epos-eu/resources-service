@@ -271,10 +271,11 @@ public class ResourcesApiController extends ApiController implements ResourcesAp
 	public ResponseEntity<List<String>> exvsUsingGet() {
 		List<String> exvs = new ArrayList<>();
 
-		List<DataProduct> list = AbstractAPI.retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAllWithStatus(StatusType.PUBLISHED);
+		List<DataProduct> list = (List<DataProduct>) AbstractAPI.retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAllWithStatus(StatusType.PUBLISHED);
 
 		for(DataProduct dataProduct : list) {
-			exvs.addAll(dataProduct.getVariableMeasured());
+			if(dataProduct.getVariableMeasured()!=null)
+				exvs.addAll(dataProduct.getVariableMeasured());
 		}
 
 		return ResponseEntity.ok(exvs);

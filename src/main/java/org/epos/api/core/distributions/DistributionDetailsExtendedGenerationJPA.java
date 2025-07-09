@@ -196,7 +196,7 @@ public class DistributionDetailsExtendedGenerationJPA {
 			dataproduct.setDataProvider(dataProviders);
 		}
 
-		if(!dp.getContactPoint().isEmpty()) {
+		if(dp.getContactPoint()!=null && !dp.getContactPoint().isEmpty()) {
 			for(LinkedEntity contactsLe : dp.getContactPoint()) {
 				HashMap<String,Object> contact = new HashMap<String, Object>();
 				ContactPoint contactpoint = (ContactPoint) LinkedEntityAPI.retrieveFromLinkedEntity(contactsLe);
