@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import org.epos.api.beans.OrganizationBean;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -135,7 +136,7 @@ public interface ResourcesApi {
 
 			@ApiResponse(responseCode = "404", description = "Not Found") })
 	@RequestMapping(value = "/resources/exvs",
-			produces = { "*/*" },
+			produces = MediaType.APPLICATION_JSON_VALUE,
 			method = RequestMethod.GET)
 	ResponseEntity<List<String>> exvsUsingGet();
 
