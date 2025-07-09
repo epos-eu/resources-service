@@ -138,7 +138,7 @@ public interface ResourcesApi {
 	@RequestMapping(value = "/resources/exvs",
 			produces = MediaType.APPLICATION_JSON_VALUE,
 			method = RequestMethod.GET)
-	ResponseEntity<List<String>> exvsUsingGet();
+	ResponseEntity<String> exvsUsingGet();
 
 
 }

@@ -9,9 +9,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import metadataapis.EntityNames;
 import model.StatusType;
 import org.epos.api.beans.OrganizationBean;
+import org.epos.api.utility.Utils;
 import org.epos.eposdatamodel.DataProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -268,7 +270,7 @@ public class ResourcesApiController extends ApiController implements ResourcesAp
 	}
 
 	@Override
-	public ResponseEntity<List<String>> exvsUsingGet() {
+	public ResponseEntity<String> exvsUsingGet() {
 		List<String> exvs = new ArrayList<>();
 
 		List<DataProduct> list = (List<DataProduct>) AbstractAPI.retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAllWithStatus(StatusType.PUBLISHED);
@@ -278,7 +280,7 @@ public class ResourcesApiController extends ApiController implements ResourcesAp
 				exvs.addAll(dataProduct.getVariableMeasured());
 		}
 
-		return ResponseEntity.ok(exvs);
+		return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(Utils.gson.toJson(exvs));
 	}
 
 }
