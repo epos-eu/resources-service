@@ -119,7 +119,7 @@ public interface ResourcesApi {
 
 	@Operation(summary = "exvs operation", description = "exvs endpoint", tags={ "Resources Service" })
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "ok.", content = @Content(mediaType = "*/*", schema = @Schema(implementation = String.class))),
+			@ApiResponse(responseCode = "200", description = "ok."),
 
 			@ApiResponse(responseCode = "201", description = "Created."),
 

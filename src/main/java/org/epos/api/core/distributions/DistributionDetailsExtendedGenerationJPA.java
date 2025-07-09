@@ -407,7 +407,7 @@ public class DistributionDetailsExtendedGenerationJPA {
 		ArrayList<DiscoveryItem> discoveryList = new ArrayList<>();
 
 		Set<String> facetsDataProviders = new HashSet<String>();
-		if(dp.getPublisher() != null ) {
+		if(dp.getContactPoint()!=null && dp.getPublisher() != null ) {
 			for (LinkedEntity edmMetaIdLe : dp.getPublisher()) {
 				Organization edmMetaId = (Organization) LinkedEntityAPI.retrieveFromLinkedEntity(edmMetaIdLe);
 				if(edmMetaId.getLegalName() != null && !edmMetaId.getLegalName().isEmpty()) {
