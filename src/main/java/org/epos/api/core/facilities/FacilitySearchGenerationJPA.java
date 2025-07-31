@@ -174,6 +174,7 @@ public class FacilitySearchGenerationJPA {
 			// Facility Types
 			categoriesFromDB
 					.stream()
+					.filter(cat -> cat.getUid()!=null)
 					.filter(cat -> cat.getUid().equals(facility.getType()))
 					.forEach(facilityTypes::add);
 
