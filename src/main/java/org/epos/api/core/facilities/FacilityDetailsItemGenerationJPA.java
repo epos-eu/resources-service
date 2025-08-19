@@ -23,8 +23,11 @@ import org.epos.api.enums.AvailableFormatType;
 import org.epos.api.facets.Facets;
 import org.epos.api.facets.FacetsGeneration;
 import org.epos.api.facets.FacetsNodeTree;
-import org.epos.api.routines.DatabaseConnections;
-import org.epos.eposdatamodel.*;
+import org.epos.eposdatamodel.Category;
+import org.epos.eposdatamodel.Equipment;
+import org.epos.eposdatamodel.LinkedEntity;
+import org.epos.eposdatamodel.Location;
+import org.epos.eposdatamodel.Organization;
 import org.epos.library.feature.Feature;
 import org.epos.library.feature.FeaturesCollection;
 import org.epos.library.geometries.Geometry;
@@ -63,11 +66,6 @@ public class FacilityDetailsItemGenerationJPA {
 		if(parameters.containsKey("format") && parameters.get("format").toString().equals("application/epos.geo+json"))
 			return generateAsGeoJson(facilitySelected, parameters.containsKey("equipmenttypes")? parameters.get("equipmenttypes").toString() : null);
 		else {
-
-			//Collection<EDMFacilityService> ws = facilitySelected.getFacilityServicesByInstanceId() != null ? facilitySelected.getFacilityServicesByInstanceId() : null;
-			//if (ws == null && facilitySelected.getFacilitiesByInstanceId() != null) return null;
-
-
 			Facility facility = new Facility();
 
 			if (facilitySelected.getTitle() != null) facility.setTitle(facilitySelected.getTitle());
@@ -89,7 +87,6 @@ public class FacilityDetailsItemGenerationJPA {
 			keywords.removeAll(Collections.singleton(null));
 			keywords.removeAll(Collections.singleton(""));
 			facility.setKeywords(new ArrayList<>(keywords));
-
 
 			// Facility Types
 			List<Category> type = categoriesFromDB
@@ -117,7 +114,6 @@ public class FacilityDetailsItemGenerationJPA {
 						}
 					}
 			});
-
 
 			facility.setDataProvider(DataServiceProviderGeneration.getProviders(new ArrayList<Organization>(organizationsEntityIds)));
 			if(facilitySelected.getPageURL()!=null) {
@@ -200,7 +196,7 @@ public class FacilityDetailsItemGenerationJPA {
 					.categories(categoryList.isEmpty() ? null : categoryList)
 					.build());
 
-			FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList, Facets.Type.DATA);
+			FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList, Facets.Type.FACILITY);
 			categories.getNodes().forEach(node -> node.setDistributions(null));
 			facility.setCategories(categories.getFacets());
 
