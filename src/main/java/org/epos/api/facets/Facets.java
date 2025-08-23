@@ -2,6 +2,7 @@ package org.epos.api.facets;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import abstractapis.AbstractAPI;
@@ -49,7 +50,7 @@ public class Facets {
 				.filter(e -> e.getUid().contains("category:"))
 				.filter(e -> getCategorySchemeType(e).equals(type))
 				.collect(Collectors.toList());
-		List<Category> categoriesList = categories.stream().filter(e -> e.getUid().contains("category:"))
+		List<Category> categoriesList = categories.stream().filter(e -> Objects.nonNull(e.getUid()) && e.getUid().contains("category:"))
 				.collect(Collectors.toList());
 
 		for (CategoryScheme scheme : categorySchemesList) {
