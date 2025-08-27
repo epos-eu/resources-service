@@ -249,18 +249,20 @@ public class DistributionFilterSearch {
 				List<DataServiceProvider> providers = new ArrayList<DataServiceProvider>(DataServiceProviderGeneration.getProviders(organizations));
 
 				List<Organization> organisationList = new ArrayList<>();
-				for (LinkedEntity distribution : ds.getDistribution()) {
-					Distribution distribution1 = (Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(distribution.getInstanceId());
-					if(Objects.nonNull(distribution1) && distribution1.getAccessService() != null){
-						for (LinkedEntity accessService : distribution1.getAccessService()) {
-							WebService ws = (WebService) AbstractAPI.retrieveAPI(EntityNames.WEBSERVICE.name()).retrieve(accessService.getInstanceId());
-							if(Objects.nonNull(ws)){
-								Organization organization = (Organization) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieve(ws.getProvider().getInstanceId());
-								if(Objects.nonNull(organization)) organisationList.add(organization);
-							}
-						}
-					}
-				}
+                if(ds.getDistribution() != null && !ds.getDistribution().isEmpty()) {
+                    for (LinkedEntity distribution : ds.getDistribution()) {
+                        Distribution distribution1 = (Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(distribution.getInstanceId());
+                        if (Objects.nonNull(distribution1) && distribution1.getAccessService() != null) {
+                            for (LinkedEntity accessService : distribution1.getAccessService()) {
+                                WebService ws = (WebService) AbstractAPI.retrieveAPI(EntityNames.WEBSERVICE.name()).retrieve(accessService.getInstanceId());
+                                if (Objects.nonNull(ws)) {
+                                    Organization organization = (Organization) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieve(ws.getProvider().getInstanceId());
+                                    if (Objects.nonNull(organization)) organisationList.add(organization);
+                                }
+                            }
+                        }
+                    }
+                }
 				providers.addAll(DataServiceProviderGeneration.getProviders(organisationList));
 
 				List<String> value = new ArrayList<>();
