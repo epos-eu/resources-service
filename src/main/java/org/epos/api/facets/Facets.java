@@ -192,6 +192,10 @@ public class Facets {
 	}
 
 	public static Type getCategoryType(Category category) {
+		if (category.getInScheme() == null) {
+			LOGGER.warn("category has no scheme, defaulting to DATA for type. Category UID: {}", category.getUid());
+			return Type.DATA;
+		}
 		var scheme = (CategoryScheme) LinkedEntityAPI.retrieveFromLinkedEntity(category.getInScheme());
 		return getCategorySchemeType(scheme);
 	}
