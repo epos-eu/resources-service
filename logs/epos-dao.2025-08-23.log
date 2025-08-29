@@ -1,0 +1,37 @@
+2025-08-23 18:09:11 [main] INFO  o.testcontainers.images.PullPolicy - Image pull policy will be performed by: DefaultPullPolicy()
+2025-08-23 18:09:11 [main] INFO  o.t.utility.ImageNameSubstitutor - Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+2025-08-23 18:09:11 [main] INFO  o.testcontainers.DockerClientFactory - Testcontainers version: 1.21.0
+2025-08-23 18:09:11 [main] INFO  o.t.d.DockerClientProviderStrategy - Loaded org.testcontainers.dockerclient.UnixSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+2025-08-23 18:09:11 [main] INFO  o.t.d.DockerClientProviderStrategy - Found Docker environment with local Unix socket (unix:///var/run/docker.sock)
+2025-08-23 18:09:11 [main] INFO  o.testcontainers.DockerClientFactory - Docker host IP address is localhost
+2025-08-23 18:09:11 [main] INFO  o.testcontainers.DockerClientFactory - Connected to docker: 
+  Server Version: 28.3.3
+  API Version: 1.51
+  Operating System: EndeavourOS
+  Total Memory: 63743 MB
+2025-08-23 18:09:11 [main] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling docker image: testcontainers/ryuk:0.11.0. Please be patient; this may take some time but only needs to be done once.
+2025-08-23 18:09:13 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Starting to pull image
+2025-08-23 18:09:13 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling image layers:  0 pending,  0 downloaded,  0 extracted, (0 bytes/0 bytes)
+2025-08-23 18:09:14 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling image layers:  2 pending,  1 downloaded,  0 extracted, (879 KB/? MB)
+2025-08-23 18:09:14 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling image layers:  1 pending,  2 downloaded,  0 extracted, (4 MB/? MB)
+2025-08-23 18:09:14 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling image layers:  0 pending,  3 downloaded,  0 extracted, (4 MB/10 MB)
+2025-08-23 18:09:14 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling image layers:  0 pending,  3 downloaded,  1 extracted, (6 MB/10 MB)
+2025-08-23 18:09:15 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling image layers:  0 pending,  3 downloaded,  2 extracted, (6 MB/10 MB)
+2025-08-23 18:09:15 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pulling image layers:  0 pending,  3 downloaded,  3 extracted, (10 MB/10 MB)
+2025-08-23 18:09:15 [main] INFO  tc.testcontainers/ryuk:0.11.0 - Image testcontainers/ryuk:0.11.0 pull took PT3.187963564S
+2025-08-23 18:09:15 [docker-java-stream-2099354479] INFO  tc.testcontainers/ryuk:0.11.0 - Pull complete. 3 layers, pulled in 1s (downloaded 10 MB at 10 MB/s)
+2025-08-23 18:09:15 [main] INFO  tc.testcontainers/ryuk:0.11.0 - Creating container for image: testcontainers/ryuk:0.11.0
+2025-08-23 18:09:15 [main] INFO  tc.testcontainers/ryuk:0.11.0 - Container testcontainers/ryuk:0.11.0 is starting: 747332a0d35c5084929ffd03c4c8faa322f233ac3bdcad338e87338fd55c9775
+2025-08-23 18:09:15 [main] INFO  tc.testcontainers/ryuk:0.11.0 - Container testcontainers/ryuk:0.11.0 started in PT0.379563346S
+2025-08-23 18:09:15 [main] INFO  o.t.utility.RyukResourceReaper - Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+2025-08-23 18:09:15 [main] INFO  o.testcontainers.DockerClientFactory - Checking the system...
+2025-08-23 18:09:15 [main] INFO  o.testcontainers.DockerClientFactory - ✔︎ Docker server version should be at least 1.6.0
+2025-08-23 18:09:15 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Pulling docker image: epos/metadata-database-deploy-pop-test:latest. Please be patient; this may take some time but only needs to be done once.
+2025-08-23 18:09:17 [docker-java-stream-1558317450] INFO  t.epos/metadata-database-deploy-pop-test:latest - Starting to pull image
+2025-08-23 18:09:17 [docker-java-stream-1558317450] INFO  t.epos/metadata-database-deploy-pop-test:latest - Pulling image layers:  0 pending,  0 downloaded,  0 extracted, (0 bytes/0 bytes)
+2025-08-23 18:09:18 [docker-java-stream-1558317450] INFO  t.epos/metadata-database-deploy-pop-test:latest - Pulling image layers: 20 pending,  1 downloaded,  0 extracted, (69 KB/? MB)
+2025-08-23 18:09:18 [docker-java-stream-1558317450] INFO  t.epos/metadata-database-deploy-pop-test:latest - Pulling image layers: 20 pending,  1 downloaded,  1 extracted, (69 KB/? MB)
+2025-08-23 18:09:18 [docker-java-stream-1558317450] INFO  t.epos/metadata-database-deploy-pop-test:latest - Pull complete. 21 layers, pulled in 1s (downloaded 69 KB at 69 KB/s)
+2025-08-23 18:09:18 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Image epos/metadata-database-deploy-pop-test:latest pull took PT2.812923769S
+2025-08-23 18:09:18 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Creating container for image: epos/metadata-database-deploy-pop-test:latest
+2025-08-23 18:09:18 [main] INFO  t.epos/metadata-database-deploy-pop-test:latest - Container epos/metadata-database-deploy-pop-test:latest is starting: 46fc3a28d818580c65e9135b547042777d81f684dfc809d88ebaffd4a86e1c23
