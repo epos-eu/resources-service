@@ -27,6 +27,7 @@ import org.epos.api.facets.Node;
 import org.epos.eposdatamodel.Category;
 import org.epos.eposdatamodel.DataProduct;
 import org.epos.eposdatamodel.Distribution;
+import org.epos.eposdatamodel.LinkedEntity;
 import org.epos.eposdatamodel.SoftwareApplication;
 import org.epos.eposdatamodel.SoftwareSourceCode;
 import org.slf4j.Logger;
@@ -98,6 +99,10 @@ public class SoftwareSearch {
 				continue;
 			}
 
+			if (software.getCategory() == null) {
+				LOGGER.warn("software source code {} doesn't have a category set", software.getUid());
+				continue;
+			}
 			List<String> categoryList = extractCategoryUids(software.getCategory());
 			List<AvailableFormat> formats = createFormatsForSourceCode(software);
 
@@ -124,6 +129,10 @@ public class SoftwareSearch {
 				continue;
 			}
 
+			if (software.getCategory() == null) {
+				LOGGER.warn("software application {} doesn't have a category set", software.getUid());
+				continue;
+			}
 			List<String> categoryList = extractCategoryUids(software.getCategory());
 			List<AvailableFormat> formats = createFormatsForApplication(software);
 
@@ -179,7 +188,7 @@ public class SoftwareSearch {
 		}
 	}
 
-	private static List<String> extractCategoryUids(List<org.epos.eposdatamodel.LinkedEntity> categoryEntities) {
+	private static List<String> extractCategoryUids(List<LinkedEntity> categoryEntities) {
 		return categoryEntities.stream()
 				.map(linkedEntity -> (Category) LinkedEntityAPI.retrieveFromLinkedEntity(linkedEntity))
 				.map(Category::getUid)

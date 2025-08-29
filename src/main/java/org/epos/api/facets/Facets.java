@@ -42,14 +42,16 @@ public class Facets {
 		JsonArray domainsFacets = new JsonArray();
 		JsonObject facetsObject = new JsonObject();
 
-		List<CategoryScheme> schemes = (List<CategoryScheme>) AbstractAPI.retrieveAPI(EntityNames.CATEGORYSCHEME.name()).retrieveAll();
+		List<CategoryScheme> schemes = (List<CategoryScheme>) AbstractAPI.retrieveAPI(EntityNames.CATEGORYSCHEME.name())
+				.retrieveAll();
 		List<Category> categories = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll();
 
 		List<CategoryScheme> categorySchemesList = schemes.stream()
 				.filter(e -> e.getUid().contains("category:"))
 				.filter(e -> getCategorySchemeType(e).equals(type))
 				.collect(Collectors.toList());
-		List<Category> categoriesList = categories.stream().filter(e -> Objects.nonNull(e.getUid()) && e.getUid().contains("category:"))
+		List<Category> categoriesList = categories.stream()
+				.filter(e -> Objects.nonNull(e.getUid()) && e.getUid().contains("category:"))
 				.collect(Collectors.toList());
 
 		for (CategoryScheme scheme : categorySchemesList) {

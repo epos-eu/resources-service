@@ -192,7 +192,7 @@ public interface ClientHelpersApi {
 	ResponseEntity<ParametersResponse> searchLinkedParameters(
 			@Parameter(in = ParameterIn.PATH, description = "The instance ID", required = true, schema = @Schema()) @PathVariable("instance_id") String id);
 
-	@Operation(summary = "linked parameters", description = "returns all the output parameters available for a distribution that are linked to something", tags = {
+	@Operation(summary = "software search", description = "search for softwares in the catalog", tags = {
 			"Resources Service" })
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SearchResponse.class))),
