@@ -188,7 +188,7 @@ public class FacilitySearchGenerationJPA {
 							&& linkedEntity.getInstanceId().equals(facility.getInstanceId())) {
 						categoriesFromDB
 								.stream()
-								.filter(cat -> cat.getUid().equals(equipment.getType()))
+								.filter(cat -> cat.getUid() != null && cat.getUid().equals(equipment.getType()))
 								.forEach(equipmentTypes::add);
 					}
 				}
