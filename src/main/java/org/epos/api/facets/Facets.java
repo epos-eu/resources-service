@@ -5,20 +5,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import abstractapis.AbstractAPI;
-import metadataapis.EntityNames;
-import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.Category;
 import org.epos.eposdatamodel.CategoryScheme;
 import org.epos.eposdatamodel.LinkedEntity;
-import org.epos.eposdatamodel.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import abstractapis.AbstractAPI;
 import commonapis.LinkedEntityAPI;
+import metadataapis.EntityNames;
 
 public class Facets {
 
@@ -26,6 +24,7 @@ public class Facets {
 
 	private JsonObject facetsStatic;
 	private JsonObject facetsFromDatabaseData;
+	private JsonObject facetsFromDatabaseSoftware;
 	private JsonObject facetsFromDatabaseFacilities;
 
 	private Facets() {
@@ -136,6 +135,8 @@ public class Facets {
 				return facetsFromDatabaseFacilities;
 			case DATA:
 				return facetsFromDatabaseData;
+			case SOFTWARE:
+				return facetsFromDatabaseSoftware;
 			default:
 				return facetsFromDatabaseData;
 		}
@@ -148,6 +149,9 @@ public class Facets {
 				break;
 			case DATA:
 				this.facetsFromDatabaseData = facetsFromDatabase;
+				break;
+			case SOFTWARE:
+				this.facetsFromDatabaseSoftware = facetsFromDatabase;
 				break;
 			default:
 				this.facetsFromDatabaseData = facetsFromDatabase;
@@ -171,6 +175,8 @@ public class Facets {
 			String uid = topConcept.getUid();
 			if ("category:facets/facility-theme".equals(uid)) {
 				return Type.FACILITY;
+			} else if ("category:facets/software-theme".equals(uid)) {
+				return Type.SOFTWARE;
 			} else if ("category:facets/dataset-theme".equals(uid)) {
 				return Type.DATA;
 			}
@@ -191,5 +197,6 @@ public class Facets {
 	public enum Type {
 		FACILITY,
 		DATA,
+		SOFTWARE,
 	}
 }
