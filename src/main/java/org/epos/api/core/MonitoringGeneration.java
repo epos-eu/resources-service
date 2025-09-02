@@ -113,7 +113,11 @@ public class MonitoringGeneration {
                                 if(Objects.nonNull(ws.getContactPoint())) {
                                     for (LinkedEntity le : ws.getContactPoint()) {
                                         ContactPoint contact = (ContactPoint) LinkedEntityAPI.retrieveFromLinkedEntity(le);
-                                        mb.createContacts(contact.getUid(), contact.getRole(), new HashSet<>(contact.getEmail()).stream().toList());
+                                        try {
+                                            mb.createContacts(contact.getUid(), contact.getRole(), new HashSet<>(contact.getEmail()).stream().toList());
+                                        }catch (Exception e) {
+                                            LOGGER.error("Found the following issue whilst creating contacts, issue raised "+ e.getMessage() + " - Continuing execution");
+                                        }
                                     }
                                 }
 							}
