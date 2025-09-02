@@ -58,7 +58,7 @@ public class FacilityDetailsItemGenerationJPA {
 		// maybe the details is for a service from the data panel
 		if (facilitySelected == null) {
 			LOGGER.info("Given id is not of a facility, checking if it's a distribution");
-			return DistributionDetailsGenerationJPA.generate(parameters);
+			return DistributionDetailsGenerationJPA.generate(parameters, Facets.Type.FACILITY);
 		}
 		List<Organization> organizationForOwners  = (List<Organization>) AbstractAPI.retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll();
 		List<Category> categoriesFromDB = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll();
@@ -76,7 +76,7 @@ public class FacilityDetailsItemGenerationJPA {
 				facility.setType(type[type.length - 1]);
 			}
 
-			facility.setId(facilitySelected.getMetaId());
+			facility.setId(facilitySelected.getInstanceId());
 			facility.setUid(facilitySelected.getUid());
 
 			facility.setHref(EnvironmentVariables.API_HOST + API_PATH_DETAILS + facilitySelected.getMetaId());

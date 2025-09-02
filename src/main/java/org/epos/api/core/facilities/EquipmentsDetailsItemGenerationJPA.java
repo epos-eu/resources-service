@@ -33,7 +33,7 @@ public class EquipmentsDetailsItemGenerationJPA {
 
 		List<Facility> facilitySelectedList = null;
 		if(parameters.containsKey("facilityid")) {
-			facilitySelectedList = List.of((Facility)AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieve(parameters.get("id").toString()));
+			facilitySelectedList = List.of((Facility)AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieve(parameters.get("facilityid").toString()));
 		}else {
 			facilitySelectedList = (List<Facility>) AbstractAPI.retrieveAPI(EntityNames.FACILITY.name()).retrieveAll();
 		}

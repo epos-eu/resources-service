@@ -53,6 +53,10 @@ public class DistributionDetailsGenerationJPA {
 	private static final String EMAIL_SENDER = EnvironmentVariables.API_CONTEXT + "/sender/send-email?id=";
 
 	public static Distribution generate(Map<String,Object> parameters) {
+		return generate(parameters, Facets.Type.DATA);
+	}
+
+	public static Distribution generate(Map<String,Object> parameters, Facets.Type facetsType) {
 
 		LOGGER.info("Parameters {}", parameters);
 
@@ -348,7 +352,7 @@ public class DistributionDetailsGenerationJPA {
 				.editorId(distribution.getEditorId())
 				.build());
 		
-		FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList, Facets.Type.DATA);
+		FacetsNodeTree categories = FacetsGeneration.generateResponseUsingCategories(discoveryList, facetsType);
 		categories.getNodes().forEach(node -> node.setDistributions(null));
 		distribution.setCategories(categories.getFacets());
 		
