@@ -188,8 +188,10 @@ public class DistributionFilterSearch {
 										tempDatasetList.add(ds);
 										uidSet.add(ds.getMetaId());
 									}
-								} catch (ParseException e) {
-									LOGGER.error("Error occurs during BBOX dataproduct parsing", e);
+								} catch (Exception e) {
+									LOGGER.warn("Error occurs during BBOX dataproduct parsing for dataset with uid {} and spatial {}",
+											ds.getUid(), wsSpatial, e);
+									continue;
 								}
 							}
 						}
