@@ -95,6 +95,37 @@ public class AvailableFormatsGeneration {
 
 			boolean isOgcFormat = false;
 
+			if (!isOgcFormat) {
+				if (DatabaseConnections.getInstance().getPlugins().containsKey(distribution.getInstanceId())) {
+					for (Plugin.Relations relation : DatabaseConnections.getInstance().getPlugins()
+							.get(distribution.getInstanceId())) {
+						if (relation.getOutputFormat().equals("application/epos.geo+json")
+								|| relation.getOutputFormat().equals("application/epos.table.geo+json")
+								|| relation.getOutputFormat().equals("application/epos.map.geo+json")) {
+							formats.add(buildAvailableFormatConverted(
+									relation.getInputFormat(),
+									relation.getPluginId(),
+									relation.getInputFormat(),
+									relation.getOutputFormat(),
+									buildHrefConverted(distribution, relation.getOutputFormat(), relation.getInputFormat(), relation.getPluginId()),
+									"GEOJSON",
+									AvailableFormatType.CONVERTED));
+						} else if (relation.getOutputFormat().equals("application/epos.graph.covjson")
+								|| relation.getOutputFormat().equals("application/epos.covjson")) {
+							formats.add(buildAvailableFormatConverted(
+									relation.getInputFormat(),
+									relation.getPluginId(),
+									relation.getInputFormat(),
+									relation.getOutputFormat(),
+									buildHrefConverted(distribution, relation.getOutputFormat(), relation.getInputFormat(), relation.getPluginId()),
+									"COVJSON",
+									AvailableFormatType.CONVERTED));
+						} else {
+							System.out.println("Unknown format: " + relation.getOutputFormat());
+						}
+					}
+				}
+			}
 
 			if (operation.getMapping() != null) {
 				List<String> maps = operation.getMapping().parallelStream().map(LinkedEntity::getInstanceId).collect(Collectors.toList());
@@ -173,37 +204,6 @@ public class AvailableFormatsGeneration {
 				}
 			}
 
-			if (!isOgcFormat) {
-				if (DatabaseConnections.getInstance().getPlugins().containsKey(distribution.getInstanceId())) {
-					for (Plugin.Relations relation : DatabaseConnections.getInstance().getPlugins()
-							.get(distribution.getInstanceId())) {
-						if (relation.getOutputFormat().equals("application/epos.geo+json")
-								|| relation.getOutputFormat().equals("application/epos.table.geo+json")
-								|| relation.getOutputFormat().equals("application/epos.map.geo+json")) {
-							formats.add(buildAvailableFormatConverted(
-									relation.getInputFormat(),
-									relation.getPluginId(),
-									relation.getInputFormat(),
-									relation.getOutputFormat(),
-									buildHrefConverted(distribution, relation.getOutputFormat(), relation.getInputFormat(), relation.getPluginId()),
-									"GEOJSON",
-									AvailableFormatType.CONVERTED));
-						} else if (relation.getOutputFormat().equals("application/epos.graph.covjson")
-								|| relation.getOutputFormat().equals("application/epos.covjson")) {
-							formats.add(buildAvailableFormatConverted(
-									relation.getInputFormat(),
-									relation.getPluginId(),
-									relation.getInputFormat(),
-									relation.getOutputFormat(),
-									buildHrefConverted(distribution, relation.getOutputFormat(), relation.getInputFormat(), relation.getPluginId()),
-									"COVJSON",
-									AvailableFormatType.CONVERTED));
-						} else {
-							System.out.println("Unknown format: " + relation.getOutputFormat());
-						}
-					}
-				}
-			}
 		}
 
 		return formats;
