@@ -134,6 +134,8 @@ public class DatabaseConnections {
 
 		// one thread for each query
 		ExecutorService executor = Executors.newFixedThreadPool(maxDbConnections);
+
+		EposDataModelDAO.smartCacheCleanup();
 //
 //		// wrap each query in a future
 //		CompletableFuture<List<DataProduct>> tempDataproductsFuture = createSafeFuture(
