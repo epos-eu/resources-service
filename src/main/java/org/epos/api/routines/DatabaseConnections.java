@@ -136,12 +136,14 @@ public class DatabaseConnections {
 		// one thread for each query
 		ExecutorService executor = Executors.newFixedThreadPool(maxDbConnections);
 
-		List<String> strings = (List<String>) ((List<DataProduct>) AbstractAPI.retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll() ).stream()
-				.map(l -> l.getInstanceId()).collect(Collectors.toList());
+		// List<String> strings = (List<String>) ((List<DataProduct>) AbstractAPI.retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll() ).stream()
+		// 		.map(l -> l.getInstanceId()).collect(Collectors.toList());
 
 		EposDataModelDAO.clearAllCaches();
 
-		EposDataModelDAO.getInstance().warmUpCache(DataProduct.class, strings);
+		AbstractAPI.retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll();
+
+		// EposDataModelDAO.getInstance().warmUpCache(DataProduct.class, strings);
 		//
 		// // wrap each query in a future
 		// CompletableFuture<List<DataProduct>> tempDataproductsFuture =
