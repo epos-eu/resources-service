@@ -91,8 +91,8 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 	}
 
     public ResponseEntity<Distribution> resourcesDiscoveryWithUIDGetUsingGET(
-            @Parameter(in = ParameterIn.QUERY, description = "The distribution UID", required=true, schema=@Schema()) @PathVariable("instance_id") String id,
-            @Parameter(in = ParameterIn.QUERY, description = "extended payload" ,schema=@Schema()) @Valid @RequestParam(value = "extended", required = false) Boolean extended){
+            @Parameter(in = ParameterIn.QUERY, description = "The distribution UID", required=true, schema=@Schema()) @RequestParam(value = "uid", required = true)  String id,
+            @Parameter(in = ParameterIn.QUERY, description = "extended payload" ,schema=@Schema()) @RequestParam(value = "extended", required = false) Boolean extended){
 
         if (id == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
