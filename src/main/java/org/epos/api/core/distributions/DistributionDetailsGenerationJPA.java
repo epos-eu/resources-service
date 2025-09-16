@@ -56,8 +56,6 @@ public class DistributionDetailsGenerationJPA {
 
 		LOGGER.info("Parameters {}", parameters);
 
-
-
 		org.epos.eposdatamodel.Distribution distributionSelected = (org.epos.eposdatamodel.Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(parameters.get("id").toString());
 
 		if (distributionSelected == null) {
