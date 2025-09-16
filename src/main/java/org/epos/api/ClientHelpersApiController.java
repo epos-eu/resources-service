@@ -90,7 +90,35 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		return standardRequest("DETAILS", requestParams, null);
 	}
 
-	public ResponseEntity<SearchResponse> searchUsingGet(
+    public ResponseEntity<Distribution> resourcesDiscoveryWithUIDGetUsingGET(
+            @Parameter(in = ParameterIn.QUERY, description = "The distribution UID", required=true, schema=@Schema()) @PathVariable("instance_id") String id,
+            @Parameter(in = ParameterIn.QUERY, description = "extended payload" ,schema=@Schema()) @Valid @RequestParam(value = "extended", required = false) Boolean extended){
+
+        if (id == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (extended == null) {
+            extended = false;
+        }
+
+        try {
+            id = java.net.URLDecoder.decode(id, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.warn(A_PROBLEM_WAS_ENCOUNTERED_DECODING + "id: " + id, e);
+            Distribution errorResponse = new Distribution(e.getLocalizedMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+
+        Map<String, Object> requestParams = new HashMap<>();
+        requestParams.put("id", id);
+        requestParams.put("extended", extended);
+
+        return standardRequest("DETAILS", requestParams, null);
+    }
+
+
+    public ResponseEntity<SearchResponse> searchUsingGet(
 			@Parameter(in = ParameterIn.QUERY, description = "q", schema = @Schema()) @Valid @RequestParam(value = "q", required = false) String q,
 			@Parameter(in = ParameterIn.QUERY, description = "startDate", schema = @Schema()) @Valid @RequestParam(value = "startDate", required = false) String startDate,
 			@Parameter(in = ParameterIn.QUERY, description = "endDate", schema = @Schema()) @Valid @RequestParam(value = "endDate", required = false) String endDate,

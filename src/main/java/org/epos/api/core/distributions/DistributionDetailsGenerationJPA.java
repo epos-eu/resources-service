@@ -56,10 +56,16 @@ public class DistributionDetailsGenerationJPA {
 
 		LOGGER.info("Parameters {}", parameters);
 
+
+
 		org.epos.eposdatamodel.Distribution distributionSelected = (org.epos.eposdatamodel.Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(parameters.get("id").toString());
 
-
-		if (distributionSelected == null) return null;
+		if (distributionSelected == null) {
+            List<model.Distribution> distribution = AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).getDbaccess().getOneFromDBByUID(parameters.get("id").toString(), model.Distribution.class);
+            if (distribution == null) return null;
+            distributionSelected = (org.epos.eposdatamodel.Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(distribution.get(0).getInstanceId());
+            if (distributionSelected == null) return null;
+        }
 
 		DataProduct dp;
 		if (distributionSelected.getDataProduct() != null &&

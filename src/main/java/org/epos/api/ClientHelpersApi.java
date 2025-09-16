@@ -57,6 +57,29 @@ public interface ClientHelpersApi {
     ResponseEntity<Distribution> resourcesDiscoveryGetUsingGET(@Parameter(in = ParameterIn.PATH, description = "The distribution ID", required=true, schema=@Schema()) @PathVariable("instance_id") String id,
     		@Parameter(in = ParameterIn.QUERY, description = "extended payload" ,schema=@Schema()) @Valid @RequestParam(value = "extended", required = false) Boolean extended);
 
+    @Operation(summary = "metadata resources details using UID", description = "returns detailed information useful to contextualise the discovery phase", tags={ "Resources Service" })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "ok.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Distribution.class))),
+
+            @ApiResponse(responseCode = "201", description = "Created."),
+
+            @ApiResponse(responseCode = "204", description = "No content."),
+
+            @ApiResponse(responseCode = "301", description = "Moved Permanently."),
+
+            @ApiResponse(responseCode = "400", description = "Bad request."),
+
+            @ApiResponse(responseCode = "401", description = "Access token is missing or invalid"),
+
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+
+            @ApiResponse(responseCode = "404", description = "Not Found") })
+    @RequestMapping(value = "/resources/details",
+            produces = { "application/json" },
+            method = RequestMethod.GET)
+    ResponseEntity<Distribution> resourcesDiscoveryWithUIDGetUsingGET(@Parameter(in = ParameterIn.QUERY, description = "The distribution UID", required=true, schema=@Schema()) @PathVariable("instance_id") String id,
+                                                               @Parameter(in = ParameterIn.QUERY, description = "extended payload" ,schema=@Schema()) @Valid @RequestParam(value = "extended", required = false) Boolean extended);
+
 
 	@Operation(summary = "search operation", description = "Search endpoint", tags={ "Resources Service" })
 	@ApiResponses(value = { 
