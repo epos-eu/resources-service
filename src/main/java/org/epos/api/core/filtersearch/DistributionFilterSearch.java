@@ -153,7 +153,10 @@ public class DistributionFilterSearch {
 					//if the uid belong to an already selected dataproduct just skip the iteration
 					if(uidSet.contains(ds.getMetaId())) continue;
 
-					if (ds.getDistribution() == null) continue;
+					if (ds.getDistribution() == null) {
+                        LOGGER.error("[Spatial Filter] Error on current Dataset: {} skip", ds.getUid());
+                        continue;
+                    }
 
 					//iterate over every distribution related to the dataproduct taken into account
 					for (LinkedEntity distribution : ds.getDistribution()) {
@@ -274,6 +277,8 @@ public class DistributionFilterSearch {
 				List<DataServiceProvider> providers = new ArrayList<DataServiceProvider>(DataServiceProviderGeneration.getProviders(organizations));
 
 				List<Organization> organisationList = new ArrayList<>();
+                if(ds.getDistribution() == null)
+                    LOGGER.error("[Organization Filter] Error on current Dataset: {} skip", ds.getUid());
 				if(ds.getDistribution() != null && !ds.getDistribution().isEmpty()){
 					for (LinkedEntity distribution : ds.getDistribution()) {
 						Distribution distribution1 = (Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(distribution.getInstanceId());
