@@ -154,7 +154,7 @@ public class DistributionFilterSearch {
 					if(uidSet.contains(ds.getMetaId())) continue;
 
 					if (ds.getDistribution() == null) {
-                        LOGGER.error("[Spatial Filter] Error on current Dataset: {} skip", ds.getUid());
+                        LOGGER.error("[Spatial Filter] Error on current Dataset: {} skip", ds);
                         continue;
                     }
 
@@ -278,7 +278,7 @@ public class DistributionFilterSearch {
 
 				List<Organization> organisationList = new ArrayList<>();
                 if(ds.getDistribution() == null)
-                    LOGGER.error("[Organization Filter] Error on current Dataset: {} skip", ds.getUid());
+                    LOGGER.error("[Organization Filter] Error on current Dataset: {} skip", ds);
 				if(ds.getDistribution() != null && !ds.getDistribution().isEmpty()){
 					for (LinkedEntity distribution : ds.getDistribution()) {
 						Distribution distribution1 = (Distribution) AbstractAPI.retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieve(distribution.getInstanceId());
