@@ -48,30 +48,31 @@ import org.epos.router_framework.types.ServiceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import abstractapis.AbstractAPI;
 import metadataapis.EntityNames;
 import usermanagementapis.UserGroupManagementAPI;
 
 public class DatabaseConnections {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseConnections.class);
 
-//	private List<DataProduct> dataproducts;
-//	private List<SoftwareApplication> softwareApplications;
-//	private List<Organization> organizationList;
-//	private List<Category> categoryList;
-//	private List<CategoryScheme> categorySchemesList;
-//	private List<Distribution> distributionList;
-//	private List<Operation> operationList;
-//	private List<WebService> webServiceList;
-//	private List<Address> addressList;
-//	private List<Location> locationList;
-//	private List<PeriodOfTime> periodOfTimeList;
-//	private List<Identifier> identifierList;
-//	private List<Mapping> mappingList;
-//	private List<Equipment> equipmentList;
-//	private List<Facility> facilityList;
-//	private List<OutputMapping> outputMappingsList;
-//	private List<Payload> payloadsList;
-//	private Map<String, User> usersMap;
+	// private List<DataProduct> dataproducts;
+	// private List<SoftwareApplication> softwareApplications;
+	// private List<Organization> organizationList;
+	// private List<Category> categoryList;
+	// private List<CategoryScheme> categorySchemesList;
+	// private List<Distribution> distributionList;
+	// private List<Operation> operationList;
+	// private List<WebService> webServiceList;
+	// private List<Address> addressList;
+	// private List<Location> locationList;
+	// private List<PeriodOfTime> periodOfTimeList;
+	// private List<Identifier> identifierList;
+	// private List<Mapping> mappingList;
+	// private List<Equipment> equipmentList;
+	// private List<Facility> facilityList;
+	// private List<OutputMapping> outputMappingsList;
+	// private List<Payload> payloadsList;
+	// private Map<String, User> usersMap;
 
 	// distributionId -> list of relations with plugins
 	private Map<String, List<Plugin.Relations>> plugins;
@@ -134,115 +135,132 @@ public class DatabaseConnections {
 
 		// one thread for each query
 		ExecutorService executor = Executors.newFixedThreadPool(maxDbConnections);
-//
-//		// wrap each query in a future
-//		CompletableFuture<List<DataProduct>> tempDataproductsFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI DATAPRODUCT",
-//				executor);
-//
-//		CompletableFuture<List<SoftwareApplication>> tempSoftwareApplicationsFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI SOFTWAREAPPLICATION",
-//				executor);
-//
-//		CompletableFuture<List<Organization>> tempOrganizationListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI ORGANIZATION",
-//				executor);
-//
-//		CompletableFuture<List<Category>> tempCategoryListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI CATEGORY",
-//				executor);
-//
-//		CompletableFuture<List<CategoryScheme>> tempCategorySchemeListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.CATEGORYSCHEME.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI CATEGORYSCHEME",
-//				executor);
-//
-//		CompletableFuture<List<Distribution>> tempDistributionListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI DISTRIBUTION",
-//				executor);
-//
-//		CompletableFuture<List<Operation>> tempOperationListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.OPERATION.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI OPERATION",
-//				executor);
-//
-//		CompletableFuture<List<WebService>> tempWebServiceListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.WEBSERVICE.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI WEBSERVICE",
-//				executor);
-//
-//		CompletableFuture<List<Address>> tempAddressListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.ADDRESS.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI ADDRESS",
-//				executor);
-//
-//		CompletableFuture<List<Location>> tempLocationListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.LOCATION.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI LOCATION",
-//				executor);
-//
-//		CompletableFuture<List<PeriodOfTime>> tempPeriodOfTimeListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.PERIODOFTIME.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI PERIODOFTIME",
-//				executor);
-//
-//		CompletableFuture<List<Identifier>> tempIdentifierListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.IDENTIFIER.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI IDENTIFIER",
-//				executor);
-//
-//		CompletableFuture<List<Mapping>> tempMappingListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.MAPPING.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI MAPPING",
-//				executor);
-//
-//		CompletableFuture<List<Facility>> tempFacilityListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.FACILITY.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI FACILITY",
-//				executor);
-//
-//		CompletableFuture<List<Equipment>> tempEquipmentListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI EQUIPMENT",
-//				executor);
-//
-//		CompletableFuture<List<OutputMapping>> tempOutputMappingListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.OUTPUTMAPPING.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI OUTPUTMAPPING",
-//				executor);
-//
-//		CompletableFuture<List<Payload>> tempPayloadListFuture = createSafeFuture(
-//				() -> retrieveAPI(EntityNames.PAYLOAD.name()).retrieveAll(),
-//				new ArrayList<>(),
-//				"retrieveAPI PAYLOAD",
-//				executor);
-//
-//		CompletableFuture<List<User>> tempUserListFuture = createSafeFuture(
-//				() -> UserGroupManagementAPI.retrieveAllUsers(),
-//				new ArrayList<>(),
-//				"UserGroupManagementAPI.retrieveAllUsers",
-//				executor);
+
+		LOGGER.info("reloading cache");
+		EposDataModelDAO.getInstance().reloadCache();
+		LOGGER.info("cache reloaded");
+
+		// EposDataModelDAO.getInstance().warmUpCache(DataProduct.class, strings);
+		//
+		// // wrap each query in a future
+		// CompletableFuture<List<DataProduct>> tempDataproductsFuture =
+		// createSafeFuture(
+		// () -> retrieveAPI(EntityNames.DATAPRODUCT.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI DATAPRODUCT",
+		// executor);
+		//
+		// CompletableFuture<List<SoftwareApplication>> tempSoftwareApplicationsFuture =
+		// createSafeFuture(
+		// () -> retrieveAPI(EntityNames.SOFTWAREAPPLICATION.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI SOFTWAREAPPLICATION",
+		// executor);
+		//
+		// CompletableFuture<List<Organization>> tempOrganizationListFuture =
+		// createSafeFuture(
+		// () -> retrieveAPI(EntityNames.ORGANIZATION.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI ORGANIZATION",
+		// executor);
+		//
+		// CompletableFuture<List<Category>> tempCategoryListFuture = createSafeFuture(
+		// () -> retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI CATEGORY",
+		// executor);
+		//
+		// CompletableFuture<List<CategoryScheme>> tempCategorySchemeListFuture =
+		// createSafeFuture(
+		// () -> retrieveAPI(EntityNames.CATEGORYSCHEME.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI CATEGORYSCHEME",
+		// executor);
+		//
+		// CompletableFuture<List<Distribution>> tempDistributionListFuture =
+		// createSafeFuture(
+		// () -> retrieveAPI(EntityNames.DISTRIBUTION.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI DISTRIBUTION",
+		// executor);
+		//
+		// CompletableFuture<List<Operation>> tempOperationListFuture =
+		// createSafeFuture(
+		// () -> retrieveAPI(EntityNames.OPERATION.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI OPERATION",
+		// executor);
+		//
+		// CompletableFuture<List<WebService>> tempWebServiceListFuture =
+		// createSafeFuture(
+		// () -> retrieveAPI(EntityNames.WEBSERVICE.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI WEBSERVICE",
+		// executor);
+		//
+		// CompletableFuture<List<Address>> tempAddressListFuture = createSafeFuture(
+		// () -> retrieveAPI(EntityNames.ADDRESS.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI ADDRESS",
+		// executor);
+		//
+		// CompletableFuture<List<Location>> tempLocationListFuture = createSafeFuture(
+		// () -> retrieveAPI(EntityNames.LOCATION.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI LOCATION",
+		// executor);
+		//
+		// CompletableFuture<List<PeriodOfTime>> tempPeriodOfTimeListFuture =
+		// createSafeFuture(
+		// () -> retrieveAPI(EntityNames.PERIODOFTIME.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI PERIODOFTIME",
+		// executor);
+		//
+		// CompletableFuture<List<Identifier>> tempIdentifierListFuture =
+		// createSafeFuture(
+		// () -> retrieveAPI(EntityNames.IDENTIFIER.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI IDENTIFIER",
+		// executor);
+		//
+		// CompletableFuture<List<Mapping>> tempMappingListFuture = createSafeFuture(
+		// () -> retrieveAPI(EntityNames.MAPPING.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI MAPPING",
+		// executor);
+		//
+		// CompletableFuture<List<Facility>> tempFacilityListFuture = createSafeFuture(
+		// () -> retrieveAPI(EntityNames.FACILITY.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI FACILITY",
+		// executor);
+		//
+		// CompletableFuture<List<Equipment>> tempEquipmentListFuture =
+		// createSafeFuture(
+		// () -> retrieveAPI(EntityNames.EQUIPMENT.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI EQUIPMENT",
+		// executor);
+		//
+		// CompletableFuture<List<OutputMapping>> tempOutputMappingListFuture =
+		// createSafeFuture(
+		// () -> retrieveAPI(EntityNames.OUTPUTMAPPING.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI OUTPUTMAPPING",
+		// executor);
+		//
+		// CompletableFuture<List<Payload>> tempPayloadListFuture = createSafeFuture(
+		// () -> retrieveAPI(EntityNames.PAYLOAD.name()).retrieveAll(),
+		// new ArrayList<>(),
+		// "retrieveAPI PAYLOAD",
+		// executor);
+		//
+		// CompletableFuture<List<User>> tempUserListFuture = createSafeFuture(
+		// () -> UserGroupManagementAPI.retrieveAllUsers(),
+		// new ArrayList<>(),
+		// "UserGroupManagementAPI.retrieveAllUsers",
+		// executor);
 
 		CompletableFuture<Map<String, List<Plugin.Relations>>> tempPluginsFuture = createSafeFuture(
 				() -> retrievePlugins(),
@@ -252,75 +270,78 @@ public class DatabaseConnections {
 
 		// join the futures together
 		CompletableFuture<Void> allFutures = CompletableFuture.allOf(
-//				tempDataproductsFuture,
-//				tempSoftwareApplicationsFuture,
-//				tempOrganizationListFuture,
-//				tempCategoryListFuture,
-//				tempCategorySchemeListFuture,
-//				tempDistributionListFuture,
-//				tempOperationListFuture,
-//				tempWebServiceListFuture,
-//				tempAddressListFuture,
-//				tempLocationListFuture,
-//				tempPeriodOfTimeListFuture,
-//				tempIdentifierListFuture,
-//				tempMappingListFuture,
-//				tempFacilityListFuture,
-//				tempEquipmentListFuture,
-//				tempOutputMappingListFuture,
-//				tempPayloadListFuture,
-//				tempUserListFuture,
+				// tempDataproductsFuture,
+				// tempSoftwareApplicationsFuture,
+				// tempOrganizationListFuture,
+				// tempCategoryListFuture,
+				// tempCategorySchemeListFuture,
+				// tempDistributionListFuture,
+				// tempOperationListFuture,
+				// tempWebServiceListFuture,
+				// tempAddressListFuture,
+				// tempLocationListFuture,
+				// tempPeriodOfTimeListFuture,
+				// tempIdentifierListFuture,
+				// tempMappingListFuture,
+				// tempFacilityListFuture,
+				// tempEquipmentListFuture,
+				// tempOutputMappingListFuture,
+				// tempPayloadListFuture,
+				// tempUserListFuture,
 				tempPluginsFuture);
 
 		// block until all done
 		allFutures.join();
 
 		// retrieve the results of the queries
-//		List<DataProduct> tempDataproducts = tempDataproductsFuture.join();
-//		List<SoftwareApplication> tempSoftwareApplications = tempSoftwareApplicationsFuture.join();
-//		List<Organization> tempOrganizationList = tempOrganizationListFuture.join();
-//		List<Category> tempCategoryList = tempCategoryListFuture.join();
-//		List<CategoryScheme> tempCategorySchemeList = tempCategorySchemeListFuture.join();
-//		List<Distribution> tempDistributionList = tempDistributionListFuture.join();
-//		List<Operation> tempOperationList = tempOperationListFuture.join();
-//		List<WebService> tempWebServiceList = tempWebServiceListFuture.join();
-//		List<Address> tempAddressList = tempAddressListFuture.join();
-//		List<Location> tempLocationList = tempLocationListFuture.join();
-//		List<PeriodOfTime> tempPeriodOfTimeList = tempPeriodOfTimeListFuture.join();
-//		List<Identifier> tempIdentifierList = tempIdentifierListFuture.join();
-//		List<Mapping> tempMappingList = tempMappingListFuture.join();
-//		List<Facility> tempFacilityList = tempFacilityListFuture.join();
-//		List<Equipment> tempEquipmentList = tempEquipmentListFuture.join();
-//		List<OutputMapping> tempOutputMappingList = tempOutputMappingListFuture.join();
-//		List<Payload> tempPayloadList = tempPayloadListFuture.join();
-//		List<User> tempUserList = tempUserListFuture.join();
+		// List<DataProduct> tempDataproducts = tempDataproductsFuture.join();
+		// List<SoftwareApplication> tempSoftwareApplications =
+		// tempSoftwareApplicationsFuture.join();
+		// List<Organization> tempOrganizationList = tempOrganizationListFuture.join();
+		// List<Category> tempCategoryList = tempCategoryListFuture.join();
+		// List<CategoryScheme> tempCategorySchemeList =
+		// tempCategorySchemeListFuture.join();
+		// List<Distribution> tempDistributionList = tempDistributionListFuture.join();
+		// List<Operation> tempOperationList = tempOperationListFuture.join();
+		// List<WebService> tempWebServiceList = tempWebServiceListFuture.join();
+		// List<Address> tempAddressList = tempAddressListFuture.join();
+		// List<Location> tempLocationList = tempLocationListFuture.join();
+		// List<PeriodOfTime> tempPeriodOfTimeList = tempPeriodOfTimeListFuture.join();
+		// List<Identifier> tempIdentifierList = tempIdentifierListFuture.join();
+		// List<Mapping> tempMappingList = tempMappingListFuture.join();
+		// List<Facility> tempFacilityList = tempFacilityListFuture.join();
+		// List<Equipment> tempEquipmentList = tempEquipmentListFuture.join();
+		// List<OutputMapping> tempOutputMappingList =
+		// tempOutputMappingListFuture.join();
+		// List<Payload> tempPayloadList = tempPayloadListFuture.join();
+		// List<User> tempUserList = tempUserListFuture.join();
 		Map<String, List<Plugin.Relations>> tempPlugins = tempPluginsFuture.join();
 
 		// convert the list to a map <id, object> for faster retrieval, with null safety
-		//Map<String, User> tempUsersMap = createSafeUserMap(tempUserList);
+		// Map<String, User> tempUsersMap = createSafeUserMap(tempUserList);
 
 		lock.writeLock().lock();
 
 		// hot-swap the temp variables
 		try {
-//			dataproducts = tempDataproducts;
-//			softwareApplications = tempSoftwareApplications;
-//			organizationList = tempOrganizationList;
-//			categoryList = tempCategoryList;
-//			categorySchemesList = tempCategorySchemeList;
-//			distributionList = tempDistributionList;
-//			operationList = tempOperationList;
-//			webServiceList = tempWebServiceList;
-//			addressList = tempAddressList;
-//			locationList = tempLocationList;
-//			periodOfTimeList = tempPeriodOfTimeList;
-//			identifierList = tempIdentifierList;
-//			mappingList = tempMappingList;
-//			facilityList = tempFacilityList;
-//			equipmentList = tempEquipmentList;
-//			outputMappingsList = tempOutputMappingList;
-//			payloadsList = tempPayloadList;
-//			usersMap = tempUsersMap;
+			// dataproducts = tempDataproducts;
+			// softwareApplications = tempSoftwareApplications;
+			// organizationList = tempOrganizationList;
+			// categoryList = tempCategoryList;
+			// categorySchemesList = tempCategorySchemeList;
+			// distributionList = tempDistributionList;
+			// operationList = tempOperationList;
+			// webServiceList = tempWebServiceList;
+			// addressList = tempAddressList;
+			// locationList = tempLocationList;
+			// periodOfTimeList = tempPeriodOfTimeList;
+			// identifierList = tempIdentifierList;
+			// mappingList = tempMappingList;
+			// facilityList = tempFacilityList;
+			// equipmentList = tempEquipmentList;
+			// outputMappingsList = tempOutputMappingList;
+			// payloadsList = tempPayloadList;
+			// usersMap = tempUsersMap;
 			plugins = tempPlugins;
 
 			// free the executor's resources
@@ -335,7 +356,7 @@ public class DatabaseConnections {
 		}
 	}
 
-	public static Map<String, User> retrieveUserMap(){
+	public static Map<String, User> retrieveUserMap() {
 		return createSafeUserMap(UserGroupManagementAPI.retrieveAllUsers());
 	}
 
@@ -368,77 +389,77 @@ public class DatabaseConnections {
 		}
 	}
 
-//	public List<DataProduct> getDataproducts() {
-//		return safeRead(dataproducts);
-//	}
-//
-//	public List<SoftwareApplication> getSoftwareApplications() {
-//		return safeRead(softwareApplications);
-//	}
-//
-//	public List<Organization> getOrganizationList() {
-//		return safeRead(organizationList);
-//	}
-//
-//	public List<Category> getCategoryList() {
-//		return safeRead(categoryList);
-//	}
-//
-//	public List<CategoryScheme> getCategorySchemesList() {
-//		return safeRead(categorySchemesList);
-//	}
-//
-//	public List<Distribution> getDistributionList() {
-//		return safeRead(distributionList);
-//	}
-//
-//	public List<Operation> getOperationList() {
-//		return safeRead(operationList);
-//	}
-//
-//	public List<WebService> getWebServiceList() {
-//		return safeRead(webServiceList);
-//	}
-//
-//	public List<Address> getAddressList() {
-//		return safeRead(addressList);
-//	}
-//
-//	public List<Location> getLocationList() {
-//		return safeRead(locationList);
-//	}
-//
-//	public List<PeriodOfTime> getPeriodOfTimeList() {
-//		return safeRead(periodOfTimeList);
-//	}
-//
-//	public List<Identifier> getIdentifierList() {
-//		return safeRead(identifierList);
-//	}
-//
-//	public List<Mapping> getMappingList() {
-//		return safeRead(mappingList);
-//	}
-//
-//	public List<Facility> getFacilityList() {
-//		return safeRead(facilityList);
-//	}
-//
-//	public List<Equipment> getEquipmentList() {
-//		return safeRead(equipmentList);
-//	}
-//
-//	public List<OutputMapping> getOutputMappings() {
-//		return safeRead(outputMappingsList);
-//	}
-//
-//	public List<Payload> getPayloads() {
-//		return safeRead(payloadsList);
-//	}
-//
-//	public Map<String, User> getUsers() {
-//		return safeRead(usersMap);
-//	}
+	// public List<DataProduct> getDataproducts() {
+	// return safeRead(dataproducts);
+	// }
+	//
+	// public List<SoftwareApplication> getSoftwareApplications() {
+	// return safeRead(softwareApplications);
+	// }
+	//
+	// public List<Organization> getOrganizationList() {
+	// return safeRead(organizationList);
+	// }
+	//
+	// public List<Category> getCategoryList() {
+	// return safeRead(categoryList);
+	// }
+	//
+	// public List<CategoryScheme> getCategorySchemesList() {
+	// return safeRead(categorySchemesList);
+	// }
+	//
+	// public List<Distribution> getDistributionList() {
+	// return safeRead(distributionList);
+	// }
+	//
+	// public List<Operation> getOperationList() {
+	// return safeRead(operationList);
+	// }
+	//
+	// public List<WebService> getWebServiceList() {
+	// return safeRead(webServiceList);
+	// }
+	//
+	// public List<Address> getAddressList() {
+	// return safeRead(addressList);
+	// }
+	//
+	// public List<Location> getLocationList() {
+	// return safeRead(locationList);
+	// }
+	//
+	// public List<PeriodOfTime> getPeriodOfTimeList() {
+	// return safeRead(periodOfTimeList);
+	// }
+	//
+	// public List<Identifier> getIdentifierList() {
+	// return safeRead(identifierList);
+	// }
+	//
+	// public List<Mapping> getMappingList() {
+	// return safeRead(mappingList);
+	// }
+	//
+	// public List<Facility> getFacilityList() {
+	// return safeRead(facilityList);
+	// }
+	//
+	// public List<Equipment> getEquipmentList() {
+	// return safeRead(equipmentList);
+	// }
+	//
+	// public List<OutputMapping> getOutputMappings() {
+	// return safeRead(outputMappingsList);
+	// }
+	//
+	// public List<Payload> getPayloads() {
+	// return safeRead(payloadsList);
+	// }
+	//
+	// public Map<String, User> getUsers() {
+	// return safeRead(usersMap);
+	// }
 
 	public Map<String, List<Plugin.Relations>> getPlugins() {
 		return safeRead(plugins);

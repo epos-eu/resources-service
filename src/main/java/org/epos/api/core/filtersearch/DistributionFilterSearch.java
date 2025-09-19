@@ -192,8 +192,9 @@ public class DistributionFilterSearch {
 										tempDatasetList.add(ds);
 										uidSet.add(ds.getMetaId());
 									}
-								} catch (ParseException e) {
-									LOGGER.error("Error occurs during BBOX dataproduct parsing", e);
+								} catch (Exception e) {
+									LOGGER.warn("Error occurs during BBOX dataproduct parsing for distribution with uid {} and spatial {}",
+											distribution1.getUid(), wsSpatial, e);
 									continue;
 								}
 							}
@@ -215,8 +216,10 @@ public class DistributionFilterSearch {
 										tempDatasetList.add(ds);
 										uidSet.add(ds.getMetaId());
 									}
-								} catch (ParseException e) {
-									LOGGER.error("Error occurs during BBOX dataproduct parsing", e);
+								} catch (Exception e) {
+									LOGGER.warn("Error occurs during BBOX dataproduct parsing for dataset with uid {} and spatial {}",
+											ds.getUid(), wsSpatial, e);
+									continue;
 								}
 							}
 						}
@@ -277,7 +280,7 @@ public class DistributionFilterSearch {
 				List<DataServiceProvider> providers = new ArrayList<DataServiceProvider>(DataServiceProviderGeneration.getProviders(organizations));
 
 				List<Organization> organisationList = new ArrayList<>();
-                if(ds.getDistribution() == null)
+                if(ds.getDistribution() == null && ds.getDistribution().isEmpty())
                     LOGGER.error("[Organization Filter] Error on current Dataset: {} skip", ds);
 				if(ds.getDistribution() != null && !ds.getDistribution().isEmpty()){
 					for (LinkedEntity distribution : ds.getDistribution()) {

@@ -4,8 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.epos.api.beans.Distribution;
@@ -14,6 +12,7 @@ import org.epos.api.beans.ParametersResponse;
 import org.epos.api.beans.SearchResponse;
 import org.epos.api.core.distributions.LinkedEntityParametersSearch;
 import org.epos.api.core.distributions.LinkedEntityWebserviceSearch;
+import org.epos.api.core.software.SoftwareSearch;
 import org.epos.api.utility.Utils;
 import org.epos.eposdatamodel.User;
 import org.slf4j.Logger;
@@ -31,6 +30,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @jakarta.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-10-11T14:51:06.469Z[GMT]")
@@ -596,6 +597,12 @@ public class ClientHelpersApiController extends ApiController implements ClientH
 		if (response == null) {
 			return ResponseEntity.noContent().build();
 		}
+		return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
+	}
+
+	@Override
+	public ResponseEntity<SearchResponse> searchSoftware(String query) {
+		var response = SoftwareSearch.generate(query);
 		return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
 	}
 }

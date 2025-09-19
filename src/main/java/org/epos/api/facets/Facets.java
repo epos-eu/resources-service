@@ -2,22 +2,21 @@ package org.epos.api.facets;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import abstractapis.AbstractAPI;
-import metadataapis.EntityNames;
-import org.epos.api.routines.DatabaseConnections;
 import org.epos.eposdatamodel.Category;
 import org.epos.eposdatamodel.CategoryScheme;
 import org.epos.eposdatamodel.LinkedEntity;
-import org.epos.eposdatamodel.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import abstractapis.AbstractAPI;
 import commonapis.LinkedEntityAPI;
+import metadataapis.EntityNames;
 
 public class Facets {
 
@@ -25,6 +24,7 @@ public class Facets {
 
 	private JsonObject facetsStatic;
 	private JsonObject facetsFromDatabaseData;
+	private JsonObject facetsFromDatabaseSoftware;
 	private JsonObject facetsFromDatabaseFacilities;
 
 	private Facets() {
@@ -42,14 +42,16 @@ public class Facets {
 		JsonArray domainsFacets = new JsonArray();
 		JsonObject facetsObject = new JsonObject();
 
-		List<CategoryScheme> schemes = (List<CategoryScheme>) AbstractAPI.retrieveAPI(EntityNames.CATEGORYSCHEME.name()).retrieveAll();
+		List<CategoryScheme> schemes = (List<CategoryScheme>) AbstractAPI.retrieveAPI(EntityNames.CATEGORYSCHEME.name())
+				.retrieveAll();
 		List<Category> categories = (List<Category>) AbstractAPI.retrieveAPI(EntityNames.CATEGORY.name()).retrieveAll();
 
 		List<CategoryScheme> categorySchemesList = schemes.stream()
 				.filter(e -> e.getUid().contains("category:"))
 				.filter(e -> getCategorySchemeType(e).equals(type))
 				.collect(Collectors.toList());
-		List<Category> categoriesList = categories.stream().filter(e -> e.getUid().contains("category:"))
+		List<Category> categoriesList = categories.stream()
+				.filter(e -> Objects.nonNull(e.getUid()) && e.getUid().contains("category:"))
 				.collect(Collectors.toList());
 
 		for (CategoryScheme scheme : categorySchemesList) {
@@ -135,6 +137,8 @@ public class Facets {
 				return facetsFromDatabaseFacilities;
 			case DATA:
 				return facetsFromDatabaseData;
+			case SOFTWARE:
+				return facetsFromDatabaseSoftware;
 			default:
 				return facetsFromDatabaseData;
 		}
@@ -147,6 +151,9 @@ public class Facets {
 				break;
 			case DATA:
 				this.facetsFromDatabaseData = facetsFromDatabase;
+				break;
+			case SOFTWARE:
+				this.facetsFromDatabaseSoftware = facetsFromDatabase;
 				break;
 			default:
 				this.facetsFromDatabaseData = facetsFromDatabase;
@@ -170,6 +177,8 @@ public class Facets {
 			String uid = topConcept.getUid();
 			if ("category:facets/facility-theme".equals(uid)) {
 				return Type.FACILITY;
+			} else if ("category:facets/software-theme".equals(uid)) {
+				return Type.SOFTWARE;
 			} else if ("category:facets/dataset-theme".equals(uid)) {
 				return Type.DATA;
 			}
@@ -183,6 +192,10 @@ public class Facets {
 	}
 
 	public static Type getCategoryType(Category category) {
+		if (category.getInScheme() == null) {
+			LOGGER.warn("category has no scheme, defaulting to DATA for type. Category: {}", category.toString());
+			return Type.DATA;
+		}
 		var scheme = (CategoryScheme) LinkedEntityAPI.retrieveFromLinkedEntity(category.getInScheme());
 		return getCategorySchemeType(scheme);
 	}
@@ -190,5 +203,6 @@ public class Facets {
 	public enum Type {
 		FACILITY,
 		DATA,
+		SOFTWARE,
 	}
 }

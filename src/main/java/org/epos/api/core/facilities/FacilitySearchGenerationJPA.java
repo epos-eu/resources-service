@@ -174,6 +174,7 @@ public class FacilitySearchGenerationJPA {
 			// Facility Types
 			categoriesFromDB
 					.stream()
+					.filter(cat -> cat.getUid()!=null)
 					.filter(cat -> cat.getUid().equals(facility.getType()))
 					.forEach(facilityTypes::add);
 
@@ -187,7 +188,7 @@ public class FacilitySearchGenerationJPA {
 							&& linkedEntity.getInstanceId().equals(facility.getInstanceId())) {
 						categoriesFromDB
 								.stream()
-								.filter(cat -> cat.getUid().equals(equipment.getType()))
+								.filter(cat -> cat.getUid() != null && cat.getUid().equals(equipment.getType()))
 								.forEach(equipmentTypes::add);
 					}
 				}

@@ -386,7 +386,7 @@ public class DistributionDetailsExtendedGenerationJPA {
 		}
 
 
-		if(!dp.getContactPoint().isEmpty()) {
+		if(dp.getContactPoint()!=null && !dp.getContactPoint().isEmpty()) {
 			distribution.getAvailableContactPoints()
 			.add(new AvailableContactPointsBuilder()
 					.href(EnvironmentVariables.API_HOST + EMAIL_SENDER + dp.getInstanceId()+"&contactType="+ProviderType.DATAPROVIDERS)

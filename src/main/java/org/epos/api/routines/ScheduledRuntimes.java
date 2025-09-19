@@ -6,12 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import dao.DAOMonitor;
-import jakarta.annotation.PostConstruct;
-
-import dao.EposDataModelDAO;
 import org.apache.commons.lang3.StringUtils;
-import org.epos.api.core.AvailableFormatsGeneration;
 import org.epos.api.core.EnvironmentVariables;
 import org.epos.api.core.ZabbixExecutor;
 import org.epos.api.facets.Facets;
@@ -24,6 +19,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+import dao.DAOMonitor;
+import jakarta.annotation.PostConstruct;
 
 @Component
 public class ScheduledRuntimes {
@@ -96,15 +94,17 @@ public class ScheduledRuntimes {
 		try {
 			var dataFacets = Facets.getInstance().generateFacetsFromDatabase(Facets.Type.DATA);
 			var facilityFacets = Facets.getInstance().generateFacetsFromDatabase(Facets.Type.FACILITY);
+			var softwareFacets = Facets.getInstance().generateFacetsFromDatabase(Facets.Type.SOFTWARE);
 			Facets.getInstance().setFacetsFromDatabase(dataFacets, Facets.Type.DATA);
 			Facets.getInstance().setFacetsFromDatabase(facilityFacets, Facets.Type.FACILITY);
+			Facets.getInstance().setFacetsFromDatabase(softwareFacets, Facets.Type.SOFTWARE);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		LOGGER.info("[Scheduled Task - Facets] Facets successfully updated");
 	}
 
-	@Scheduled(fixedRate = 90000, initialDelay = 0)
+	@Scheduled(fixedRate = 600000, initialDelay = 0)
 	@Async
 	public void connectionsUpdater() {
 		LOGGER.info("[Scheduled Task - Resources] Updating resources information");

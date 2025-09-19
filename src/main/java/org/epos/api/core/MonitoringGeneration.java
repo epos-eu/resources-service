@@ -5,10 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import abstractapis.AbstractAPI;
@@ -40,24 +37,24 @@ public class MonitoringGeneration {
 			MonitoringBean mb = new MonitoringBean();
 			//IDENTIFIER
 			mb.setIdentifier(dx.getMetaId());
-			
+
 			String title = null;
 			if (dx.getTitle() != null && !dx.getTitle().isEmpty()) {
 				title = new ArrayList<>(dx.getTitle()).get(0);
 			}
-			
+
 			mb.setName(title);
 
 			Map<String,Object> params = new HashMap<String, Object>();
-			params.put("id", dx.getMetaId());
+			params.put("id", dx.getInstanceId());
 			params.put("useDefaults", "true");
-			
+
 			Distribution distribution = DistributionDetailsGenerationJPA.generate(params);
-			
-			HashMap<String, Object> parametersMap = new HashMap<>();
+
+            HashMap<String, Object> parametersMap = new HashMap<>();
 
 			if(distribution!=null) {
-				
+
 				if(distribution.getParameters()!=null) {
 					distribution.getParameters().forEach(p -> {
 						if (p.getValue() != null && !p.getValue().isEmpty())
@@ -70,12 +67,13 @@ public class MonitoringGeneration {
 					String compiledUrl = null;
 					compiledUrl = URLGeneration.generateURLFromTemplateAndMap(distribution.getEndpoint(), parametersMap);
 
+                    System.out.println(compiledUrl);
 					try {
 						compiledUrl = URLGeneration.ogcWFSChecker(compiledUrl);
 					}catch(Exception e) {
 						LOGGER.error("Found the following issue whilst executing the WFS Checker, issue raised "+ e.getMessage() + " - Continuing execution");
 					}
-					
+
 					//compiledUrl = java.net.URLDecoder.decode(compiledUrl, StandardCharsets.UTF_8);
 					mb.setOriginalURL(compiledUrl);
 				}
@@ -84,17 +82,17 @@ public class MonitoringGeneration {
 				for(DataProduct d : datasetList) {
 					ArrayList<String> distrs = new ArrayList<String>();
 					d.getDistribution().forEach(dist->{
-						distrs.add(dist.getMetaId());
+						distrs.add(dist.getInstanceId());
 					});
-					if(distrs.contains(dx.getMetaId())) {
+					if(distrs.contains(dx.getInstanceId())) {
 						String ddss = null;
-
-						for (LinkedEntity item : d.getIdentifier()) {
-							Identifier i = (Identifier) LinkedEntityAPI.retrieveFromLinkedEntity(item);
-							if(i.getType().equals("DDSS-ID")){
-								ddss = i.getIdentifier();
-							}
-						}
+                        if(Objects.nonNull(d.getIdentifier()))
+                            for (LinkedEntity item : d.getIdentifier()) {
+                                Identifier i = (Identifier) LinkedEntityAPI.retrieveFromLinkedEntity(item);
+                                if(i.getType().equals("DDSS-ID")){
+                                    ddss = i.getIdentifier();
+                                }
+                            }
 						if(ddss == null) continue;
 
 						if(ddss.toLowerCase().contains("wp08")) mb.setTCSGroup("Seismology");
@@ -109,14 +107,19 @@ public class MonitoringGeneration {
 						else if(ddss.toLowerCase().contains("wp18")) mb.setTCSGroup("Tsunami");
 						else mb.setTCSGroup("Undefined");
 
-
 						if(dx.getAccessService()!=null) {
 							for(LinkedEntity item : dx.getAccessService()) {
 								WebService ws = (WebService) LinkedEntityAPI.retrieveFromLinkedEntity(item);
-								for(LinkedEntity le : ws.getContactPoint()) {
-									ContactPoint contact = (ContactPoint) LinkedEntityAPI.retrieveFromLinkedEntity(le);
-									mb.createContacts(contact.getUid(),contact.getRole(), contact.getEmail());
-								}	
+                                if(Objects.nonNull(ws.getContactPoint())) {
+                                    for (LinkedEntity le : ws.getContactPoint()) {
+                                        ContactPoint contact = (ContactPoint) LinkedEntityAPI.retrieveFromLinkedEntity(le);
+                                        try {
+                                            mb.createContacts(contact.getUid(), contact.getRole(), new HashSet<>(contact.getEmail()).stream().toList());
+                                        }catch (Exception e) {
+                                            LOGGER.error("Found the following issue whilst creating contacts, issue raised "+ e.getMessage() + " - Continuing execution");
+                                        }
+                                    }
+                                }
 							}
 						}
 					}
