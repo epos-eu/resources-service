@@ -69,6 +69,12 @@ public class SoftwareSearch {
 			DataCollector dataCollector,
 			Set<DiscoveryItem> discoveryItems) {
 		for (DataProduct dataProduct : dataCollector.dataProducts) {
+			if (dataProduct == null
+					|| dataProduct.getTitle().isEmpty()
+					|| dataProduct.getDescription().isEmpty()
+					|| dataProduct.getCategory().isEmpty())
+				continue;
+
 			if (!hasValidCategory(dataProduct) || !matchesQuery(
 					query,
 					dataProduct.getTitle().getFirst(),
