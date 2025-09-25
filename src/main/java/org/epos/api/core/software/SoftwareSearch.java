@@ -72,7 +72,7 @@ public class SoftwareSearch {
 			if (dataProduct == null
 					|| dataProduct.getTitle().isEmpty()
 					|| dataProduct.getDescription().isEmpty()
-					|| dataProduct.getCategory().isEmpty())
+					|| dataProduct.getCategory() == null)
 				continue;
 
 			if (!hasValidCategory(dataProduct) || !matchesQuery(
