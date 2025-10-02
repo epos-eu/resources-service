@@ -20,10 +20,9 @@ public class EnvironmentVariables {
 	public static final String API_CONTEXT = System.getenv("APICONTEXT");
 	public static final String MONITORING = System.getenv("MONITORING");
 	public static final String MONITORING_URL = System.getenv("MONITORING_URL");
-	public static final String MONITORING_USER = System.getenv("MONITORING_USER");
-	public static final String MONITORING_PWD = System.getenv("MONITORING_PWD");
-	
-	///api/frontend/v1
+    public static final String MONITORING_API_TOKEN = System.getenv("MONITORING_PWD");
+
+    ///api/frontend/v1
 	
 	private EnvironmentVariables() {}
 
