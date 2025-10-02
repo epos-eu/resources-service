@@ -35,7 +35,7 @@ public class ZabbixExecutor {
 				+ "    \"jsonrpc\": \"2.0\",\n"
 				+ "    \"method\": \"user.login\",\n"
 				+ "    \"params\": {\n"
-				+ "        \"user\": \""+EnvironmentVariables.MONITORING_USER+"\",\n"
+				+ "        \"username\": \""+EnvironmentVariables.MONITORING_USER+"\",\n"
 				+ "        \"password\": \""+EnvironmentVariables.MONITORING_PWD+"\"\n"
 				+ "    },\n"
 				+ "    \"id\": 1\n"
