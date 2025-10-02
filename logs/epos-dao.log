@@ -649,9 +649,478 @@ java.lang.IllegalStateException: The router has not been initialised, therefore 
 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
 	at java.base/java.lang.Thread.run(Thread.java:1583)
-2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Resources successfully updated
-2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Done
-2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Updating monitoring information
-2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Done
-2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Facets] Updating facets information
-2025-06-20 14:36:25 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Facets] Updating facets information
+2025-08-29 10:05:17 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Resources successfully updated
+2025-08-29 10:05:17 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Done
+2025-08-29 10:05:17 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Updating monitoring information
+2025-08-29 10:05:17 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Done
+2025-08-29 10:05:17 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Facets] Updating facets information
+2025-08-29 10:05:17 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Facets] Updating facets information
+2025-08-29 10:05:17 [main] INFO  com.zaxxer.hikari.HikariDataSource - metadata_catalogue - Starting...
+2025-08-29 10:06:00 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-08-29 10:06:01 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Resources Service Startup] -----------------------------------------------
+2025-08-29 10:06:01 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Updating facets information
+2025-08-29 10:06:01 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Updating resources information
+2025-08-29 10:06:01 [main] INFO  o.e.api.routines.ScheduledRuntimes - === EPOS DAO PERFORMANCE REPORT ===
+Generated: 2025-08-29T10:06:01.567366992
+
+OPERATION STATISTICS:
+
+CACHE STATISTICS:
+  countCacheSize: 0
+  entityCacheSize: 0
+  queryCacheSize: 0
+  countCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+  queryCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+  entityCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+
+RECENT PERFORMANCE TRENDS:
+
+===============================
+2025-08-29 10:06:01 [main] ERROR o.e.api.routines.DatabaseConnections - [CONNECTION ERROR] Error while initializing router
+java.lang.IllegalArgumentException: Values for the following message broker parameters were not specified:
+Host; vHost; username; password
+	at org.epos.router_framework.RouterBase.validateMessageBrokerParams(RouterBase.java:312)
+	at org.epos.router_framework.RouterBase.init(RouterBase.java:88)
+	at org.epos.router_framework.DefaultRpcRouter.init(DefaultRpcRouter.java:80)
+	at org.epos.api.routines.DatabaseConnections.<init>(DatabaseConnections.java:93)
+	at org.epos.api.routines.DatabaseConnections.getInstance(DatabaseConnections.java:363)
+	at org.epos.api.routines.ScheduledRuntimes.connectionsUpdater(ScheduledRuntimes.java:113)
+	at org.epos.api.routines.ScheduledRuntimes.onStartup(ScheduledRuntimes.java:37)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMethod.invoke(InitDestroyAnnotationBeanPostProcessor.java:457)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMetadata.invokeInitMethods(InitDestroyAnnotationBeanPostProcessor.java:401)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:219)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsBeforeInitialization(AbstractAutowireCapableBeanFactory.java:429)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1818)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1222)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1188)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1123)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.epos.Swagger2SpringBoot.main(Swagger2SpringBoot.java:48)
+2025-08-29 10:06:01 [main] ERROR o.e.api.routines.DatabaseConnections - Error while parsing env variable CONNECTION_POOL_MAX_SIZE
+java.lang.NumberFormatException: Cannot parse null string
+	at java.base/java.lang.Integer.parseInt(Integer.java:624)
+	at java.base/java.lang.Integer.parseInt(Integer.java:778)
+	at org.epos.api.routines.DatabaseConnections.<init>(DatabaseConnections.java:104)
+	at org.epos.api.routines.DatabaseConnections.getInstance(DatabaseConnections.java:363)
+	at org.epos.api.routines.ScheduledRuntimes.connectionsUpdater(ScheduledRuntimes.java:113)
+	at org.epos.api.routines.ScheduledRuntimes.onStartup(ScheduledRuntimes.java:37)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMethod.invoke(InitDestroyAnnotationBeanPostProcessor.java:457)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMetadata.invokeInitMethods(InitDestroyAnnotationBeanPostProcessor.java:401)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:219)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsBeforeInitialization(AbstractAutowireCapableBeanFactory.java:429)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1818)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1222)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1188)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1123)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.epos.Swagger2SpringBoot.main(Swagger2SpringBoot.java:48)
+2025-08-29 10:06:01 [pool-3-thread-1] ERROR o.e.api.routines.DatabaseConnections - [CONNECTION ERROR] Error getting response from router
+java.lang.IllegalStateException: The router has not been initialised, therefore no requests can be made
+	at org.epos.router_framework.DefaultRpcRouter.makeRequest(DefaultRpcRouter.java:112)
+	at org.epos.api.routines.DatabaseConnections.doRequest(DatabaseConnections.java:468)
+	at org.epos.api.routines.DatabaseConnections.retrievePlugins(DatabaseConnections.java:481)
+	at org.epos.api.routines.DatabaseConnections.lambda$syncDatabaseConnections$0(DatabaseConnections.java:248)
+	at org.epos.api.routines.DatabaseConnections.lambda$createSafeFuture$0(DatabaseConnections.java:119)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-08-29 10:06:01 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Resources successfully updated
+2025-08-29 10:06:01 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Done
+2025-08-29 10:06:01 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Updating monitoring information
+2025-08-29 10:06:01 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Done
+2025-08-29 10:06:01 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Facets] Updating facets information
+2025-08-29 10:06:01 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Facets] Updating facets information
+2025-08-29 10:06:01 [main] INFO  com.zaxxer.hikari.HikariDataSource - metadata_catalogue - Starting...
+2025-08-29 10:06:40 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-08-29 10:06:42 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Resources Service Startup] -----------------------------------------------
+2025-08-29 10:06:42 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Updating facets information
+2025-08-29 10:06:42 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Updating resources information
+2025-08-29 10:06:42 [main] INFO  o.e.api.routines.ScheduledRuntimes - === EPOS DAO PERFORMANCE REPORT ===
+Generated: 2025-08-29T10:06:42.199528582
+
+OPERATION STATISTICS:
+
+CACHE STATISTICS:
+  countCacheSize: 0
+  entityCacheSize: 0
+  queryCacheSize: 0
+  countCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+  queryCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+  entityCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+
+RECENT PERFORMANCE TRENDS:
+
+===============================
+2025-08-29 10:06:42 [main] ERROR o.e.api.routines.DatabaseConnections - [CONNECTION ERROR] Error while initializing router
+java.lang.IllegalArgumentException: Values for the following message broker parameters were not specified:
+Host; vHost; username; password
+	at org.epos.router_framework.RouterBase.validateMessageBrokerParams(RouterBase.java:312)
+	at org.epos.router_framework.RouterBase.init(RouterBase.java:88)
+	at org.epos.router_framework.DefaultRpcRouter.init(DefaultRpcRouter.java:80)
+	at org.epos.api.routines.DatabaseConnections.<init>(DatabaseConnections.java:93)
+	at org.epos.api.routines.DatabaseConnections.getInstance(DatabaseConnections.java:363)
+	at org.epos.api.routines.ScheduledRuntimes.connectionsUpdater(ScheduledRuntimes.java:113)
+	at org.epos.api.routines.ScheduledRuntimes.onStartup(ScheduledRuntimes.java:37)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMethod.invoke(InitDestroyAnnotationBeanPostProcessor.java:457)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMetadata.invokeInitMethods(InitDestroyAnnotationBeanPostProcessor.java:401)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:219)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsBeforeInitialization(AbstractAutowireCapableBeanFactory.java:429)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1818)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1222)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1188)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1123)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.epos.Swagger2SpringBoot.main(Swagger2SpringBoot.java:48)
+2025-08-29 10:06:42 [main] ERROR o.e.api.routines.DatabaseConnections - Error while parsing env variable CONNECTION_POOL_MAX_SIZE
+java.lang.NumberFormatException: Cannot parse null string
+	at java.base/java.lang.Integer.parseInt(Integer.java:624)
+	at java.base/java.lang.Integer.parseInt(Integer.java:778)
+	at org.epos.api.routines.DatabaseConnections.<init>(DatabaseConnections.java:104)
+	at org.epos.api.routines.DatabaseConnections.getInstance(DatabaseConnections.java:363)
+	at org.epos.api.routines.ScheduledRuntimes.connectionsUpdater(ScheduledRuntimes.java:113)
+	at org.epos.api.routines.ScheduledRuntimes.onStartup(ScheduledRuntimes.java:37)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMethod.invoke(InitDestroyAnnotationBeanPostProcessor.java:457)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMetadata.invokeInitMethods(InitDestroyAnnotationBeanPostProcessor.java:401)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:219)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsBeforeInitialization(AbstractAutowireCapableBeanFactory.java:429)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1818)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1222)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1188)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1123)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.epos.Swagger2SpringBoot.main(Swagger2SpringBoot.java:48)
+2025-08-29 10:06:42 [pool-3-thread-1] ERROR o.e.api.routines.DatabaseConnections - [CONNECTION ERROR] Error getting response from router
+java.lang.IllegalStateException: The router has not been initialised, therefore no requests can be made
+	at org.epos.router_framework.DefaultRpcRouter.makeRequest(DefaultRpcRouter.java:112)
+	at org.epos.api.routines.DatabaseConnections.doRequest(DatabaseConnections.java:468)
+	at org.epos.api.routines.DatabaseConnections.retrievePlugins(DatabaseConnections.java:481)
+	at org.epos.api.routines.DatabaseConnections.lambda$syncDatabaseConnections$0(DatabaseConnections.java:248)
+	at org.epos.api.routines.DatabaseConnections.lambda$createSafeFuture$0(DatabaseConnections.java:119)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-08-29 10:06:42 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Resources successfully updated
+2025-08-29 10:06:42 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Done
+2025-08-29 10:06:42 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Updating monitoring information
+2025-08-29 10:06:42 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Done
+2025-08-29 10:06:42 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Facets] Updating facets information
+2025-08-29 10:06:42 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Facets] Updating facets information
+2025-08-29 10:06:42 [main] INFO  com.zaxxer.hikari.HikariDataSource - metadata_catalogue - Starting...
+2025-08-29 10:07:16 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-08-29 10:07:16 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Resources Service Startup] -----------------------------------------------
+2025-08-29 10:07:16 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Updating facets information
+2025-08-29 10:07:16 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Updating resources information
+2025-08-29 10:07:16 [main] INFO  o.e.api.routines.ScheduledRuntimes - === EPOS DAO PERFORMANCE REPORT ===
+Generated: 2025-08-29T10:07:16.848881675
+
+OPERATION STATISTICS:
+
+CACHE STATISTICS:
+  countCacheSize: 0
+  entityCacheSize: 0
+  queryCacheSize: 0
+  countCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+  queryCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+  entityCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+
+RECENT PERFORMANCE TRENDS:
+
+===============================
+2025-08-29 10:07:16 [main] ERROR o.e.api.routines.DatabaseConnections - [CONNECTION ERROR] Error while initializing router
+java.lang.IllegalArgumentException: Values for the following message broker parameters were not specified:
+Host; vHost; username; password
+	at org.epos.router_framework.RouterBase.validateMessageBrokerParams(RouterBase.java:312)
+	at org.epos.router_framework.RouterBase.init(RouterBase.java:88)
+	at org.epos.router_framework.DefaultRpcRouter.init(DefaultRpcRouter.java:80)
+	at org.epos.api.routines.DatabaseConnections.<init>(DatabaseConnections.java:93)
+	at org.epos.api.routines.DatabaseConnections.getInstance(DatabaseConnections.java:363)
+	at org.epos.api.routines.ScheduledRuntimes.connectionsUpdater(ScheduledRuntimes.java:113)
+	at org.epos.api.routines.ScheduledRuntimes.onStartup(ScheduledRuntimes.java:37)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMethod.invoke(InitDestroyAnnotationBeanPostProcessor.java:457)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMetadata.invokeInitMethods(InitDestroyAnnotationBeanPostProcessor.java:401)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:219)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsBeforeInitialization(AbstractAutowireCapableBeanFactory.java:429)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1818)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1222)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1188)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1123)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.epos.Swagger2SpringBoot.main(Swagger2SpringBoot.java:48)
+2025-08-29 10:07:16 [main] ERROR o.e.api.routines.DatabaseConnections - Error while parsing env variable CONNECTION_POOL_MAX_SIZE
+java.lang.NumberFormatException: Cannot parse null string
+	at java.base/java.lang.Integer.parseInt(Integer.java:624)
+	at java.base/java.lang.Integer.parseInt(Integer.java:778)
+	at org.epos.api.routines.DatabaseConnections.<init>(DatabaseConnections.java:104)
+	at org.epos.api.routines.DatabaseConnections.getInstance(DatabaseConnections.java:363)
+	at org.epos.api.routines.ScheduledRuntimes.connectionsUpdater(ScheduledRuntimes.java:113)
+	at org.epos.api.routines.ScheduledRuntimes.onStartup(ScheduledRuntimes.java:37)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMethod.invoke(InitDestroyAnnotationBeanPostProcessor.java:457)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMetadata.invokeInitMethods(InitDestroyAnnotationBeanPostProcessor.java:401)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:219)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsBeforeInitialization(AbstractAutowireCapableBeanFactory.java:429)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1818)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1222)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1188)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1123)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.epos.Swagger2SpringBoot.main(Swagger2SpringBoot.java:48)
+2025-08-29 10:07:16 [pool-3-thread-1] ERROR o.e.api.routines.DatabaseConnections - [CONNECTION ERROR] Error getting response from router
+java.lang.IllegalStateException: The router has not been initialised, therefore no requests can be made
+	at org.epos.router_framework.DefaultRpcRouter.makeRequest(DefaultRpcRouter.java:112)
+	at org.epos.api.routines.DatabaseConnections.doRequest(DatabaseConnections.java:468)
+	at org.epos.api.routines.DatabaseConnections.retrievePlugins(DatabaseConnections.java:481)
+	at org.epos.api.routines.DatabaseConnections.lambda$syncDatabaseConnections$0(DatabaseConnections.java:248)
+	at org.epos.api.routines.DatabaseConnections.lambda$createSafeFuture$0(DatabaseConnections.java:119)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-08-29 10:07:16 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Resources successfully updated
+2025-08-29 10:07:16 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Done
+2025-08-29 10:07:16 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Updating monitoring information
+2025-08-29 10:07:16 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Done
+2025-08-29 10:07:16 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Facets] Updating facets information
+2025-08-29 10:07:16 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Facets] Updating facets information
+2025-08-29 10:07:16 [main] INFO  com.zaxxer.hikari.HikariDataSource - metadata_catalogue - Starting...
+2025-08-29 10:07:54 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-08-29 10:07:55 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Resources Service Startup] -----------------------------------------------
+2025-08-29 10:07:55 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Updating facets information
+2025-08-29 10:07:55 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Updating resources information
+2025-08-29 10:07:55 [main] INFO  o.e.api.routines.ScheduledRuntimes - === EPOS DAO PERFORMANCE REPORT ===
+Generated: 2025-08-29T10:07:55.165000772
+
+OPERATION STATISTICS:
+
+CACHE STATISTICS:
+  countCacheSize: 0
+  entityCacheSize: 0
+  queryCacheSize: 0
+  countCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+  queryCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+  entityCache:
+    evictionCount: 0
+    averageLoadPenalty: 0.0
+    hitCount: 0
+    hitRate: 100.0
+    missCount: 0
+
+RECENT PERFORMANCE TRENDS:
+
+===============================
+2025-08-29 10:07:55 [main] ERROR o.e.api.routines.DatabaseConnections - [CONNECTION ERROR] Error while initializing router
+java.lang.IllegalArgumentException: Values for the following message broker parameters were not specified:
+Host; vHost; username; password
+	at org.epos.router_framework.RouterBase.validateMessageBrokerParams(RouterBase.java:312)
+	at org.epos.router_framework.RouterBase.init(RouterBase.java:88)
+	at org.epos.router_framework.DefaultRpcRouter.init(DefaultRpcRouter.java:80)
+	at org.epos.api.routines.DatabaseConnections.<init>(DatabaseConnections.java:93)
+	at org.epos.api.routines.DatabaseConnections.getInstance(DatabaseConnections.java:363)
+	at org.epos.api.routines.ScheduledRuntimes.connectionsUpdater(ScheduledRuntimes.java:113)
+	at org.epos.api.routines.ScheduledRuntimes.onStartup(ScheduledRuntimes.java:37)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMethod.invoke(InitDestroyAnnotationBeanPostProcessor.java:457)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMetadata.invokeInitMethods(InitDestroyAnnotationBeanPostProcessor.java:401)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:219)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsBeforeInitialization(AbstractAutowireCapableBeanFactory.java:429)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1818)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1222)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1188)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1123)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.epos.Swagger2SpringBoot.main(Swagger2SpringBoot.java:48)
+2025-08-29 10:07:55 [main] ERROR o.e.api.routines.DatabaseConnections - Error while parsing env variable CONNECTION_POOL_MAX_SIZE
+java.lang.NumberFormatException: Cannot parse null string
+	at java.base/java.lang.Integer.parseInt(Integer.java:624)
+	at java.base/java.lang.Integer.parseInt(Integer.java:778)
+	at org.epos.api.routines.DatabaseConnections.<init>(DatabaseConnections.java:104)
+	at org.epos.api.routines.DatabaseConnections.getInstance(DatabaseConnections.java:363)
+	at org.epos.api.routines.ScheduledRuntimes.connectionsUpdater(ScheduledRuntimes.java:113)
+	at org.epos.api.routines.ScheduledRuntimes.onStartup(ScheduledRuntimes.java:37)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMethod.invoke(InitDestroyAnnotationBeanPostProcessor.java:457)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMetadata.invokeInitMethods(InitDestroyAnnotationBeanPostProcessor.java:401)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:219)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsBeforeInitialization(AbstractAutowireCapableBeanFactory.java:429)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1818)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1222)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1188)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1123)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.epos.Swagger2SpringBoot.main(Swagger2SpringBoot.java:48)
+2025-08-29 10:07:55 [pool-3-thread-1] ERROR o.e.api.routines.DatabaseConnections - [CONNECTION ERROR] Error getting response from router
+java.lang.IllegalStateException: The router has not been initialised, therefore no requests can be made
+	at org.epos.router_framework.DefaultRpcRouter.makeRequest(DefaultRpcRouter.java:112)
+	at org.epos.api.routines.DatabaseConnections.doRequest(DatabaseConnections.java:468)
+	at org.epos.api.routines.DatabaseConnections.retrievePlugins(DatabaseConnections.java:481)
+	at org.epos.api.routines.DatabaseConnections.lambda$syncDatabaseConnections$0(DatabaseConnections.java:248)
+	at org.epos.api.routines.DatabaseConnections.lambda$createSafeFuture$0(DatabaseConnections.java:119)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-08-29 10:07:55 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Resources] Resources successfully updated
+2025-08-29 10:07:55 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Resources] Done
+2025-08-29 10:07:55 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Updating monitoring information
+2025-08-29 10:07:55 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Monitoring] Done
+2025-08-29 10:07:55 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Facets] Updating facets information
+2025-08-29 10:07:55 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Facets] Updating facets information
+2025-08-29 10:07:55 [main] INFO  com.zaxxer.hikari.HikariDataSource - metadata_catalogue - Starting...

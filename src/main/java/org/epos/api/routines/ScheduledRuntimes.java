@@ -49,16 +49,14 @@ public class ScheduledRuntimes {
 		if(EnvironmentVariables.MONITORING != null && EnvironmentVariables.MONITORING.equals("true")) {
 			LOGGER.info("[Scheduled Task - Monitoring] Updating monitoring information");
 			JsonObject hostResults = new JsonObject();
-			String auth;
 			try {
-				auth = ZabbixExecutor.auth();
 				DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 				//String items = ZabbixExecutor.getItems(auth);
 				ArrayList<String> listOfIds = new ArrayList<String>();
-				Utils.gson.fromJson(ZabbixExecutor.getProblems(auth), JsonObject.class).get("result").getAsJsonArray()
+				Utils.gson.fromJson(ZabbixExecutor.getInstance().getProblems(), JsonObject.class).get("result").getAsJsonArray()
 				.forEach(e->listOfIds.add(getSubString(e.getAsJsonObject().get("name").getAsString())));
 
-				for(JsonElement item : Utils.gson.fromJson(ZabbixExecutor.getItems(auth), JsonObject.class).get("result").getAsJsonArray()) {
+				for(JsonElement item : Utils.gson.fromJson(ZabbixExecutor.getInstance().getItems(), JsonObject.class).get("result").getAsJsonArray()) {
 					if(!item.getAsJsonObject().get("name").getAsString().contains("EPOS ICS-C")) {
 						JsonObject singleResult = new JsonObject();
 
@@ -75,7 +73,6 @@ public class ScheduledRuntimes {
 						hostResults.add(id,singleResult);
 					}
 				}
-				ZabbixExecutor.logout(auth);
 
 				ZabbixExecutor.getInstance().setHostResults(hostResults);
 
