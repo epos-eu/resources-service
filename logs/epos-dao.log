@@ -1094,3 +1094,57 @@ java.lang.IllegalStateException: The router has not been initialised, therefore 
 2025-08-29 10:07:55 [main] INFO  o.e.api.routines.ScheduledRuntimes - [StartUp Task - Facets] Updating facets information
 2025-08-29 10:07:55 [main] INFO  o.e.api.routines.ScheduledRuntimes - [Scheduled Task - Facets] Updating facets information
 2025-08-29 10:07:55 [main] INFO  com.zaxxer.hikari.HikariDataSource - metadata_catalogue - Starting...
+2025-10-02 11:44:21 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:44:33 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:44:54 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:45:26 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:46:46 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:47:08 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:47:39 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:50:42 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:50:56 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:51:17 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:51:46 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:53:02 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:53:38 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:53:49 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor initialized using API Token
+2025-10-02 11:57:35 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor inizializzato con API Token per Zabbix 7.4
+2025-10-02 11:57:35 [main] INFO  org.epos.api.core.ZabbixExecutor - Zabbix URL: https://epos-services.vm.fedcloud.eu/zabbix/api_jsonrpc.php
+2025-10-02 11:58:08 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor inizializzato con API Token per Zabbix 7.4
+2025-10-02 11:58:08 [main] INFO  org.epos.api.core.ZabbixExecutor - Zabbix URL: https://epos-services.vm.fedcloud.eu/zabbix/api_jsonrpc.php
+2025-10-02 11:59:11 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor inizializzato con API Token per Zabbix 7.4
+2025-10-02 11:59:11 [main] INFO  org.epos.api.core.ZabbixExecutor - Zabbix URL: https://epos-services.vm.fedcloud.eu/zabbix/api_jsonrpc.php
+2025-10-02 12:00:30 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor inizializzato con API Token per Zabbix 7.4
+2025-10-02 12:00:30 [main] INFO  org.epos.api.core.ZabbixExecutor - Zabbix URL: https://epos-services.vm.fedcloud.eu/zabbix/api_jsonrpc.php
+2025-10-02 12:01:05 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor inizializzato con API Token per Zabbix 7.4
+2025-10-02 12:01:05 [main] INFO  org.epos.api.core.ZabbixExecutor - Zabbix URL: https://epos-services.vm.fedcloud.eu/zabbix/api_jsonrpc.php
+2025-10-02 12:02:25 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Updating monitoring information
+2025-10-02 12:02:25 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor inizializzato con API Token per Zabbix 7.4
+2025-10-02 12:02:25 [main] INFO  org.epos.api.core.ZabbixExecutor - Zabbix URL: https://epos-services.vm.fedcloud.eu/zabbix/api_jsonrpc.php
+2025-10-02 12:02:26 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Monitoring information successfully updated
+2025-10-02 12:03:16 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Updating monitoring information
+2025-10-02 12:03:16 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor inizializzato con API Token per Zabbix 7.4
+2025-10-02 12:03:16 [main] INFO  org.epos.api.core.ZabbixExecutor - Zabbix URL: https://epos-services.vm.fedcloud.eu/zabbix/api_jsonrpc.php
+2025-10-02 12:03:17 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Monitoring information successfully updated
+2025-10-02 12:04:00 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Updating monitoring information
+2025-10-02 12:04:00 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor inizializzato con API Token per Zabbix 7.4
+2025-10-02 12:04:00 [main] INFO  org.epos.api.core.ZabbixExecutor - Zabbix URL: https://epos-services.vm.fedcloud.eu/zabbix/api_jsonrpc.php
+2025-10-02 12:04:01 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Monitoring information successfully updated
+2025-10-02 12:04:22 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Updating monitoring information
+2025-10-02 12:04:22 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor inizializzato con API Token per Zabbix 7.4
+2025-10-02 12:04:22 [main] INFO  org.epos.api.core.ZabbixExecutor - Zabbix URL: https://epos-services.vm.fedcloud.eu/zabbix/api_jsonrpc.php
+2025-10-02 12:04:23 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Monitoring information successfully updated
+2025-10-02 12:04:44 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Updating monitoring information
+2025-10-02 12:04:44 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor inizializzato con API Token per Zabbix 7.4
+2025-10-02 12:04:44 [main] INFO  org.epos.api.core.ZabbixExecutor - Zabbix URL: https://epos-services.vm.fedcloud.eu/zabbix/api_jsonrpc.php
+2025-10-02 12:04:45 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Monitoring information successfully updated
+2025-10-02 12:07:41 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Updating monitoring information
+2025-10-02 12:07:41 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor inizializzato con API Token per Zabbix 7.4
+2025-10-02 12:07:41 [main] INFO  org.epos.api.core.ZabbixExecutor - Zabbix URL: https://epos-services.vm.fedcloud.eu/zabbix/api_jsonrpc.php
+2025-10-02 12:07:56 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Updating monitoring information
+2025-10-02 12:07:56 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor inizializzato con API Token per Zabbix 7.4
+2025-10-02 12:07:56 [main] INFO  org.epos.api.core.ZabbixExecutor - Zabbix URL: https://epos-services.vm.fedcloud.eu/zabbix/api_jsonrpc.php
+2025-10-02 12:08:11 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Updating monitoring information
+2025-10-02 12:08:11 [main] INFO  org.epos.api.core.ZabbixExecutor - ZabbixExecutor inizializzato con API Token per Zabbix 7.4
+2025-10-02 12:08:11 [main] INFO  org.epos.api.core.ZabbixExecutor - Zabbix URL: https://epos-services.vm.fedcloud.eu/zabbix/api_jsonrpc.php
+2025-10-02 12:08:15 [main] INFO  org.epos.api.core.ZabbixExecutor - [Scheduled Task - Monitoring] Monitoring information successfully updated
