@@ -64,7 +64,7 @@ public class MonitoringGeneration {
 						if (p.getDefaultValue() != null && p.getValue() == null && p.isRequired())
 							parametersMap.put(p.getName(), URLGeneration.encodeValue(p.getDefaultValue()));*/
                         if(p.getDefaultValue() != null){
-                            if(p.getValuePattern() != null){
+                            if(p.getProperty()!=null && p.getValuePattern() != null){
                                 if (p.getProperty().equals("schema:startDate") || p.getProperty().equals("schema:endDate")) {
                                     parametersMap.put(p.getName(), Utils.convertDateUsingPattern(p.getDefaultValue(), null, p.getValuePattern()));
                                 }
