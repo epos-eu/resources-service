@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ import org.epos.api.beans.Distribution;
 import org.epos.api.beans.MonitoringBean;
 import org.epos.api.core.distributions.DistributionDetailsGenerationJPA;
 import org.epos.api.routines.DatabaseConnections;
+import org.epos.api.utility.Utils;
 import org.epos.eposdatamodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,12 +59,22 @@ public class MonitoringGeneration {
 
 				if(distribution.getParameters()!=null) {
 					distribution.getParameters().forEach(p -> {
-						if (p.getValue() != null && !p.getValue().isEmpty())
+						/*if (p.getValue() != null && !p.getValue().isEmpty())
 							parametersMap.put(p.getName(),URLGeneration.encodeValue(p.getValue()));
 						if (p.getDefaultValue() != null && p.getValue() == null && p.isRequired())
-							parametersMap.put(p.getName(), URLGeneration.encodeValue(p.getDefaultValue()));
+							parametersMap.put(p.getName(), URLGeneration.encodeValue(p.getDefaultValue()));*/
+                        if(p.getDefaultValue() != null){
+                            if(p.getValuePattern() != null){
+                                if (p.getProperty().equals("schema:startDate") || p.getProperty().equals("schema:endDate")) {
+                                    parametersMap.put(p.getName(), Utils.convertDateUsingPattern(p.getDefaultValue(), null, p.getValuePattern()));
+                                }
+                            } else{
+                                parametersMap.put(p.getName(), URLGeneration.encodeValue(p.getDefaultValue()));
+                            }
+                        }
 					});
 				}
+
 				if(distribution.getEndpoint()!=null) {
 					String compiledUrl = null;
 					compiledUrl = URLGeneration.generateURLFromTemplateAndMap(distribution.getEndpoint(), parametersMap);
